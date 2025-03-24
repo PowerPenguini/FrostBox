@@ -29,9 +29,9 @@ services:
       timeout: 5s
       retries: 10
 
-  voltdesk:
+  backend:
     build: 
-      context: ./voltdesk
+      context: ./backend/main
       dockerfile: Dockerfile.dev
     environment:
       - POSTGRES_HOST
@@ -43,17 +43,36 @@ services:
       - "8080:8080"
     restart: unless-stopped
     volumes:
-      - ./voltdesk:/app
+      - ./backend/main:/app
     depends_on:
+      - postgres
       - go-migrate
 
-
-  front:
+  uta-processor:
     build: 
-      context: ./voltdesk-front
+      context: ./backend/uta-processor
+      dockerfile: Dockerfile.dev
+    environment:
+      - POSTGRES_HOST
+      - POSTGRES_PORT
+      - POSTGRES_USER
+      - POSTGRES_PASSWORD
+      - POSTGRES_DB
+    ports:
+      - "8080"
+    restart: unless-stopped
+    volumes:
+      - ./backend/uta-processor:/app
+    depends_on:
+      - postgres
+      - go-migrate
+
+  frontend:
+    build: 
+      context: ./frontend
       dockerfile: Dockerfile.dev
     volumes:
-      - ./voltdesk-front:/app
+      - ./frontend:/app
     ports:
       - "3000"
     restart: unless-stopped
@@ -61,8 +80,9 @@ services:
   nginx:
     build: ./nginx
     depends_on:
-      - voltdesk
-      - front
+      - backend
+      - frontend
+      - uta-processor
     ports:
       - "80:80"
 

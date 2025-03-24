@@ -1,0 +1,10 @@
+FROM migrate/migrate
+
+
+COPY ./migrations/ ./migrations/
+COPY ./seeds/ ./seeds/
+RUN apk add postgresql-client
+
+ENTRYPOINT ["sh", "-c"]
+
+CMD ["migrate -path ./migrations -database postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}?sslmode=disable up && psql \"postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}?sslmode=disable\" -f ./seeds/dev_seed.sql"]

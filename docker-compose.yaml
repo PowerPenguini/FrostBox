@@ -28,9 +28,9 @@ services:
       timeout: 5s
       retries: 10
 
-  voltdesk:
+  backend:
     build: 
-      context: ./voltdesk
+      context: ./backend/main
     environment:
       - POSTGRES_HOST
       - POSTGRES_PORT
@@ -43,9 +43,24 @@ services:
     depends_on:
       - go-migrate
 
-  front:
+  uta-processor:
     build: 
-      context: ./voltdesk-front
+      context: ./backend/uta-processor
+    environment:
+      - POSTGRES_HOST
+      - POSTGRES_PORT
+      - POSTGRES_USER
+      - POSTGRES_PASSWORD
+      - POSTGRES_DB
+    ports:
+      - "8080"
+    restart: unless-stopped
+    depends_on:
+      - postgres
+
+  frontend:
+    build: 
+      context: ./frontend
     ports:
       - "3000"
     restart: unless-stopped
@@ -53,11 +68,11 @@ services:
   nginx:
     build: ./nginx
     depends_on:
-      - voltdesk
-      - front
+      - backend
+      - frontend
+      - uta-processor
     ports:
       - "80:80"
-
 
 volumes:
   postgres_storage:
