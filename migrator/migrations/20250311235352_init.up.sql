@@ -14,7 +14,7 @@ CREATE TABLE users (
 );
 
 CREATE TABLE costs (
-    id SERIAL PRIMARY KEY,
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     value DECIMAL(10, 2) NOT NULL,
     source VARCHAR(255) NOT NULL,
     quantity DECIMAL(10,6) NOT NULL,
@@ -26,7 +26,17 @@ CREATE TABLE costs (
     category VARCHAR(255) NOT NULL,
     country VARCHAR(3) NOT NULL,
     invoice_date DATE NOT NULL,
-    cost_date DATE NOT NULL
+    cost_date DATE NOT NULL,
+    document_id UUID,
+    created_at DATE NOT NULL,
+    FOREIGN KEY (document_id) REFERENCES documents(id) ON DELETE CASCADE
+);
+
+
+CREATE TABLE documents (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    readable_id VARCHAR(8),
+    created_at DATE NOT NULL
 );
 
 

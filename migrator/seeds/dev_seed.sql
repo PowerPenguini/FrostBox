@@ -8,9 +8,11 @@ VALUES (
 );
 
 
-INSERT INTO IF NOT EXISTS vehicles (id, registration_number) VALUES
-    (uuid_generate_v4(), 'WGM1988J'),
-    (uuid_generate_v4(), 'WGM59883'),
-    (uuid_generate_v4(), 'WGM8988C'),
-    (uuid_generate_v4(), 'WGM59882'),
-    (uuid_generate_v4(), 'WGM6482H');
+INSERT INTO vehicles (id, registration_number) 
+VALUES 
+    (uuid_generate_v4(), 'WGM1988J'), 
+    (uuid_generate_v4(), 'WGM59883'), 
+    (uuid_generate_v4(), 'WGM8988C'), 
+    (uuid_generate_v4(), 'WGM59882'), 
+    (uuid_generate_v4(), 'WGM6482H')
+ON CONFLICT (registration_number) DO NOTHING;

@@ -6,7 +6,8 @@ import {
   IconReceiptDollar,
   IconSettings,
   IconTruck,
-  IconUsers
+  IconUsers,
+  IconBasketDollar
 } from "@tabler/icons-react"
 
 import { NavDocuments } from "@/components/nav-documents"
@@ -36,6 +37,11 @@ const data = {
       title: "Dashboard",
       url: "/manager/dashboard",
       icon: IconDashboard,
+    },
+    {
+      title: "Koszty",
+      url: "/manager/costs",
+      icon: IconBasketDollar,
     },
     {
       title: "Pojazdy",

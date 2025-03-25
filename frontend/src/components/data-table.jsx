@@ -31,6 +31,7 @@ import {
   IconLoader,
   IconPlus,
   IconTrendingUp,
+  IconCircleXFilled
 } from "@tabler/icons-react"
 import {
   flexRender,
@@ -103,6 +104,8 @@ export const schema = z.object({
   limit: z.string(),
   reviewer: z.string(),
 })
+
+
 
 // Create a separate component for the drag handle
 function DragHandle({
@@ -179,12 +182,6 @@ const columns = [
     header: "Status",
     cell: ({ row }) => (
       <Badge variant="outline" className="text-muted-foreground px-1.5">
-        {row.original.status === "Done" ? (
-          <IconCircleCheckFilled className="fill-green-500 dark:fill-green-400" />
-        ) : (
-          <IconLoader />
-        )}
-        {row.original.status}
       </Badge>
     ),
   },

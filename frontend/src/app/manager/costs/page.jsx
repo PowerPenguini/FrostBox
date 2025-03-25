@@ -15,16 +15,17 @@ import {
 import data from "../data.json";
 import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
+import { CostDocumentsTable } from "@/components/cost-documets-table";
 export default function Page() {
   // const form = useForm();
   return (
     <div className="flex flex-1 flex-col">
       <div className="@container/main flex flex-1 flex-col gap-2">
-        <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
-          <Form>
+        <div className="flex flex-col gap-4 py-4 px-4 md:gap-6 lg:py-6 lg:px-6">
+          {/* <Form>
             <form>
               <FormField
-                control={form.control}
+                // control={form.control}
                 name="file"
                 render={() => (
                   <FormItem>
@@ -39,12 +40,12 @@ export default function Page() {
               />
               <Button type="submit">Submit</Button>
             </form>
-          </Form>
+          </Form> */}
 
-          <div className="px-4">
+          {/* <div className="px-4">
             <FileUpload></FileUpload>
-          </div>
-          <DataTable data={data} />
+          </div> */}
+          <CostDocumentsTable data={data} />
         </div>
       </div>
     </div>
