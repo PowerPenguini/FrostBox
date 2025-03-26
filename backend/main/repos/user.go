@@ -3,29 +3,10 @@ package repos
 import (
 	"database/sql"
 	"time"
+	"voltdesk/models"
 
 	"github.com/google/uuid"
 )
-
-type UserRole string
-
-const (
-	Technician UserRole = "technician"
-	Manager    UserRole = "manager"
-	Admin      UserRole = "admin"
-	Client     UserRole = "client"
-)
-
-type User struct {
-	ID           uuid.UUID
-	FirstName    string
-	LastName     string
-	Role         UserRole
-	Email        string
-	PasswordHash string
-	CreatedAt    time.Time
-	UpdatedAt    time.Time
-}
 
 type UserRepo struct {
 	db *sql.DB
@@ -35,7 +16,7 @@ func NewUserRepo(db *sql.DB) *UserRepo {
 	return &UserRepo{db: db}
 }
 
-func (r *UserRepo) CreateUser(user *User) error {
+func (r *UserRepo) CreateUser(user *models.User) error {
 	query := `INSERT INTO users (id, first_name, last_name, role, email, password_hash, created_at, updated_at)
 		VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`
 	_, err := r.db.Exec(query,
@@ -51,11 +32,11 @@ func (r *UserRepo) CreateUser(user *User) error {
 	return err
 }
 
-func (r *UserRepo) GetUserByID(id uuid.UUID) (*User, error) {
+func (r *UserRepo) GetUserByID(id uuid.UUID) (*models.User, error) {
 	query := `SELECT id, first_name, last_name, role, email, password_hash, created_at, updated_at FROM users WHERE id = $1`
 	row := r.db.QueryRow(query, id)
 
-	user := &User{}
+	user := &models.User{}
 	if err := row.Scan(
 		&user.ID,
 		&user.FirstName,
@@ -71,11 +52,11 @@ func (r *UserRepo) GetUserByID(id uuid.UUID) (*User, error) {
 	return user, nil
 }
 
-func (r *UserRepo) GetUserByEmail(email string) (*User, error) {
+func (r *UserRepo) GetUserByEmail(email string) (*models.User, error) {
 	query := `SELECT id, first_name, last_name, role, email, password_hash, created_at, updated_at FROM users WHERE email = $1`
 	row := r.db.QueryRow(query, email)
 
-	user := &User{}
+	user := &models.User{}
 	if err := row.Scan(
 		&user.ID,
 		&user.FirstName,
@@ -91,7 +72,7 @@ func (r *UserRepo) GetUserByEmail(email string) (*User, error) {
 	return user, nil
 }
 
-func (r *UserRepo) UpdateUser(user *User) error {
+func (r *UserRepo) UpdateUser(user *models.User) error {
 	query := `UPDATE users SET first_name=$1, last_name=$2, role=$3, email=$4, password_hash=$5, updated_at=$6 WHERE id=$7`
 	_, err := r.db.Exec(query,
 		user.FirstName,
@@ -111,7 +92,7 @@ func (r *UserRepo) DeleteUser(id uuid.UUID) error {
 	return err
 }
 
-func (r *UserRepo) GetAllUsers() ([]User, error) {
+func (r *UserRepo) GetAllUsers() ([]models.User, error) {
 	query := `SELECT id, first_name, last_name, role, email, password_hash, created_at, updated_at FROM users`
 	rows, err := r.db.Query(query)
 	if err != nil {
@@ -119,9 +100,9 @@ func (r *UserRepo) GetAllUsers() ([]User, error) {
 	}
 	defer rows.Close()
 
-	var users []User
+	var users []models.User
 	for rows.Next() {
-		var user User
+		var user models.User
 		if err := rows.Scan(
 			&user.ID,
 			&user.FirstName,

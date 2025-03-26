@@ -8,7 +8,8 @@ import (
 	"os"
 	"time"
 	"voltdesk/contract"
-	"voltdesk/repos"
+	"voltdesk/di"
+	"voltdesk/handlers"
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/google/uuid"
@@ -33,7 +34,7 @@ func createAccessToken(uuid uuid.UUID, expires time.Duration) (string, error) {
 	return token.SignedString(secretKey)
 }
 
-func loginHandler(di *DI) http.HandlerFunc {
+func loginHandler(di *di.DI) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var req contract.TokenRequest
 		err := json.NewDecoder(r.Body).Decode(&req)
@@ -61,14 +62,15 @@ func loginHandler(di *DI) http.HandlerFunc {
 	}
 }
 
-func getUserProfile(w http.ResponseWriter, r *http.Request) {
-	user := r.Context().Value("user").(repos.User)
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(user)
-}
+// func getUserProfile(w http.ResponseWriter, r *http.Request) {
+// 	user := r.Context().Value("user").(repos.User)
+// 	w.Header().Set("Content-Type", "application/json")
+// 	json.NewEncoder(w).Encode(user)
+// }
 
 func main() {
 	mux := http.NewServeMux()
+
 	connStr := fmt.Sprintf(
 		"postgres://%s:%s@%s:%s/%s?sslmode=disable",
 		os.Getenv("POSTGRES_USER"),
@@ -78,15 +80,15 @@ func main() {
 		os.Getenv("POSTGRES_DB"),
 	)
 
-	di, err := NewDI(connStr)
+	di, err := di.NewDI(connStr)
 	if err != nil {
 		panic(err)
 	}
+	documentsHandler := handlers.NewDocumentsHandler(di)
+
 	mux.HandleFunc("POST /token", loginHandler(di))
 
-	mux.HandleFunc("GET /users/hello", authMiddleware(di, func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("Hello, world!"))
-	}))
+	mux.HandleFunc("GET /documents/cost", authMiddleware(di, documentsHandler.GetDocuments))
 
 	log.Println("Server running on port 8080...")
 	log.Fatal(http.ListenAndServe(":8080", mux))

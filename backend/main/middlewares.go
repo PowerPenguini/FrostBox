@@ -3,13 +3,14 @@ package main
 import (
 	"net/http"
 	"strings"
+	"voltdesk/di"
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/google/uuid"
 	"golang.org/x/net/context"
 )
 
-func authMiddleware(di *DI, next http.HandlerFunc) http.HandlerFunc {
+func authMiddleware(di *di.DI, next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		authHeader := r.Header.Get("Authorization")
 		if authHeader == "" {

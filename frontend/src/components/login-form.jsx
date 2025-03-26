@@ -67,7 +67,7 @@ export function LoginForm({ className, ...props }) {
           </div>
           <Input id="password" type="password" required value={password} onChange={(e) => setPassword(e.target.value)} />
         </div>
-        {error && <p className="text-red-500 text-sm">{error}</p>}
+        {error && <p className="text-red-500 font-medium text-sm">{error}</p>}
         <Button type="submit" className="w-full">
           Zaloguj
         </Button>

@@ -6,7 +6,7 @@ import {
   IconReceiptDollar,
   IconSettings,
   IconTruck,
-  IconUsers,
+  IconSteeringWheel,
   IconBasketDollar
 } from "@tabler/icons-react"
 
@@ -51,7 +51,7 @@ const data = {
     {
       title: "Kierowcy",
       url: "#",
-      icon: IconUsers,
+      icon: IconSteeringWheel,
     },
   ],
   navSecondary: [

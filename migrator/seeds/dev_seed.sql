@@ -8,11 +8,11 @@ VALUES (
 );
 
 
-INSERT INTO vehicles (id, registration_number) 
+INSERT INTO vehicles (id, vin, registration_number) 
 VALUES 
-    (uuid_generate_v4(), 'WGM1988J'), 
-    (uuid_generate_v4(), 'WGM59883'), 
-    (uuid_generate_v4(), 'WGM8988C'), 
-    (uuid_generate_v4(), 'WGM59882'), 
-    (uuid_generate_v4(), 'WGM6482H')
+    (uuid_generate_v4(), '1G1AF1F57A7192174', 'WGM1988J'), 
+    (uuid_generate_v4(), '2FMDK36C58BA12345', 'WGM59883'), 
+    (uuid_generate_v4(), '3VW2K7AJ5FM123456' , 'WGM8988C'), 
+    (uuid_generate_v4(), '4T1BF1FK0GU123456', 'WGM59882'), 
+    (uuid_generate_v4(), '5N1AR2MN8FC123456', 'WGM6482H')
 ON CONFLICT (registration_number) DO NOTHING;

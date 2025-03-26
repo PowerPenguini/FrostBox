@@ -65,6 +65,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { useState } from "react";
+import { toast } from "sonner";
 
 const typeOptions = {
   uta: [
@@ -217,6 +218,7 @@ export function CostDocumentsTable({ data: initialData }) {
   });
 
   const table = useReactTable({
+
     data,
     columns,
     state: {
@@ -399,11 +401,63 @@ export function CostDocumentsTable({ data: initialData }) {
 }
 
 function AddCostDocumentDrawer() {
+  const [open, setOpen] = useState(false)
+  const [error, setError] = useState("")
   const [source, setSource] = useState("");
+  const [type, setType] = useState("");
   const isMobile = useIsMobile();
+  const [file, setFile] = useState(null);
+
+  const handleFileChange = (event) => {
+    if (event.target.files && event.target.files.length > 0) {
+      setFile(event.target.files[0]);
+      setError("")
+    }
+  };
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    if (!source) {
+      setError("Wybierz źródło dokumentu")
+      return;
+    }
+
+    if (!type) {
+      setError("Wybierz typ dokumentu")
+      return;
+    }
+
+    if (!file) {
+      setError("Wybierz plik")
+      return;
+    }
+
+
+    const formData = new FormData();
+    formData.append("source", source);
+    formData.append("file", file);
+
+    try {
+      const response = await fetch("/api/v1/analysers/uta/upload/", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (response.ok) {
+        toast("Dokument dodany pomyślnie!");
+      } else {
+        toast("Błąd podczas przesyłania dokumentu.");
+      }
+    } catch (error) {
+      toast("Błąd sieci podczas przesyłania dokumentu.");
+    } finally {
+      setOpen(false)
+      setFile(null);
+    }
+  };
 
   return (
-    <Drawer direction={isMobile ? "bottom" : "right"}>
+    <Drawer open={open} onOpenChange={setOpen} direction={isMobile ? "bottom" : "right"}>
       <DrawerTrigger asChild>
         <Button variant="outline" size="sm">
           <IconPlus />
@@ -418,10 +472,10 @@ function AddCostDocumentDrawer() {
           </DrawerDescription>
         </DrawerHeader>
         <div className="flex flex-col gap-4 overflow-y-auto text-sm">
-          <form className="flex flex-col gap-4">
+          <form id="cost-document-form" className="flex flex-col gap-4" onSubmit={handleSubmit}>
             <div className="flex flex-col gap-3 px-4 pb-4">
               <Label htmlFor="source">Źródło</Label>
-              <Select onValueChange={(value) => setSource(value)}>
+              <Select onValueChange={(value) => {setSource(value); setType("")}}>
                 <SelectTrigger id="source" className="w-full">
                   <SelectValue placeholder="Wybierz źródło" />
                 </SelectTrigger>
@@ -431,7 +485,7 @@ function AddCostDocumentDrawer() {
                 </SelectContent>
               </Select>
               <Label htmlFor="type">Typ dokumentu</Label>
-              <Select disabled={!source}>
+              <Select onValueChange={(value) => setType(value)} disabled={!source}>
                 <SelectTrigger id="type" className="w-full">
                   <SelectValue placeholder="Wybierz typ dokumentu" />
                 </SelectTrigger>
@@ -445,12 +499,13 @@ function AddCostDocumentDrawer() {
                 </SelectContent>
               </Select>
               <Label htmlFor="file">Plik</Label>
-              <Input id="file" type="file" />
+              <Input id="file" type="file" onChange={handleFileChange} />
+              {error && <p className="text-red-500 text-sm font-medium">{error}</p>}
             </div>
           </form>
         </div>
         <DrawerFooter>
-          <Button>Dodaj</Button>
+          <Button form='cost-document-form' type="submit">Dodaj</Button>
           <DrawerClose asChild>
             <Button variant="outline">Anuluj</Button>
           </DrawerClose>
