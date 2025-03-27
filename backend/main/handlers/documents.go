@@ -2,9 +2,9 @@ package handlers
 
 import (
 	"encoding/json"
+	"frostbox/contract"
+	"frostbox/di"
 	"net/http"
-	"voltdesk/contract"
-	"voltdesk/di"
 )
 
 type DocumentHandler struct {
@@ -24,11 +24,10 @@ func (h *DocumentHandler) GetDocuments(w http.ResponseWriter, r *http.Request) {
 	var response []contract.DocumentCostResponse
 	for _, doc := range docs {
 		response = append(response, contract.DocumentCostResponse{
-			ID:         doc.ID,
-			ReadableID: doc.ReadableID,
-			Status:     string(doc.Status),
-			Source:     doc.Source,
-			CreatedAt:  doc.CreatedAt,
+			ID:        doc.ReadableID,
+			Status:    string(doc.Status),
+			Source:    doc.Source,
+			CreatedAt: doc.CreatedAt,
 		})
 	}
 	w.Header().Set("Content-Type", "application/json")

@@ -1,9 +1,9 @@
 package main
 
 import (
+	"frostbox/di"
 	"net/http"
 	"strings"
-	"voltdesk/di"
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/google/uuid"

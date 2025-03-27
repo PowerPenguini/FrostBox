@@ -19,5 +19,6 @@ type Document struct {
 	ReadableID string
 	Status     DocumentStatus
 	Source     string
+	CreatedBy  uuid.UUID
 	CreatedAt  time.Time
 }

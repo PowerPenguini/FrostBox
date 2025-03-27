@@ -2,8 +2,8 @@ package repos
 
 import (
 	"database/sql"
+	"frostbox/models"
 	"time"
-	"voltdesk/models"
 
 	"github.com/google/uuid"
 )

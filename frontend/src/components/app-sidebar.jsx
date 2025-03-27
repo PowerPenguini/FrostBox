@@ -69,7 +69,7 @@ const data = {
   documents: [
     {
       name: "Dokumenty kosztowe",
-      url: "/manager/costs",
+      url: "/manager/documents/costs",
       icon: IconReceiptDollar,
     },
     // {

@@ -1,4 +1,4 @@
-module voltdesk
+module frostbox
 
 go 1.23.5
 

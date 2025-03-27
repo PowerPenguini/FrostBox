@@ -2,7 +2,7 @@ package repos
 
 import (
 	"database/sql"
-	"voltdesk/models"
+	"frostbox/models"
 )
 
 type DocumentRepo struct {

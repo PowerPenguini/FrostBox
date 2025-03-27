@@ -11,7 +11,6 @@ import {
   IconDotsVertical,
   IconLayoutColumns,
   IconPlus,
-  IconTrendingUp,
   IconCircleXFilled,
   IconAlertTriangleFilled,
 } from "@tabler/icons-react";
@@ -66,16 +65,14 @@ import {
 } from "@/components/ui/table";
 import { useState } from "react";
 import { toast } from "sonner";
-
+import { useCostsDataContext } from "@/state/costsDataContext";
+import { Spinner } from "./spinner";
 const typeOptions = {
-  uta: [
-    { value: "cost_breakdown", label: "Zestawienie kosztów" },
-  ],
+  uta: [{ value: "cost_breakdown", label: "Zestawienie kosztów" }],
   gastruck: [
     { value: "cars_invoice", label: "Faktura z podziałem na pojazdy" },
   ],
 };
-
 
 const renderStatus = (status) => {
   if (status === "added") {
@@ -159,7 +156,7 @@ const columns = [
     accessorKey: "Data dodania",
     header: "Data dodania",
     cell: ({ row }) => (
-      <div className="w-32">{formatDateTime(row.original.date)}</div>
+      <div className="w-32">{formatDateTime(row.original.created_at)}</div>
     ),
   },
   {
@@ -208,7 +205,7 @@ function Row({ row }) {
 }
 
 export function CostDocumentsTable({ data: initialData }) {
-  const [data, setData] = React.useState(() => initialData);
+  const { data, loading, error } = useCostsDataContext(); // TODO: Make error
   const [rowSelection, setRowSelection] = React.useState({});
   const [columnVisibility, setColumnVisibility] = React.useState({});
   const [columnFilters, setColumnFilters] = React.useState([]);
@@ -216,10 +213,8 @@ export function CostDocumentsTable({ data: initialData }) {
     pageIndex: 0,
     pageSize: 10,
   });
-
   const table = useReactTable({
-
-    data,
+    data: data || [],
     columns,
     state: {
       columnVisibility,
@@ -306,7 +301,16 @@ export function CostDocumentsTable({ data: initialData }) {
             ))}
           </TableHeader>
           <TableBody className="**:data-[slot=table-cell]:first:w-8">
-            {table.getRowModel().rows?.length ? (
+            {loading ? (
+              <TableRow>
+                <TableCell
+                  colSpan={columns.length}
+                  className="h-24 text-center"
+                >
+                  <Spinner />
+                </TableCell>
+              </TableRow>
+            ) : data?.length ? (
               table
                 .getRowModel()
                 .rows.map((row) => <Row key={row.id} row={row} />)
@@ -316,7 +320,7 @@ export function CostDocumentsTable({ data: initialData }) {
                   colSpan={columns.length}
                   className="h-24 text-center"
                 >
-                  No results.
+                  Nie znaleziono dokumentów.
                 </TableCell>
               </TableRow>
             )}
@@ -351,7 +355,7 @@ export function CostDocumentsTable({ data: initialData }) {
           </div>
           <div className="flex w-fit items-center justify-center text-sm font-medium">
             Strona {table.getState().pagination.pageIndex + 1} z{" "}
-            {table.getPageCount()}
+            {table?.getPageCount()}
           </div>
           <div className="ml-auto flex items-center gap-2 lg:ml-0">
             <Button
@@ -401,8 +405,9 @@ export function CostDocumentsTable({ data: initialData }) {
 }
 
 function AddCostDocumentDrawer() {
-  const [open, setOpen] = useState(false)
-  const [error, setError] = useState("")
+  const { refetchData } = useCostsDataContext();
+  const [open, setOpen] = useState(false);
+  const [error, setError] = useState("");
   const [source, setSource] = useState("");
   const [type, setType] = useState("");
   const isMobile = useIsMobile();
@@ -411,27 +416,26 @@ function AddCostDocumentDrawer() {
   const handleFileChange = (event) => {
     if (event.target.files && event.target.files.length > 0) {
       setFile(event.target.files[0]);
-      setError("")
+      setError("");
     }
   };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
     if (!source) {
-      setError("Wybierz źródło dokumentu")
+      setError("Wybierz źródło dokumentu");
       return;
     }
 
     if (!type) {
-      setError("Wybierz typ dokumentu")
+      setError("Wybierz typ dokumentu");
       return;
     }
 
     if (!file) {
-      setError("Wybierz plik")
+      setError("Wybierz plik");
       return;
     }
-
 
     const formData = new FormData();
     formData.append("source", source);
@@ -451,13 +455,18 @@ function AddCostDocumentDrawer() {
     } catch (error) {
       toast("Błąd sieci podczas przesyłania dokumentu.");
     } finally {
-      setOpen(false)
+      refetchData();
+      setOpen(false);
       setFile(null);
     }
   };
 
   return (
-    <Drawer open={open} onOpenChange={setOpen} direction={isMobile ? "bottom" : "right"}>
+    <Drawer
+      open={open}
+      onOpenChange={setOpen}
+      direction={isMobile ? "bottom" : "right"}
+    >
       <DrawerTrigger asChild>
         <Button variant="outline" size="sm">
           <IconPlus />
@@ -468,14 +477,23 @@ function AddCostDocumentDrawer() {
         <DrawerHeader className="gap-1">
           <DrawerTitle>Dodaj dokument kosztowy</DrawerTitle>
           <DrawerDescription>
-            Dodaj znane dokumenty, aby zautomatyzować dodawnie kosztów
+            Dodaj znane dokumenty, aby zautomatyzować rejestrację kosztów
           </DrawerDescription>
         </DrawerHeader>
         <div className="flex flex-col gap-4 overflow-y-auto text-sm">
-          <form id="cost-document-form" className="flex flex-col gap-4" onSubmit={handleSubmit}>
+          <form
+            id="cost-document-form"
+            className="flex flex-col gap-4"
+            onSubmit={handleSubmit}
+          >
             <div className="flex flex-col gap-3 px-4 pb-4">
               <Label htmlFor="source">Źródło</Label>
-              <Select onValueChange={(value) => {setSource(value); setType("")}}>
+              <Select
+                onValueChange={(value) => {
+                  setSource(value);
+                  setType("");
+                }}
+              >
                 <SelectTrigger id="source" className="w-full">
                   <SelectValue placeholder="Wybierz źródło" />
                 </SelectTrigger>
@@ -485,7 +503,10 @@ function AddCostDocumentDrawer() {
                 </SelectContent>
               </Select>
               <Label htmlFor="type">Typ dokumentu</Label>
-              <Select onValueChange={(value) => setType(value)} disabled={!source}>
+              <Select
+                onValueChange={(value) => setType(value)}
+                disabled={!source}
+              >
                 <SelectTrigger id="type" className="w-full">
                   <SelectValue placeholder="Wybierz typ dokumentu" />
                 </SelectTrigger>
@@ -500,12 +521,16 @@ function AddCostDocumentDrawer() {
               </Select>
               <Label htmlFor="file">Plik</Label>
               <Input id="file" type="file" onChange={handleFileChange} />
-              {error && <p className="text-red-500 text-sm font-medium">{error}</p>}
+              {error && (
+                <p className="text-red-500 text-sm font-medium">{error}</p>
+              )}
             </div>
           </form>
         </div>
         <DrawerFooter>
-          <Button form='cost-document-form' type="submit">Dodaj</Button>
+          <Button form="cost-document-form" type="submit">
+            Dodaj
+          </Button>
           <DrawerClose asChild>
             <Button variant="outline">Anuluj</Button>
           </DrawerClose>

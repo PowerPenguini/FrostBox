@@ -116,7 +116,7 @@ async def upload_file(file: UploadFile = File(...)):
 
 
 def generate_id(length):
-    characters = string.ascii_letters + string.digits
+    characters = string.ascii_uppercase + string.digits
     return ''.join(random.choice(characters) for _ in range(length))
 
 
@@ -136,7 +136,7 @@ def add_document():
             "id": document_uuid,
             "readable_id": readable_id,
             "status": "added",
-            "source": "uta",
+            "source": "UTA",
         },
     )
     session.commit()

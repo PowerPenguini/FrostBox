@@ -1,9 +1,7 @@
 "use client";
-
-import { GalleryVerticalEnd } from "lucide-react"
-
 import { LoginForm } from "@/components/login-form"
 import Link from "next/link";
+
 // TODO: Redirect to dashboard or login depending on token
 export default function LoginPage() {
   return (

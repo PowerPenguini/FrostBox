@@ -3,13 +3,13 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"frostbox/contract"
+	"frostbox/di"
+	"frostbox/handlers"
 	"log"
 	"net/http"
 	"os"
 	"time"
-	"voltdesk/contract"
-	"voltdesk/di"
-	"voltdesk/handlers"
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/google/uuid"
@@ -20,7 +20,6 @@ var secretKey = []byte("09d25e094faa6ca2556c818166b7a9563b93f7099f6f0f4caa6cf63b
 
 func verifyPassword(plain, hashed string) bool {
 	err := bcrypt.CompareHashAndPassword([]byte(hashed), []byte(plain))
-	fmt.Println(err)
 	return err == nil
 }
 
@@ -44,7 +43,6 @@ func loginHandler(di *di.DI) http.HandlerFunc {
 		}
 
 		user, err := di.UserRepo.GetUserByEmail(req.Email)
-		fmt.Println(err, user)
 		if err != nil || !verifyPassword(req.Password, user.PasswordHash) {
 			http.Error(w, "Incorrect username or password", http.StatusUnauthorized)
 			return
