@@ -6,16 +6,16 @@ import (
 	"net/http"
 )
 
-type DocumentsHandler struct {
+type VehiclesHandler struct {
 	di *di.DI
 }
 
-func NewDocumentsHandler(di *di.DI) *DocumentsHandler {
-	return &DocumentsHandler{di}
+func NewVehiclesHandler(di *di.DI) *VehiclesHandler {
+	return &VehiclesHandler{di}
 }
 
-func (h *DocumentsHandler) GetDocuments(w http.ResponseWriter, r *http.Request) {
-	response, err := h.di.DocumentViewer.GetDocuments()
+func (h *VehiclesHandler) GetVehicles(w http.ResponseWriter, r *http.Request) {
+	response, err := h.di.VehicleViewer.GetVehicles()
 	if err != nil {
 		http.Error(w, "Failed to fetch documents", http.StatusInternalServerError)
 		return

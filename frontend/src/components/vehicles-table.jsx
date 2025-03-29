@@ -67,101 +67,34 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { useCostDocumentsDataContext } from "@/state/cost-documents-data-context";
 import { Spinner } from "./spinner";
-const typeOptions = {
-  uta: [{ value: "cost_breakdown", label: "Zestawienie kosztów" }],
-  gastruck: [
-    { value: "cars_invoice", label: "Faktura z podziałem na pojazdy" },
-  ],
-};
-
-const renderStatus = (status) => {
-  if (status === "added") {
-    return (
-      <>
-        <IconCircleCheckFilled className="w-8 fill-green-500 dark:fill-green-400" />{" "}
-        Dodany
-      </>
-    );
-  } else if (status === "withdrawn") {
-    return (
-      <>
-        <IconCircleXFilled className="fill-red-700" /> Wycofany
-      </>
-    );
-  } else if (status === "incorrect") {
-    return (
-      <>
-        <IconAlertTriangleFilled className="fill-amber-600" />
-        Nieprawidłowy
-      </>
-    );
-  }
-};
-
-function formatDateTime(jsonDate) {
-  const dateObject = new Date(jsonDate);
-
-  const day = String(dateObject.getDate()).padStart(2, "0");
-  const month = String(dateObject.getMonth() + 1).padStart(2, "0");
-  const year = dateObject.getFullYear();
-  const hours = String(dateObject.getHours()).padStart(2, "0");
-  const minutes = String(dateObject.getMinutes()).padStart(2, "0");
-
-  return `${day}.${month}.${year} ${hours}:${minutes}`;
-}
+import { useVehiclesDataContext } from "@/state/vehicles-data-context";
 
 const columns = [
   {
-    accessorKey: "ID",
-    header: "ID dokumentu",
-    cell: ({ row }) => {
-      return <div className="text-foreground w-32">{row.original.id}</div>;
-    },
+    accessorKey: "Numer rejestracyjny",
+    header: "Numer rejestracyjny",
+    cell: ({ row }) => row.original.registration_number,
     enableHiding: false,
   },
 
   {
-    accessorKey: "Źródło",
-    header: "Źródło",
-    cell: ({ row }) => (
-      <div className="w-32">
-        <Badge variant="outline" className="text-muted-foreground px-1.5">
-          {row.original.source}
-        </Badge>
-      </div>
-    ),
+    accessorKey: "Marka",
+    header: "Marka",
+    cell: ({ row }) => row.original.brand,
   },
   {
-    accessorKey: "Status",
-    header: "Status",
-    cell: ({ row }) => (
-      <Badge variant="outline" className="text-muted-foreground px-1.5">
-        {renderStatus(row.original.status)}
-      </Badge>
-    ),
+    accessorKey: "Model",
+    header: "Model",
+    cell: ({ row }) => row.original.model,
   },
   {
-    accessorKey: "Liczba kosztów",
-    header: () => <div className="w-full">Liczba kosztów</div>,
-    cell: ({ row }) => <div className="w-full">{row.original.costs_number}</div>, // TODO: maybe cost_quantity?
-  },
-  {
-    accessorKey: "Dodał/a",
-    header: "Dodał/a",
-    cell: ({ row }) => {
-      return row.original.owner;
-    },
-  },
-  {
-    accessorKey: "Data dodania",
-    header: "Data dodania",
-    cell: ({ row }) => (
-      <div className="w-32">{formatDateTime(row.original.created_at)}</div>
-    ),
+    accessorKey: "VIN",
+    header: () => <div className="w-full">VIN</div>,
+    cell: ({ row }) => row.original.vin,
   },
   {
     id: "actions",
-    cell: ({ row }) => (
+    cell: () => (
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button
@@ -174,18 +107,7 @@ const columns = [
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-32">
-          {row.original.status === "incorrect" ? (
-            <>
-              <DropdownMenuItem>Popraw</DropdownMenuItem>{" "}
-              <DropdownMenuSeparator />
-            </>
-          ) : null}
-
-          {row.original.status === "withdrawn" ? (
-            <DropdownMenuItem variant="destructive">Ukryj</DropdownMenuItem>
-          ) : (
-            <DropdownMenuItem variant="destructive">Wycofaj</DropdownMenuItem>
-          )}
+          <DropdownMenuItem variant="destructive">Usuń</DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
     ),
@@ -204,25 +126,21 @@ function Row({ row }) {
   );
 }
 
-export function CostDocumentsTable() { // TODO: If empty rerenders into oblivion
-  const { data, loading, error } = useCostDocumentsDataContext(); // TODO: Make error
-  
-  const [columnVisibility, setColumnVisibility] = useState({});
-  const [pagination, setPagination] = useState({
+export function VehiclesTable() {
+  const { data, loading, error } = useVehiclesDataContext(); // TODO: Make error
+  const [columnVisibility, setColumnVisibility] = React.useState({});
+  const [pagination, setPagination] = React.useState({
     pageIndex: 0,
     pageSize: 10,
   });
-  console.log("rerender af")
-  
-  
   const table = useReactTable({
-    data: data,
-    columns: columns,
+    data: data || [],
+    columns,
     state: {
       columnVisibility,
       pagination,
     },
-    getRowId: (row) => row.id.toString(),
+    getRowId: (row) => row.id,
     enableRowSelection: true,
     onColumnVisibilityChange: setColumnVisibility,
     onPaginationChange: setPagination,
@@ -274,7 +192,7 @@ export function CostDocumentsTable() { // TODO: If empty rerenders into oblivion
                 })}
             </DropdownMenuContent>
           </DropdownMenu>
-          <AddCostDocumentDrawer></AddCostDocumentDrawer>
+          <AddVehicleDrawer></AddVehicleDrawer>
         </div>
       </div>
 
@@ -402,53 +320,50 @@ export function CostDocumentsTable() { // TODO: If empty rerenders into oblivion
   );
 }
 
-function AddCostDocumentDrawer() {
-  const { refetchData } = useCostDocumentsDataContext();
+function AddVehicleDrawer() {
+  const { refetchData } = useVehiclesDataContext();
   const [open, setOpen] = useState(false);
   const [error, setError] = useState("");
-  const [source, setSource] = useState("");
-  const [type, setType] = useState("");
-  const isMobile = useIsMobile();
-  const [file, setFile] = useState(null);
+  
+  const [brand, setBrand] = useState("");
+  const [model, setModel] = useState("");
+  const [vin, setVin] = useState("");
+  const [registrationNumber, setRegistrationNumber] = useState("");
 
-  const handleFileChange = (event) => {
-    if (event.target.files && event.target.files.length > 0) {
-      setFile(event.target.files[0]);
-      setError("");
-    }
-  };
+  const isMobile = useIsMobile();
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    if (!source) {
-      setError("Wybierz źródło dokumentu");
+    if (!brand) { // TODO add validation
+      setError("Wprowadź markę pojazdu");
       return;
     }
 
-    if (!type) {
-      setError("Wybierz typ dokumentu");
+    if (!model) {
+      setError("Wprowadź model pojazdu");
       return;
     }
 
-    if (!file) {
-      setError("Wybierz plik");
+    if (!vin) {
+      setError("Wprowadź VIN pojazdu");
       return;
     }
 
-    const formData = new FormData();
-    formData.append("source", source);
-    formData.append("file", file);
+    if (!registrationNumber) {
+      setError("Wprowadź numer rejestracyjny");
+      return;
+    }
 
     try {
       const response = await fetch("/api/v1/analysers/uta/upload/", {
         method: "POST",
-        body: formData,
+        body: {},
       });
 
       if (response.ok) {
-        toast("Dokument dodany pomyślnie!");
+        toast("Pojazd dodany pomyślnie!");
       } else {
-        toast("Błąd podczas przesyłania dokumentu.");
+        toast("Błąd podczas dodawania pojazdu.");
       }
     } catch (error) {
       toast("Błąd sieci podczas przesyłania dokumentu.");
@@ -468,14 +383,15 @@ function AddCostDocumentDrawer() {
       <DrawerTrigger asChild>
         <Button variant="outline" size="sm">
           <IconPlus />
-          <span className="hidden lg:inline">Dodaj dokument</span>
+          <span className="hidden lg:inline">Dodaj pojazd</span>
         </Button>
       </DrawerTrigger>
       <DrawerContent>
         <DrawerHeader className="gap-1">
-          <DrawerTitle>Dodaj dokument kosztowy</DrawerTitle>
+          <DrawerTitle>Dodaj pojazd</DrawerTitle>
           <DrawerDescription>
-            Dodaj znane dokumenty, aby zautomatyzować rejestrację kosztów
+            Pojazd musi być dodany do systemu, aby móg być poprawnie rozpoznany
+            na dokumentach kosztowych i przychodowych.
           </DrawerDescription>
         </DrawerHeader>
         <div className="flex flex-col gap-4 overflow-y-auto text-sm">
@@ -485,41 +401,15 @@ function AddCostDocumentDrawer() {
             onSubmit={handleSubmit}
           >
             <div className="flex flex-col gap-3 px-4 pb-4">
-              <Label htmlFor="source">Źródło</Label>
-              <Select
-                onValueChange={(value) => {
-                  setSource(value);
-                  setType("");
-                }}
-              >
-                {/* TODO: PROPER FORM SYNTAX  */}
-                <SelectTrigger id="source" className="w-full"> 
-                  <SelectValue placeholder="Wybierz źródło" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="uta">UTA</SelectItem>
-                  <SelectItem value="gastruck">GasTruck</SelectItem>
-                </SelectContent>
-              </Select>
-              <Label htmlFor="type">Typ dokumentu</Label>
-              <Select
-                onValueChange={(value) => setType(value)}
-                disabled={!source}
-              >
-                <SelectTrigger id="type" className="w-full">
-                  <SelectValue placeholder="Wybierz typ dokumentu" />
-                </SelectTrigger>
-                <SelectContent>
-                  {source &&
-                    typeOptions[source].map((option) => (
-                      <SelectItem key={option.value} value={option.value}>
-                        {option.label}
-                      </SelectItem>
-                    ))}
-                </SelectContent>
-              </Select>
-              <Label htmlFor="file">Plik</Label>
-              <Input id="file" type="file" onChange={handleFileChange} />
+              <Label htmlFor="brand">Marka</Label>
+              <Input id="brand" placeholder="Volvo" onChange={e => setBrand(e.target.value)} />
+              <Label htmlFor="model">Model</Label>
+              <Input id="model" placeholder="FMX" onChange={e => setModel(e.target.value)}/>
+              <Label htmlFor="vin">VIN</Label>
+              <Input id="vin" placeholder="5N1AR2MN8FC123456" onChange={e => setVin(e.target.value)}/>
+              <Label htmlFor="registration_number">Numer rejestracyjny</Label>
+              <Input id="registration_number" placeholder="EL2K25" onChange={e => setRegistrationNumber(e.target.value)}/>
+
               {error && (
                 <p className="text-red-500 text-sm font-medium">{error}</p>
               )}

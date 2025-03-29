@@ -45,7 +45,7 @@ const data = {
     },
     {
       title: "Pojazdy",
-      url: "#",
+      url: "/manager/vehicles",
       icon: IconTruck,
     },
     {

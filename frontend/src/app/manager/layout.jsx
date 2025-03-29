@@ -2,7 +2,6 @@ import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 import { SiteHeader } from "@/components/site-header";
 import { AppSidebar } from "@/components/app-sidebar";
 import { Toaster } from "@/components/ui/sonner";
-import { CostsDataProvider } from "@/state/costsDataContext";
 
 export default function RootLayout({ children }) {
   return (
@@ -15,7 +14,7 @@ export default function RootLayout({ children }) {
       <AppSidebar variant="inset" />
       <SidebarInset>
         <SiteHeader />
-        <CostsDataProvider>{children}</CostsDataProvider>
+        {children}
       </SidebarInset>
       <Toaster />
     </SidebarProvider>

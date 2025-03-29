@@ -19,12 +19,14 @@ CREATE TABLE documents (
     readable_id VARCHAR(8) NOT NULL UNIQUE,
     status document_status NOT NULL,
     source VARCHAR(255) NOT NULL,
-    created_at DATE NOT NULL DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE vehicles (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    vin VARCHAR(255) NOT NULL UNIQUE,    
+    vin VARCHAR(255) NOT NULL UNIQUE, 
+    brand VARCHAR(255) NOT NULL,
+    model VARCHAR(255) NOT NULL,
     registration_number VARCHAR(20) NOT NULL UNIQUE
 );
 

@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { useAuthContext } from "@/state/authContext";
+import { useAuthContext } from "@/state/auth-context";
 
 export function LoginForm({ className, ...props }) {
   const [email, setEmail] = useState("");
@@ -20,11 +20,11 @@ export function LoginForm({ className, ...props }) {
     login(email, password);
   };
 
-  useEffect(() => {
-    if (!error) {
-      router.push("/manager/dashboard");
-    }
-  }, [error]);
+  // useEffect(() => {
+  //   if (!error) {
+  //     router.push("/manager/dashboard");
+  //   }
+  // }, [error]);
 
   return (
     <form
@@ -35,7 +35,7 @@ export function LoginForm({ className, ...props }) {
       <div className="flex flex-col items-center gap-2 text-center">
         <h1 className="text-2xl font-bold">Zaloguj się</h1>
         <p className="text-balance text-sm text-muted-foreground">
-          Logujesz się do konta Frostbox
+          Logujesz się do konta FrostBox
         </p>
       </div>
       <div className="grid gap-6">

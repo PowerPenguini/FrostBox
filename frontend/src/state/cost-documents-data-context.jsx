@@ -2,11 +2,11 @@
 
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { toast } from "sonner";
-import { useAuthContext } from "./authContext";
+import { useAuthContext } from "./auth-context";
 
-const CostsDataContext = createContext();
+const CostDocumentsDataContext = createContext();
 
-export const CostsDataProvider = ({ children }) => {
+export const CostDocumentsDataProvider = ({ children }) => {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -27,7 +27,7 @@ export const CostsDataProvider = ({ children }) => {
         throw toast("Błąd sieciowy przy pobieraniu danych");
       }
       const result = await response.json();
-      setData(result);
+      setData(result || []);
     } catch (err) {
       setError(err);
     } finally {
@@ -44,12 +44,12 @@ export const CostsDataProvider = ({ children }) => {
   };
 
   return (
-    <CostsDataContext.Provider value={{ data, loading, error, refetchData }}>
+    <CostDocumentsDataContext.Provider value={{ data, loading, error, refetchData }}>
       {children}
-    </CostsDataContext.Provider>
+    </CostDocumentsDataContext.Provider>
   );
 };
 
-export const useCostsDataContext = () => {
-  return useContext(CostsDataContext);
+export const useCostDocumentsDataContext = () => {
+  return useContext(CostDocumentsDataContext);
 };

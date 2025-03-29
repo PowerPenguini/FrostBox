@@ -83,10 +83,14 @@ func main() {
 		panic(err)
 	}
 	documentsHandler := handlers.NewDocumentsHandler(di)
+	vehiclesHandler := handlers.NewVehiclesHandler(di)
+	costsHandler := handlers.NewCostsHandler(di)
 
 	mux.HandleFunc("POST /token", loginHandler(di))
 
 	mux.HandleFunc("GET /documents/cost", authMiddleware(di, documentsHandler.GetDocuments))
+	mux.HandleFunc("GET /vehicles", authMiddleware(di, vehiclesHandler.GetVehicles))
+	mux.HandleFunc("GET /costs", authMiddleware(di, costsHandler.GetCosts))
 
 	log.Println("Server running on port 8080...")
 	log.Fatal(http.ListenAndServe(":8080", mux))

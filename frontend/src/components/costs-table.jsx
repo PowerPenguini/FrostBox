@@ -7,12 +7,12 @@ import {
   IconChevronRight,
   IconChevronsLeft,
   IconChevronsRight,
-  IconCircleCheckFilled,
   IconDotsVertical,
   IconLayoutColumns,
   IconPlus,
-  IconCircleXFilled,
-  IconAlertTriangleFilled,
+  IconRoad,
+  IconGasStation,
+  IconDropletPlus,
 } from "@tabler/icons-react";
 import {
   flexRender,
@@ -65,38 +65,25 @@ import {
 } from "@/components/ui/table";
 import { useState } from "react";
 import { toast } from "sonner";
-import { useCostDocumentsDataContext } from "@/state/cost-documents-data-context";
+import { useCostsDataContext } from "@/state/costs-data-context";
 import { Spinner } from "./spinner";
-const typeOptions = {
-  uta: [{ value: "cost_breakdown", label: "Zestawienie kosztów" }],
-  gastruck: [
-    { value: "cars_invoice", label: "Faktura z podziałem na pojazdy" },
-  ],
-};
 
-const renderStatus = (status) => {
-  if (status === "added") {
-    return (
-      <>
-        <IconCircleCheckFilled className="w-8 fill-green-500 dark:fill-green-400" />{" "}
-        Dodany
-      </>
-    );
-  } else if (status === "withdrawn") {
-    return (
-      <>
-        <IconCircleXFilled className="fill-red-700" /> Wycofany
-      </>
-    );
-  } else if (status === "incorrect") {
-    return (
-      <>
-        <IconAlertTriangleFilled className="fill-amber-600" />
-        Nieprawidłowy
-      </>
-    );
-  }
-};
+function renderCategory(category) {
+  const mnemonics = {
+    toll: { name: "Opłata drogowa", icon: IconRoad },
+    additives: { name: "Dodatki", icon: IconDropletPlus },
+    fuel: { name: "Paliwo", icon: IconGasStation },
+  };
+  const { icon: Icon, name } = mnemonics[category] || {
+    icon: null,
+    name: "Inne",
+  };
+  return (
+    <Badge variant="outline" className="text-muted-foreground px-1.5">
+      {Icon && <Icon />} {name}
+    </Badge>
+  );
+}
 
 function formatDateTime(jsonDate) {
   const dateObject = new Date(jsonDate);
@@ -112,38 +99,37 @@ function formatDateTime(jsonDate) {
 
 const columns = [
   {
-    accessorKey: "ID",
-    header: "ID dokumentu",
-    cell: ({ row }) => {
-      return <div className="text-foreground w-32">{row.original.id}</div>;
-    },
+    accessorKey: "Tytuł",
+    header: "Tytuł",
+    cell: ({ row }) => row.original.title,
     enableHiding: false,
   },
-
   {
-    accessorKey: "Źródło",
-    header: "Źródło",
-    cell: ({ row }) => (
-      <div className="w-32">
-        <Badge variant="outline" className="text-muted-foreground px-1.5">
-          {row.original.source}
-        </Badge>
-      </div>
-    ),
+    accessorKey: "Kategoria",
+    header: "Kategoria",
+    cell: ({ row }) => renderCategory(row.original.category),
   },
   {
-    accessorKey: "Status",
-    header: "Status",
-    cell: ({ row }) => (
-      <Badge variant="outline" className="text-muted-foreground px-1.5">
-        {renderStatus(row.original.status)}
-      </Badge>
-    ),
+    accessorKey: "Ilość",
+    header: "Ilość",
+    cell: ({ row }) => row.original.quantity,
+  },
+  {
+    accessorKey: "Kwota",
+    header: "Kwota netto",
+    cell: ({ row }) => row.original.value,
+  },
+  {
+    accessorKey: "Kwota VAT",
+    header: "Kwota VAT",
+    cell: ({ row }) => row.original.vat_value,
   },
   {
     accessorKey: "Liczba kosztów",
     header: () => <div className="w-full">Liczba kosztów</div>,
-    cell: ({ row }) => <div className="w-full">{row.original.costs_number}</div>, // TODO: maybe cost_quantity?
+    cell: ({ row }) => (
+      <div className="w-full">{row.original.costs_number}</div>
+    ), // TODO: maybe cost_quantity?
   },
   {
     accessorKey: "Dodał/a",
@@ -174,18 +160,7 @@ const columns = [
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-32">
-          {row.original.status === "incorrect" ? (
-            <>
-              <DropdownMenuItem>Popraw</DropdownMenuItem>{" "}
-              <DropdownMenuSeparator />
-            </>
-          ) : null}
-
-          {row.original.status === "withdrawn" ? (
-            <DropdownMenuItem variant="destructive">Ukryj</DropdownMenuItem>
-          ) : (
-            <DropdownMenuItem variant="destructive">Wycofaj</DropdownMenuItem>
-          )}
+          <DropdownMenuItem variant="destructive">Wycofaj</DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
     ),
@@ -204,20 +179,16 @@ function Row({ row }) {
   );
 }
 
-export function CostDocumentsTable() { // TODO: If empty rerenders into oblivion
-  const { data, loading, error } = useCostDocumentsDataContext(); // TODO: Make error
-  
+export function CostsTable() {
+  const { data, loading, error } = useCostsDataContext(); // TODO: Make error
   const [columnVisibility, setColumnVisibility] = useState({});
   const [pagination, setPagination] = useState({
     pageIndex: 0,
     pageSize: 10,
   });
-  console.log("rerender af")
-  
-  
   const table = useReactTable({
-    data: data,
-    columns: columns,
+    data: data || [],
+    columns,
     state: {
       columnVisibility,
       pagination,
@@ -274,7 +245,7 @@ export function CostDocumentsTable() { // TODO: If empty rerenders into oblivion
                 })}
             </DropdownMenuContent>
           </DropdownMenu>
-          <AddCostDocumentDrawer></AddCostDocumentDrawer>
+          <AddCostDrawer></AddCostDrawer>
         </div>
       </div>
 
@@ -402,8 +373,8 @@ export function CostDocumentsTable() { // TODO: If empty rerenders into oblivion
   );
 }
 
-function AddCostDocumentDrawer() {
-  const { refetchData } = useCostDocumentsDataContext();
+function AddCostDrawer() {
+  const { refetchData } = useCostsDataContext();
   const [open, setOpen] = useState(false);
   const [error, setError] = useState("");
   const [source, setSource] = useState("");
@@ -468,12 +439,12 @@ function AddCostDocumentDrawer() {
       <DrawerTrigger asChild>
         <Button variant="outline" size="sm">
           <IconPlus />
-          <span className="hidden lg:inline">Dodaj dokument</span>
+          <span className="hidden lg:inline">Dodaj koszt</span>
         </Button>
       </DrawerTrigger>
       <DrawerContent>
         <DrawerHeader className="gap-1">
-          <DrawerTitle>Dodaj dokument kosztowy</DrawerTitle>
+          <DrawerTitle>Dodaj koszt</DrawerTitle>
           <DrawerDescription>
             Dodaj znane dokumenty, aby zautomatyzować rejestrację kosztów
           </DrawerDescription>
@@ -492,8 +463,7 @@ function AddCostDocumentDrawer() {
                   setType("");
                 }}
               >
-                {/* TODO: PROPER FORM SYNTAX  */}
-                <SelectTrigger id="source" className="w-full"> 
+                <SelectTrigger id="source" className="w-full">
                   <SelectValue placeholder="Wybierz źródło" />
                 </SelectTrigger>
                 <SelectContent>

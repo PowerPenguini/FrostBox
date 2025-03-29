@@ -55,9 +55,10 @@ def process_pdf(contents):
         df["goods_type"].str.startswith("Eurowinieta"),
         df["goods_type"].str.startswith("AdBlue"),
         df["goods_type"].str.startswith("Olej napędowy"),
+        df["goods_type"].str.startswith("Olej nap?dowy"),
     ]
 
-    categories = ["toll", "toll", "toll", "toll", "additives", "fuel"]
+    categories = ["toll", "toll", "toll", "toll", "additives", "fuel", "fuel"]
 
     df["category"] = np.select(conditions, categories, default="other")
     df["source"] = "uta"
