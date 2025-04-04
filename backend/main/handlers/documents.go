@@ -17,7 +17,7 @@ func NewDocumentsHandler(di *di.DI) *DocumentsHandler {
 func (h *DocumentsHandler) GetDocuments(w http.ResponseWriter, r *http.Request) {
 	response, err := h.di.DocumentViewer.GetDocuments()
 	if err != nil {
-		http.Error(w, "Failed to fetch documents", http.StatusInternalServerError)
+		http.Error(w, "Failed to fetch", http.StatusInternalServerError)
 		return
 	}
 	w.Header().Set("Content-Type", "application/json")

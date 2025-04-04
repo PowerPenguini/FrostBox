@@ -11,6 +11,7 @@ import (
 type DI struct {
 	UserRepo       *repos.UserRepo
 	DocumentRepo   *repos.DocumentRepo
+	CostRepo       *repos.CostRepo
 	DocumentViewer *views.DocumentViewer
 	VehicleViewer  *views.VehicleViewer
 	CostViewer     *views.CostViewer
@@ -38,6 +39,7 @@ func NewDI(connStr string) (*DI, error) {
 	return &DI{
 		repos.NewUserRepo(db),
 		repos.NewDocumentRepo(db),
+		repos.NewCostRepository(db),
 		views.NewDocumentViewer(db),
 		views.NewVehicleViewer(db),
 		views.NewCostViewer(db),

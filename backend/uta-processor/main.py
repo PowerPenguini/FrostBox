@@ -1,8 +1,9 @@
+from datetime import date, timedelta
+import decimal
 from http.client import HTTPException
 import os
 import random
 import string
-import zipfile
 import pandas as pd
 from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker
@@ -11,7 +12,9 @@ from fastapi import FastAPI, UploadFile, File
 from fastapi.responses import JSONResponse
 import uuid
 import magic
+import services
 
+nbp_service = services.NBPService()
 app = FastAPI()
 
 conn_str = (
@@ -58,7 +61,9 @@ def process_pdf(contents):
         df["goods_type"].str.startswith("Olej nap?dowy"),
     ]
 
-    categories = ["toll", "toll", "toll", "toll", "additives", "fuel", "fuel"]
+    categories = ["toll", "toll", "toll", "toll", "additive", "fuel", "fuel"]
+    df['value'] = df['value'].apply(lambda x: decimal.Decimal(str(x)))
+    df['vat_value'] = df['vat_value'].apply(lambda x: decimal.Decimal(str(x)))
 
     df["category"] = np.select(conditions, categories, default="other")
     df["source"] = "uta"
@@ -68,6 +73,16 @@ def process_pdf(contents):
     df["invoice_date"] = pd.to_datetime(
         df["invoice_date"], format="%d.%m.%Y", errors="coerce"
     )
+    df["value_main_currency"] = df.apply(
+        lambda row: nbp_service.change_to_pln(row["currency"], decimal.Decimal(str(row["value"])), row["invoice_date"]),
+        axis=1
+    )
+
+    df["vat_value_main_currency"] = df.apply(
+        lambda row: nbp_service.change_to_pln(row["currency"], decimal.Decimal(str(row["vat_value"])), row["invoice_date"]),
+        axis=1
+    )
+
     return df
 
 
@@ -82,11 +97,13 @@ async def upload_file(file: UploadFile = File(...)):
             session.execute(
                 text(
                     """
-                    INSERT INTO costs (value, source, vehicle_id, vat_rate, currency, vat_value, country, cost_date, invoice_date, category, quantity, title, document_id)
-                    VALUES (:value, :source, (SELECT id FROM vehicles WHERE registration_number = :registration_number LIMIT 1), :vat_rate, :currency, :vat_value, :country, :cost_date, :invoice_date, :category, :quantity, :title, :document_id)
+                    INSERT INTO costs (value_main_currency, vat_value_main_currency, value, source, vehicle_id, vat_rate, currency, vat_value, country, cost_date, invoice_date, category, quantity, title, document_id)
+                    VALUES (:value_main_currency, :vat_value_main_currency, :value, :source, (SELECT id FROM vehicles WHERE registration_number = :registration_number LIMIT 1), :vat_rate, :currency, :vat_value, :country, :cost_date, :invoice_date, :category, :quantity, :title, :document_id)
                     """
                 ),
                 {
+                    "value_main_currency": row["value_main_currency"],
+                    "vat_value_main_currency": row["vat_value_main_currency"],
                     "value": row["value"],
                     "source": row["source"],
                     "registration_number": row["registration_number"],
@@ -106,12 +123,12 @@ async def upload_file(file: UploadFile = File(...)):
         return JSONResponse(
             content={"message": "File processed and data inserted successfully."}
         )
-    except Exception as e:
-        session.rollback()
-        return JSONResponse(
-            content={"error": f"Error during transaction: {str(e)}"},
-            status_code=500,
-        )
+    # except Exception as e:
+    #     session.rollback()
+    #     return JSONResponse(
+    #         content={"error": f"Error during transaction: {str(e)}"},
+    #         status_code=500,
+    #     )
     finally:
         session.close()
 
@@ -142,3 +159,9 @@ def add_document():
     )
     session.commit()
     return document_uuid
+
+@app.post("/rate/")
+def rates(rate_request: dict):
+    eur = rate_request["a"]
+    a = nbp_service.change_to_pln("EUR", decimal.Decimal(eur), date.today() - timedelta(days=1))
+    return a

@@ -7,12 +7,9 @@ import {
   IconChevronRight,
   IconChevronsLeft,
   IconChevronsRight,
-  IconCircleCheckFilled,
   IconDotsVertical,
   IconLayoutColumns,
   IconPlus,
-  IconCircleXFilled,
-  IconAlertTriangleFilled,
 } from "@tabler/icons-react";
 import {
   flexRender,
@@ -25,8 +22,8 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 
+
 import { useIsMobile } from "@/hooks/use-mobile";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Drawer,
@@ -65,15 +62,23 @@ import {
 } from "@/components/ui/table";
 import { useState } from "react";
 import { toast } from "sonner";
-import { useCostDocumentsDataContext } from "@/state/cost-documents-data-context";
 import { Spinner } from "./spinner";
 import { useVehiclesDataContext } from "@/state/vehicles-data-context";
+import { VehicleCellViewer } from "@/components/vehicle-cell-viewer";
 
 const columns = [
   {
+    accessorKey: "Typ",
+    header: "Typ",
+    cell: ({ row }) => row.original.type,
+    enableHiding: false,
+  },
+  {
     accessorKey: "Numer rejestracyjny",
     header: "Numer rejestracyjny",
-    cell: ({ row }) => row.original.registration_number,
+    cell: ({ row }) => (
+      <VehicleCellViewer item={row.original} />
+    ),
     enableHiding: false,
   },
 
@@ -88,9 +93,19 @@ const columns = [
     cell: ({ row }) => row.original.model,
   },
   {
-    accessorKey: "VIN",
-    header: () => <div className="w-full">VIN</div>,
-    cell: ({ row }) => row.original.vin,
+    accessorKey: "Koszt (30 dni)",
+    header: () =>  <div className="text-right">Koszt (30 dni)</div>,
+    cell: ({ row }) => <div className="text-right">{row.original.last_30_days_cost} zł</div>,
+  },
+  {
+    accessorKey: "Koszt opłaty drogowej (30 dni)",
+    header: () =>  <div className="text-right">Koszt opłaty drogowej (30 dni)</div>,
+    cell: ({ row }) => <div className="text-right">{row.original.last_30_days_toll_cost} zł</div>,
+  },
+  {
+    accessorKey: "Koszt paliwa (30 dni)",
+    header: () =>  <div className="text-right">Koszt paliwa (30 dni)</div>,
+    cell: ({ row }) => <div className="text-right">{row.original.last_30_days_fuel_cost} zł</div>,
   },
   {
     id: "actions",
@@ -324,7 +339,7 @@ function AddVehicleDrawer() {
   const { refetchData } = useVehiclesDataContext();
   const [open, setOpen] = useState(false);
   const [error, setError] = useState("");
-  
+
   const [brand, setBrand] = useState("");
   const [model, setModel] = useState("");
   const [vin, setVin] = useState("");
@@ -334,7 +349,8 @@ function AddVehicleDrawer() {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    if (!brand) { // TODO add validation
+    if (!brand) {
+      // TODO add validation
       setError("Wprowadź markę pojazdu");
       return;
     }
@@ -402,13 +418,29 @@ function AddVehicleDrawer() {
           >
             <div className="flex flex-col gap-3 px-4 pb-4">
               <Label htmlFor="brand">Marka</Label>
-              <Input id="brand" placeholder="Volvo" onChange={e => setBrand(e.target.value)} />
+              <Input
+                id="brand"
+                placeholder="Volvo"
+                onChange={(e) => setBrand(e.target.value)}
+              />
               <Label htmlFor="model">Model</Label>
-              <Input id="model" placeholder="FMX" onChange={e => setModel(e.target.value)}/>
+              <Input
+                id="model"
+                placeholder="FMX"
+                onChange={(e) => setModel(e.target.value)}
+              />
               <Label htmlFor="vin">VIN</Label>
-              <Input id="vin" placeholder="5N1AR2MN8FC123456" onChange={e => setVin(e.target.value)}/>
+              <Input
+                id="vin"
+                placeholder="5N1AR2MN8FC123456"
+                onChange={(e) => setVin(e.target.value)}
+              />
               <Label htmlFor="registration_number">Numer rejestracyjny</Label>
-              <Input id="registration_number" placeholder="EL2K25" onChange={e => setRegistrationNumber(e.target.value)}/>
+              <Input
+                id="registration_number"
+                placeholder="EL2K25"
+                onChange={(e) => setRegistrationNumber(e.target.value)}
+              />
 
               {error && (
                 <p className="text-red-500 text-sm font-medium">{error}</p>

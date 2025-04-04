@@ -4,8 +4,8 @@ VALUES (
     'Kowalski', 
     'admin', 
     'jan.kowalski@example.com', 
-    '$2a$10$qiP30Od/V/uBpxf0gfUi..HvUqVpJNQ8Lfvgo3CzPn9NzQzZS71u.' -- Hash hasła "securepassword"
-);
+    '$2a$10$qiP30Od/V/uBpxf0gfUi..HvUqVpJNQ8Lfvgo3CzPn9NzQzZS71u.' -- "admin"
+) ON CONFLICT (email) DO NOTHING;
 
 
 INSERT INTO vehicles (id, brand, model, vin, registration_number) 

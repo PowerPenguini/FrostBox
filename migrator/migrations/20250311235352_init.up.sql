@@ -2,6 +2,7 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 CREATE TYPE user_role AS ENUM ('driver', 'manager', 'admin');
 CREATE TYPE document_status AS ENUM ('withdrawn', 'added', 'incorrect');
+CREATE TYPE cost_category AS ENUM ('fuel', 'additive', 'toll', 'other');
 
 CREATE TABLE users (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -33,19 +34,21 @@ CREATE TABLE vehicles (
 
 CREATE TABLE costs (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    value DECIMAL(10, 2) NOT NULL,
-    source VARCHAR(255) NOT NULL,
-    quantity DECIMAL(10,6) NOT NULL,
-    vehicle_id UUID,
+    value DECIMAL(16, 2) NOT NULL,
     vat_rate DECIMAL(5, 2) NOT NULL,
-    vat_value DECIMAL(10, 2) NOT NULL,
-    title VARCHAR(255) NOT NULL,
+    vat_value DECIMAL(16, 2) NOT NULL,
     currency VARCHAR(3) NOT NULL,
-    category VARCHAR(255) NOT NULL,
+    value_main_currency DECIMAL(16, 8) NOT NULL,
+    vat_value_main_currency DECIMAL(16, 8) NOT NULL, 
+    quantity DECIMAL(16,8) NOT NULL,
+    vehicle_id UUID,
+    title VARCHAR(255) NOT NULL,
+    category cost_category NOT NULL,
     country VARCHAR(3) NOT NULL,
     invoice_date DATE NOT NULL,
     cost_date DATE NOT NULL,
     document_id UUID,
+    amortization INT NOT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (document_id) REFERENCES documents(id) ON DELETE CASCADE,
     FOREIGN KEY (vehicle_id) REFERENCES vehicles(id) ON DELETE CASCADE

@@ -7,7 +7,9 @@ import {
   IconSettings,
   IconTruck,
   IconSteeringWheel,
-  IconBasketDollar
+  IconBasketDollar,
+  IconFileDollar,
+  IconBusinessplan
 } from "@tabler/icons-react"
 
 import { NavDocuments } from "@/components/nav-documents"
@@ -44,6 +46,11 @@ const data = {
       icon: IconBasketDollar,
     },
     {
+      title: "Przychody",
+      url: "/manager/costs",
+      icon: IconBusinessplan,
+    },
+    {
       title: "Pojazdy",
       url: "/manager/vehicles",
       icon: IconTruck,
@@ -72,11 +79,11 @@ const data = {
       url: "/manager/documents/costs",
       icon: IconReceiptDollar,
     },
-    // {
-    //   name: "Faktury przychodowe",
-    //   url: "#",
-    //   icon: IconReceiptDollar,
-    // },
+    {
+      name: "Dokumenty przychodowe",
+      url: "#",
+      icon: IconFileDollar,
+    },
   ],
 }
 

@@ -6,16 +6,18 @@ import (
 	"github.com/google/uuid"
 )
 
-type CostsResponse []Cost
+type GetCostsResponse []Cost
+type GetCostsCategoryResponse []string
+type PostCosts Cost
 
 type Cost struct {
 	ID                        uuid.UUID `json:"id"`
-	Value                     float64   `json:"value"`
+	Value                     string    `json:"value"`
 	Source                    string    `json:"source"`
-	Quantity                  float64   `json:"quantity"`
+	Quantity                  string    `json:"quantity"`
 	VehicleRegistrationNumber string    `json:"vehicle_registration_number"`
-	VatRate                   float64   `json:"vat_rate"`
-	VatValue                  float64   `json:"vat_value"`
+	VatRate                   string    `json:"vat_rate"`
+	VatValue                  string    `json:"vat_value"`
 	Title                     string    `json:"title"`
 	Currency                  string    `json:"currency"`
 	Category                  string    `json:"category"`

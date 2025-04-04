@@ -89,8 +89,11 @@ func main() {
 	mux.HandleFunc("POST /token", loginHandler(di))
 
 	mux.HandleFunc("GET /documents/cost", authMiddleware(di, documentsHandler.GetDocuments))
+	mux.HandleFunc("GET /vehicles/available", authMiddleware(di, vehiclesHandler.GetVehiclesAvailable))
 	mux.HandleFunc("GET /vehicles", authMiddleware(di, vehiclesHandler.GetVehicles))
+	mux.HandleFunc("GET /costs/categories", authMiddleware(di, costsHandler.GetCostsCategories))
 	mux.HandleFunc("GET /costs", authMiddleware(di, costsHandler.GetCosts))
+	mux.HandleFunc("POST /costs", authMiddleware(di, costsHandler.PostCosts))
 
 	log.Println("Server running on port 8080...")
 	log.Fatal(http.ListenAndServe(":8080", mux))

@@ -25,19 +25,8 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 
-import { useIsMobile } from "@/hooks/use-mobile";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  Drawer,
-  DrawerClose,
-  DrawerContent,
-  DrawerDescription,
-  DrawerFooter,
-  DrawerHeader,
-  DrawerTitle,
-  DrawerTrigger,
-} from "@/components/ui/drawer";
+
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -64,38 +53,11 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { useState } from "react";
-import { toast } from "sonner";
 import { useCostsDataContext } from "@/state/costs-data-context";
 import { Spinner } from "./spinner";
-
-function renderCategory(category) {
-  const mnemonics = {
-    toll: { name: "Opłata drogowa", icon: IconRoad },
-    additives: { name: "Dodatki", icon: IconDropletPlus },
-    fuel: { name: "Paliwo", icon: IconGasStation },
-  };
-  const { icon: Icon, name } = mnemonics[category] || {
-    icon: null,
-    name: "Inne",
-  };
-  return (
-    <Badge variant="outline" className="text-muted-foreground px-1.5">
-      {Icon && <Icon />} {name}
-    </Badge>
-  );
-}
-
-function formatDateTime(jsonDate) {
-  const dateObject = new Date(jsonDate);
-
-  const day = String(dateObject.getDate()).padStart(2, "0");
-  const month = String(dateObject.getMonth() + 1).padStart(2, "0");
-  const year = dateObject.getFullYear();
-  const hours = String(dateObject.getHours()).padStart(2, "0");
-  const minutes = String(dateObject.getMinutes()).padStart(2, "0");
-
-  return `${day}.${month}.${year} ${hours}:${minutes}`;
-}
+import { AddCostDrawer } from "@/components/add-cost-drawer";
+import { renderCostCategory } from "@/formatting/category";
+import { formatDate } from "@/formatting/date";
 
 const columns = [
   {
@@ -107,7 +69,7 @@ const columns = [
   {
     accessorKey: "Kategoria",
     header: "Kategoria",
-    cell: ({ row }) => renderCategory(row.original.category),
+    cell: ({ row }) => renderCostCategory(row.original.category),
   },
   {
     accessorKey: "Ilość",
@@ -117,32 +79,34 @@ const columns = [
   {
     accessorKey: "Kwota",
     header: "Kwota netto",
-    cell: ({ row }) => row.original.value,
+    cell: ({ row }) => (
+      <div className="text-right">{row.original.value} zł</div>
+    ),
   },
   {
     accessorKey: "Kwota VAT",
     header: "Kwota VAT",
-    cell: ({ row }) => row.original.vat_value,
-  },
-  {
-    accessorKey: "Liczba kosztów",
-    header: () => <div className="w-full">Liczba kosztów</div>,
     cell: ({ row }) => (
-      <div className="w-full">{row.original.costs_number}</div>
-    ), // TODO: maybe cost_quantity?
+      <div className="text-right">{row.original.vat_value} zł</div>
+    ),
   },
   {
-    accessorKey: "Dodał/a",
-    header: "Dodał/a",
-    cell: ({ row }) => {
-      return row.original.owner;
-    },
-  },
-  {
-    accessorKey: "Data dodania",
-    header: "Data dodania",
+    accessorKey: "Stawka VAT",
+    header: "Stawka VAT",
     cell: ({ row }) => (
-      <div className="w-32">{formatDateTime(row.original.created_at)}</div>
+      <div className="text-right">{row.original.vat_rate}%</div>
+    ),
+  },
+  {
+    accessorKey: "ID Dokumentu",
+    header: () => <div className="w-full">ID Dokumentu</div>,
+    cell: ({ row }) => <div className="w-full">{row.original.document_id}</div>,
+  },
+  {
+    accessorKey: "Data kosztu",
+    header: "Data kosztu",
+    cell: ({ row }) => (
+      <div className="w-32">{formatDate(row.original.cost_date)}</div>
     ),
   },
   {
@@ -370,141 +334,5 @@ export function CostsTable() {
         </div>
       </div>
     </>
-  );
-}
-
-function AddCostDrawer() {
-  const { refetchData } = useCostsDataContext();
-  const [open, setOpen] = useState(false);
-  const [error, setError] = useState("");
-  const [source, setSource] = useState("");
-  const [type, setType] = useState("");
-  const isMobile = useIsMobile();
-  const [file, setFile] = useState(null);
-
-  const handleFileChange = (event) => {
-    if (event.target.files && event.target.files.length > 0) {
-      setFile(event.target.files[0]);
-      setError("");
-    }
-  };
-
-  const handleSubmit = async (event) => {
-    event.preventDefault();
-    if (!source) {
-      setError("Wybierz źródło dokumentu");
-      return;
-    }
-
-    if (!type) {
-      setError("Wybierz typ dokumentu");
-      return;
-    }
-
-    if (!file) {
-      setError("Wybierz plik");
-      return;
-    }
-
-    const formData = new FormData();
-    formData.append("source", source);
-    formData.append("file", file);
-
-    try {
-      const response = await fetch("/api/v1/analysers/uta/upload/", {
-        method: "POST",
-        body: formData,
-      });
-
-      if (response.ok) {
-        toast("Dokument dodany pomyślnie!");
-      } else {
-        toast("Błąd podczas przesyłania dokumentu.");
-      }
-    } catch (error) {
-      toast("Błąd sieci podczas przesyłania dokumentu.");
-    } finally {
-      refetchData();
-      setOpen(false);
-      setFile(null);
-    }
-  };
-
-  return (
-    <Drawer
-      open={open}
-      onOpenChange={setOpen}
-      direction={isMobile ? "bottom" : "right"}
-    >
-      <DrawerTrigger asChild>
-        <Button variant="outline" size="sm">
-          <IconPlus />
-          <span className="hidden lg:inline">Dodaj koszt</span>
-        </Button>
-      </DrawerTrigger>
-      <DrawerContent>
-        <DrawerHeader className="gap-1">
-          <DrawerTitle>Dodaj koszt</DrawerTitle>
-          <DrawerDescription>
-            Dodaj znane dokumenty, aby zautomatyzować rejestrację kosztów
-          </DrawerDescription>
-        </DrawerHeader>
-        <div className="flex flex-col gap-4 overflow-y-auto text-sm">
-          <form
-            id="cost-document-form"
-            className="flex flex-col gap-4"
-            onSubmit={handleSubmit}
-          >
-            <div className="flex flex-col gap-3 px-4 pb-4">
-              <Label htmlFor="source">Źródło</Label>
-              <Select
-                onValueChange={(value) => {
-                  setSource(value);
-                  setType("");
-                }}
-              >
-                <SelectTrigger id="source" className="w-full">
-                  <SelectValue placeholder="Wybierz źródło" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="uta">UTA</SelectItem>
-                  <SelectItem value="gastruck">GasTruck</SelectItem>
-                </SelectContent>
-              </Select>
-              <Label htmlFor="type">Typ dokumentu</Label>
-              <Select
-                onValueChange={(value) => setType(value)}
-                disabled={!source}
-              >
-                <SelectTrigger id="type" className="w-full">
-                  <SelectValue placeholder="Wybierz typ dokumentu" />
-                </SelectTrigger>
-                <SelectContent>
-                  {source &&
-                    typeOptions[source].map((option) => (
-                      <SelectItem key={option.value} value={option.value}>
-                        {option.label}
-                      </SelectItem>
-                    ))}
-                </SelectContent>
-              </Select>
-              <Label htmlFor="file">Plik</Label>
-              <Input id="file" type="file" onChange={handleFileChange} />
-              {error && (
-                <p className="text-red-500 text-sm font-medium">{error}</p>
-              )}
-            </div>
-          </form>
-        </div>
-        <DrawerFooter>
-          <Button form="cost-document-form" type="submit">
-            Dodaj
-          </Button>
-          <DrawerClose asChild>
-            <Button variant="outline">Anuluj</Button>
-          </DrawerClose>
-        </DrawerFooter>
-      </DrawerContent>
-    </Drawer>
   );
 }
