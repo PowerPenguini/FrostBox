@@ -19,16 +19,17 @@ import {
 } from "@/components/ui/popover";
 import { useAuthContext } from "@/state/auth-context";
 import { translateCostCategory } from "@/formatting/category";
-export function CategoryCombox() {
+
+
+export function CategoryCombox({ id, value, onChange }) {
   const [open, setOpen] = useState(false);
-  const [value, setValue] = useState("");
-  const [categories, setCategoies] = useState([]);
+  const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const { token } = useAuthContext();
 
   useEffect(() => {
-    const fetchFrameworks = async () => {
+    const fetchCategories = async () => {
       try {
         const response = await fetch("/api/v1/costs/categories", {
           method: "GET",
@@ -41,7 +42,7 @@ export function CategoryCombox() {
           throw new Error("Sieć niedostępna");
         }
         const data = await response.json();
-        setCategoies(data);
+        setCategories(data);
       } catch (error) {
         setError(error.message);
       } finally {
@@ -49,8 +50,8 @@ export function CategoryCombox() {
       }
     };
 
-    fetchFrameworks();
-  }, []);
+    fetchCategories();
+  }, [token]);
 
   if (loading) return <div>Loading...</div>;
   if (error)
@@ -58,7 +59,7 @@ export function CategoryCombox() {
       <div>
         <p className="text-red-500 text-sm font-medium">{error}</p>
       </div>
-    ); // TODO: add standarized
+    );
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -67,23 +68,23 @@ export function CategoryCombox() {
           variant="outline"
           role="combobox"
           aria-expanded={open}
+          aria-controls={id}
           className="justify-between"
         >
           {value
-            ? translateCostCategory(
-                categories.find((category) => category === value)
-              )
+            ? translateCostCategory(value)
             : "Wybierz kategorię..."}
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
       <PopoverContent className="p-0 w-full min-w-[var(--radix-popover-trigger-width)]">
         <Command
-          filter={(value, search) => {
-            return translateCostCategory(value)
+          id={id}
+          filter={(val, search) =>
+            translateCostCategory(val)
               .toLowerCase()
-              .includes(search.toLowerCase());
-          }}
+              .includes(search.toLowerCase())
+          }
         >
           <CommandInput placeholder="Wybierz kategorię..." />
           <CommandList>
@@ -93,9 +94,8 @@ export function CategoryCombox() {
                 <CommandItem
                   key={category}
                   value={category}
-                  data-value={translateCostCategory(category)}
                   onSelect={(currentValue) => {
-                    setValue(currentValue === value ? "" : currentValue);
+                    onChange(currentValue === value ? "" : currentValue);
                     setOpen(false);
                   }}
                 >

@@ -3,4 +3,4 @@ FROM node:18
 WORKDIR /app
 RUN npm i -g pnpm
 
-CMD ["pnpm", "dev"]
+CMD ["pnpm", "dev-no-turbopack"]

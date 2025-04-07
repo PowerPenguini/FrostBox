@@ -9,7 +9,8 @@ import {
   IconSteeringWheel,
   IconBasketDollar,
   IconFileDollar,
-  IconBusinessplan
+  IconBusinessplan,
+  IconUsers
 } from "@tabler/icons-react"
 
 import { NavDocuments } from "@/components/nav-documents"
@@ -59,6 +60,11 @@ const data = {
       title: "Kierowcy",
       url: "#",
       icon: IconSteeringWheel,
+    },
+    {
+      title: "Użytkownicy",
+      url: "#",
+      icon: IconUsers,
     },
   ],
   navSecondary: [

@@ -19,16 +19,17 @@ import {
 } from "@/components/ui/popover";
 import { useAuthContext } from "@/state/auth-context";
 
-export function VehiclesCombox() {
+
+
+export function VehiclesCombox({ id, value, onChange }) {
   const [open, setOpen] = useState(false);
-  const [value, setValue] = useState("");
   const [vehicles, setVehicles] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const { token } = useAuthContext();
 
   useEffect(() => {
-    const fetchFrameworks = async () => {
+    const fetchVehicles = async () => {
       try {
         const response = await fetch("/api/v1/vehicles/available", {
           method: "GET",
@@ -49,8 +50,8 @@ export function VehiclesCombox() {
       }
     };
 
-    fetchFrameworks();
-  }, []);
+    fetchVehicles();
+  }, [token]);
 
   if (loading) return <div>Loading...</div>;
   if (error)
@@ -58,7 +59,7 @@ export function VehiclesCombox() {
       <div>
         <p className="text-red-500 text-sm font-medium">{error}</p>
       </div>
-    ); // TODO: add standarized
+    );
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -67,6 +68,7 @@ export function VehiclesCombox() {
           variant="outline"
           role="combobox"
           aria-expanded={open}
+          aria-controls={id}
           className="justify-between"
         >
           {value
@@ -78,8 +80,9 @@ export function VehiclesCombox() {
       </PopoverTrigger>
       <PopoverContent className="p-0 w-full min-w-[var(--radix-popover-trigger-width)]">
         <Command
-          filter={(value, search) => {
-            const vehicle = vehicles.find((v) => v.id === value);
+          id={id}
+          filter={(val, search) => {
+            const vehicle = vehicles.find((v) => v.id === val);
             return vehicle
               ? vehicle.registration_number
                   .toLowerCase()
@@ -96,7 +99,7 @@ export function VehiclesCombox() {
                   key={vehicle.id}
                   value={vehicle.id}
                   onSelect={(currentValue) => {
-                    setValue(currentValue === value ? "" : currentValue);
+                    onChange(currentValue === value ? "" : currentValue);
                     setOpen(false);
                   }}
                 >

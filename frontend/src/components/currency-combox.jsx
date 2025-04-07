@@ -26,9 +26,8 @@ const currencies = [
   { code: "PLN", name: "Polski złoty" },
 ];
 
-export function CurrencyCombox() {
+export function CurrencyCombox({ id, value, onChange }) {
   const [open, setOpen] = useState(false);
-  const [value, setValue] = useState("");
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -37,6 +36,7 @@ export function CurrencyCombox() {
           variant="outline"
           role="combobox"
           aria-expanded={open}
+          aria-controls={id}
           className="justify-between"
         >
           {value
@@ -46,7 +46,7 @@ export function CurrencyCombox() {
         </Button>
       </PopoverTrigger>
       <PopoverContent className="p-0 w-full min-w-[var(--radix-popover-trigger-width)]">
-        <Command>
+        <Command id={id}>
           <CommandInput placeholder="Wyszukaj walutę..." />
           <CommandList>
             <CommandEmpty>Nie znaleziono walut</CommandEmpty>
@@ -56,7 +56,7 @@ export function CurrencyCombox() {
                   key={currency.code}
                   value={currency.code}
                   onSelect={(currentValue) => {
-                    setValue(currentValue === value ? "" : currentValue);
+                    onChange(currentValue === value ? "" : currentValue);
                     setOpen(false);
                   }}
                 >
