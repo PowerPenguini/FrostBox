@@ -6,16 +6,15 @@ import (
 	"github.com/google/uuid"
 )
 
-type GetCostsResponse []Cost
+type GetCostsResponse []CostResponse
 type GetCostsCategoryResponse []string
-type PostCosts Cost
+type PostCostsRequest CostRequest
 
-type Cost struct {
+type CostResponse struct {
 	ID                        uuid.UUID `json:"id"`
 	Value                     string    `json:"value"`
-	Source                    string    `json:"source"`
 	Quantity                  string    `json:"quantity"`
-	VehicleRegistrationNumber string    `json:"vehicle_registration_number"`
+	VehicleRegistrationNumber *string   `json:"vehicle_registration_number"` // TODO: Legacy?? To remove?
 	VatRate                   string    `json:"vat_rate"`
 	VatValue                  string    `json:"vat_value"`
 	Title                     string    `json:"title"`
@@ -24,6 +23,20 @@ type Cost struct {
 	Country                   string    `json:"country"`
 	InvoiceDate               time.Time `json:"invoice_date"`
 	CostDate                  time.Time `json:"cost_date"`
-	DocumentID                string    `json:"document_id"`
+	DocumentID                *string   `json:"document_id"`
 	CreatedAt                 time.Time `json:"created_at"`
+}
+
+type CostRequest struct {
+	Title        string     `json:"title"`
+	Value        string     `json:"value"`
+	VatRate      string     `json:"vat_rate"`
+	Quantity     string     `json:"quantity"`
+	VehicleID    *uuid.UUID `json:"vehicle_id"`
+	Currency     string     `json:"currency"`
+	Category     string     `json:"category"`
+	Country      string     `json:"country"`
+	InvoiceDate  time.Time  `json:"invoice_date"`
+	CostDate     time.Time  `json:"cost_date"`
+	Amortization int        `json:"amortization"`
 }

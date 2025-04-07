@@ -19,7 +19,6 @@ func (r *CostViewer) GetCosts() (contract.GetCostsResponse, error) {
 	query := `SELECT 
 		c.id, 
 		c.value_main_currency, 
-		c.source, 
 		c.quantity, 
 		c.vat_rate, 
 		c.vat_value_main_currency, 
@@ -48,11 +47,10 @@ func (r *CostViewer) GetCosts() (contract.GetCostsResponse, error) {
 	var value, quantity, vatRate, vatValue float64
 	var resp contract.GetCostsResponse
 	for rows.Next() {
-		var cost contract.Cost
+		var cost contract.CostResponse
 		if err := rows.Scan(
 			&cost.ID,
 			&value,
-			&cost.Source,
 			&quantity,
 			&vatRate,
 			&vatValue,

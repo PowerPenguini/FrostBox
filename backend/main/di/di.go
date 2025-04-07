@@ -3,6 +3,7 @@ package di
 import (
 	"database/sql"
 	"frostbox/repos"
+	"frostbox/services"
 	"frostbox/views"
 
 	_ "github.com/jackc/pgx/v5/stdlib"
@@ -15,6 +16,7 @@ type DI struct {
 	DocumentViewer *views.DocumentViewer
 	VehicleViewer  *views.VehicleViewer
 	CostViewer     *views.CostViewer
+	NBPService     *services.NBPService
 }
 
 func NewDatabase(connStr string) (*sql.DB, error) {
@@ -43,5 +45,6 @@ func NewDI(connStr string) (*DI, error) {
 		views.NewDocumentViewer(db),
 		views.NewVehicleViewer(db),
 		views.NewCostViewer(db),
+		services.NewNBPService(),
 	}, nil
 }

@@ -66,7 +66,6 @@ def process_pdf(contents):
     df['vat_value'] = df['vat_value'].apply(lambda x: decimal.Decimal(str(x)))
 
     df["category"] = np.select(conditions, categories, default="other")
-    df["source"] = "uta"
     df["cost_date"] = pd.to_datetime(
         df["cost_date"], format="%d.%m.%Y", errors="coerce"
     )
@@ -92,20 +91,19 @@ async def upload_file(file: UploadFile = File(...)):
     contents = await file.read()
     try:
         pdf_data = process_pdf(contents)
-        uuid = add_document() # TODO: add document even if inceorrect
+        uuid = add_document(session) # TODO: add document even if inceorrect
         for _, row in pdf_data.iterrows():
             session.execute(
                 text(
                     """
-                    INSERT INTO costs (value_main_currency, vat_value_main_currency, value, source, vehicle_id, vat_rate, currency, vat_value, country, cost_date, invoice_date, category, quantity, title, document_id)
-                    VALUES (:value_main_currency, :vat_value_main_currency, :value, :source, (SELECT id FROM vehicles WHERE registration_number = :registration_number LIMIT 1), :vat_rate, :currency, :vat_value, :country, :cost_date, :invoice_date, :category, :quantity, :title, :document_id)
+                    INSERT INTO costs (value_main_currency, vat_value_main_currency, value, vehicle_id, vat_rate, currency, vat_value, country, cost_date, invoice_date, category, quantity, title, document_id, amortization)
+                    VALUES (:value_main_currency, :vat_value_main_currency, :value, (SELECT id FROM vehicles WHERE registration_number = :registration_number LIMIT 1), :vat_rate, :currency, :vat_value, :country, :cost_date, :invoice_date, :category, :quantity, :title, :document_id, :amortization)
                     """
                 ),
                 {
                     "value_main_currency": row["value_main_currency"],
                     "vat_value_main_currency": row["vat_value_main_currency"],
                     "value": row["value"],
-                    "source": row["source"],
                     "registration_number": row["registration_number"],
                     "vat_rate": row["vat_rate"],
                     "currency": row["currency"],
@@ -117,18 +115,19 @@ async def upload_file(file: UploadFile = File(...)):
                     "quantity": row["quantity"],
                     "title": row["goods_type"],
                     "document_id": uuid,
+                    "amortization": 1,
                 },
             )
         session.commit()
         return JSONResponse(
             content={"message": "File processed and data inserted successfully."}
         )
-    # except Exception as e:
-    #     session.rollback()
-    #     return JSONResponse(
-    #         content={"error": f"Error during transaction: {str(e)}"},
-    #         status_code=500,
-    #     )
+    except Exception as e:
+        session.rollback()
+        return JSONResponse(
+            content={"error": f"Error during transaction: {str(e)}"},
+            status_code=500,
+        )
     finally:
         session.close()
 
@@ -138,8 +137,7 @@ def generate_id(length):
     return ''.join(random.choice(characters) for _ in range(length))
 
 
-def add_document():
-    session = Session()
+def add_document(session):
     document_uuid = uuid.uuid4()
     readable_id = generate_id(8)
 
