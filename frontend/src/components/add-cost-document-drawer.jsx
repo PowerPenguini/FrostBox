@@ -65,10 +65,11 @@ export function AddCostDocumentDrawer() {
 
     const formData = new FormData();
     formData.append("source", source);
+    formData.append("type", type);
     formData.append("file", file);
 
     try {
-      const response = await fetch("/api/v1/analysers/uta/upload/", {
+      const response = await fetch("/api/v1/analysers/upload", {
         method: "POST",
         body: formData,
       });

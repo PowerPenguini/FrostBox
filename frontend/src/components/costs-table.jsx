@@ -253,7 +253,7 @@ export function CostsTable() {
                   colSpan={columns.length}
                   className="h-24 text-center"
                 >
-                  Nie znaleziono dokumentów.
+                  Nie znaleziono kosztów.
                 </TableCell>
               </TableRow>
             )}

@@ -19,10 +19,9 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import * as React from "react";
-
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { AddVehicleDrawer } from "./add-vehicle-drawer";
+import { AddUserDrawer } from "@/components/add-user-drawer";
 
 import {
   DropdownMenu,
@@ -48,56 +47,32 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { VehicleCellViewer } from "@/components/vehicle-cell-viewer";
-import { useVehiclesDataContext } from "@/state/vehicles-data-context";
+import { useUsersDataContext } from "@/state/users-data-context";
+import { translateRole } from "@/formatting/roles";
 import { Spinner } from "./spinner";
 
 const columns = [
   {
-    accessorKey: "Typ",
-    header: "Typ",
-    cell: ({ row }) => row.original.type,
+    accessorKey: "Imię",
+    header: "Imię",
+    cell: ({ row }) => row.original.first_name,
     enableHiding: false,
   },
   {
-    accessorKey: "Numer rejestracyjny",
-    header: "Numer rejestracyjny",
-    cell: ({ row }) => <VehicleCellViewer item={row.original} />,
+    accessorKey: "Nazwisko",
+    header: "Nazwisko",
+    cell: ({ row }) => row.original.last_name,
     enableHiding: false,
   },
-
   {
-    accessorKey: "Marka",
-    header: "Marka",
-    cell: ({ row }) => row.original.brand,
+    accessorKey: "Email",
+    header: "Email",
+    cell: ({ row }) => row.original.email,
   },
   {
-    accessorKey: "Model",
-    header: "Model",
-    cell: ({ row }) => row.original.model,
-  },
-  {
-    accessorKey: "Koszt (30 dni)",
-    header: () => <div className="text-right">Koszt (30 dni)</div>,
-    cell: ({ row }) => (
-      <div className="text-right">{row.original.last_30_days_cost} zł</div>
-    ),
-  },
-  {
-    accessorKey: "Koszt opłaty drogowej (30 dni)",
-    header: () => (
-      <div className="text-right">Koszt opłaty drogowej (30 dni)</div>
-    ),
-    cell: ({ row }) => (
-      <div className="text-right">{row.original.last_30_days_toll_cost} zł</div>
-    ),
-  },
-  {
-    accessorKey: "Koszt paliwa (30 dni)",
-    header: () => <div className="text-right">Koszt paliwa (30 dni)</div>,
-    cell: ({ row }) => (
-      <div className="text-right">{row.original.last_30_days_fuel_cost} zł</div>
-    ),
+    accessorKey: "Role",
+    header: "Role",
+    cell: ({ row }) => translateRole(row.original.role),
   },
   {
     id: "actions",
@@ -133,10 +108,10 @@ function Row({ row }) {
   );
 }
 
-export function VehiclesTable() {
-  const { data, loading, error } = useVehiclesDataContext(); // TODO: Make error
-  const [columnVisibility, setColumnVisibility] = React.useState({});
-  const [pagination, setPagination] = React.useState({
+export function UsersTable() {
+  const { data, loading, error } = useUsersDataContext(); // TODO: Make error
+  const [columnVisibility, setColumnVisibility] = useState({});
+  const [pagination, setPagination] = useState({
     pageIndex: 0,
     pageSize: 10,
   });
@@ -199,7 +174,7 @@ export function VehiclesTable() {
                 })}
             </DropdownMenuContent>
           </DropdownMenu>
-          <AddVehicleDrawer></AddVehicleDrawer>
+          <AddUserDrawer></AddUserDrawer>
         </div>
       </div>
 
@@ -243,7 +218,7 @@ export function VehiclesTable() {
                   colSpan={columns.length}
                   className="h-24 text-center"
                 >
-                  Nie znaleziono pojazdów.
+                  Nie znaleziono użytkowników.
                 </TableCell>
               </TableRow>
             )}

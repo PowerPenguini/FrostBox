@@ -63,7 +63,7 @@ const data = {
     },
     {
       title: "Użytkownicy",
-      url: "#",
+      url: "/manager/users",
       icon: IconUsers,
     },
   ],
