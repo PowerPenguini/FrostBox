@@ -85,15 +85,20 @@ func main() {
 	documentsHandler := handlers.NewDocumentsHandler(di)
 	vehiclesHandler := handlers.NewVehiclesHandler(di)
 	costsHandler := handlers.NewCostsHandler(di)
+	usersHandler := handlers.NewUsersHandler(di)
 
 	mux.HandleFunc("POST /token", loginHandler(di))
 
 	mux.HandleFunc("GET /documents/cost", authMiddleware(di, documentsHandler.GetDocuments))
 	mux.HandleFunc("GET /vehicles/available", authMiddleware(di, vehiclesHandler.GetVehiclesAvailable))
 	mux.HandleFunc("GET /vehicles", authMiddleware(di, vehiclesHandler.GetVehicles))
+	mux.HandleFunc("POST /vehicles", authMiddleware(di, vehiclesHandler.PostVehicles))
 	mux.HandleFunc("GET /costs/categories", authMiddleware(di, costsHandler.GetCostsCategories))
 	mux.HandleFunc("GET /costs", authMiddleware(di, costsHandler.GetCosts))
 	mux.HandleFunc("POST /costs", authMiddleware(di, costsHandler.PostCosts))
+	mux.HandleFunc("GET /users", authMiddleware(di, usersHandler.GetUsers))
+	mux.HandleFunc("GET /users/roles", authMiddleware(di, usersHandler.GetUsersRoles))
+	mux.HandleFunc("POST /users", authMiddleware(di, usersHandler.PostUsers))
 
 	log.Println("Server running on port 8080...")
 	log.Fatal(http.ListenAndServe(":8080", mux))

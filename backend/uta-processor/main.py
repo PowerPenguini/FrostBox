@@ -1,20 +1,12 @@
-from datetime import date, timedelta
-import decimal
-from http.client import HTTPException
 import os
-import random
-import string
-import pandas as pd
-from sqlalchemy import create_engine, text
+from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-import numpy as np
-from fastapi import FastAPI, UploadFile, File
+from fastapi import FastAPI, UploadFile, File, Form
 from fastapi.responses import JSONResponse
-import uuid
-import magic
-import services
-
-nbp_service = services.NBPService()
+import documents
+import uta
+import costs
+import gastruck
 app = FastAPI()
 
 conn_str = (
@@ -26,140 +18,92 @@ conn_str = (
 engine = create_engine(conn_str)
 Session = sessionmaker(bind=engine)
 
-name_map = {
-    "Data faktury": "invoice_date",
-    "Data dostawy": "cost_date",
-    "Kraj": "country",
-    "Ilość": "quantity",
-    "Stawka podatku VAT": "vat_rate",
-    "Waluta": "currency",
-    "Podatek VAT": "vat_value",
-    "Rodzaj towaru": "goods_type",
-    "Numer rejestracyjny samochodu": "registration_number",
-    "Obrót z wyłączeniem VAT": "value",
-}
 
-ALLOWED_MIME_TYPES = {"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"}
-
-def validate_file(contents):
-    mime = magic.Magic(mime=True)
-    file_type = mime.from_buffer(contents[:2048])
-    if file_type not in ALLOWED_MIME_TYPES:
-        raise HTTPException(status_code=422, detail=f"Niepoprawny format pliku: {file_type}")
-
-def process_pdf(contents):
-    df = pd.read_excel(pd.io.common.BytesIO(contents), engine="openpyxl", skiprows=1)
-    df.rename(columns=name_map, inplace=True)
-
-    conditions = [
-        df["goods_type"].str.startswith("Myto"),
-        df["goods_type"].str.startswith("TIS PL Myto"),
-        df["goods_type"].str.startswith("Winiety"),
-        df["goods_type"].str.startswith("Eurowinieta"),
-        df["goods_type"].str.startswith("AdBlue"),
-        df["goods_type"].str.startswith("Olej napędowy"),
-        df["goods_type"].str.startswith("Olej nap?dowy"),
-    ]
-
-    categories = ["toll", "toll", "toll", "toll", "additive", "fuel", "fuel"]
-    df['value'] = df['value'].apply(lambda x: decimal.Decimal(str(x)))
-    df['vat_value'] = df['vat_value'].apply(lambda x: decimal.Decimal(str(x)))
-
-    df["category"] = np.select(conditions, categories, default="other")
-    df["cost_date"] = pd.to_datetime(
-        df["cost_date"], format="%d.%m.%Y", errors="coerce"
-    )
-    df["invoice_date"] = pd.to_datetime(
-        df["invoice_date"], format="%d.%m.%Y", errors="coerce"
-    )
-    df["value_main_currency"] = df.apply(
-        lambda row: nbp_service.change_to_pln(row["currency"], decimal.Decimal(str(row["value"])), row["invoice_date"]),
-        axis=1
-    )
-
-    df["vat_value_main_currency"] = df.apply(
-        lambda row: nbp_service.change_to_pln(row["currency"], decimal.Decimal(str(row["vat_value"])), row["invoice_date"]),
-        axis=1
-    )
-
-    return df
-
-
-@app.post("/upload/")
-async def upload_file(file: UploadFile = File(...)):
+async def process_uta_cost_breakdown(file):
     session = Session()
     contents = await file.read()
     try:
-        pdf_data = process_pdf(contents)
-        uuid = add_document(session) # TODO: add document even if inceorrect
+        pdf_data = uta.process_file(contents)
+        document_id = documents.add_document(session, "UTA")
         for _, row in pdf_data.iterrows():
-            session.execute(
-                text(
-                    """
-                    INSERT INTO costs (value_main_currency, vat_value_main_currency, value, vehicle_id, vat_rate, currency, vat_value, country, cost_date, invoice_date, category, quantity, title, document_id, amortization)
-                    VALUES (:value_main_currency, :vat_value_main_currency, :value, (SELECT id FROM vehicles WHERE registration_number = :registration_number LIMIT 1), :vat_rate, :currency, :vat_value, :country, :cost_date, :invoice_date, :category, :quantity, :title, :document_id, :amortization)
-                    """
-                ),
-                {
-                    "value_main_currency": row["value_main_currency"],
-                    "vat_value_main_currency": row["vat_value_main_currency"],
-                    "value": row["value"],
-                    "registration_number": row["registration_number"],
-                    "vat_rate": row["vat_rate"],
-                    "currency": row["currency"],
-                    "vat_value": row["vat_value"],
-                    "country": row["country"],
-                    "cost_date": row["cost_date"],
-                    "invoice_date": row["invoice_date"],
-                    "category": row["category"],
-                    "quantity": row["quantity"],
-                    "title": row["goods_type"],
-                    "document_id": uuid,
-                    "amortization": 1,
-                },
+            costs.add_cost(
+                session,
+                row["value_main_currency"],
+                row["vat_value_main_currency"],
+                row["value"],
+                row["registration_number"],
+                row["vat_rate"],
+                row["currency"],
+                row["vat_value"],
+                row["country"],
+                row["cost_date"],
+                row["invoice_date"],
+                row["category"],
+                row["quantity"],
+                row["goods_type"],
+                document_id,
+                1,
+            )
+        session.commit()
+    except Exception as e:
+        print("session rollback")
+        session.rollback()
+        raise e
+    finally:
+        session.close()
+
+async def process_gastruck_invoice(file):
+    session = Session()
+    contents = await file.read()
+    try:
+        pdf_data = gastruck.process_file(contents)
+        document_id = documents.add_document(session, "GasTruck")
+        for _, row in pdf_data.iterrows():
+            costs.add_cost(
+                session,
+                row["value_main_currency"],
+                row["vat_value_main_currency"],
+                row["value"],
+                row["registration_number"],
+                row["vat_rate"],
+                row["currency"],
+                row["vat_value"],
+                row["country"],
+                row["cost_date"],
+                row["invoice_date"],
+                row["category"],
+                row["quantity"],
+                row["goods_type"],
+                document_id,
+                1,
             )
         session.commit()
         return JSONResponse(
             content={"message": "File processed and data inserted successfully."}
         )
     except Exception as e:
+        print("session rollback")
         session.rollback()
-        return JSONResponse(
-            content={"error": f"Error during transaction: {str(e)}"},
-            status_code=500,
-        )
+        raise e
     finally:
         session.close()
 
 
-def generate_id(length):
-    characters = string.ascii_uppercase + string.digits
-    return ''.join(random.choice(characters) for _ in range(length))
+processing_map = {
+    ("uta", "cost_breakdown"): process_uta_cost_breakdown,
+    ("gastruck", "cars_invoice"): process_uta_cost_breakdown,
+}
 
 
-def add_document(session):
-    document_uuid = uuid.uuid4()
-    readable_id = generate_id(8)
-
-    session.execute(
-        text(
-            """
-            INSERT INTO documents (id, readable_id, status, source)
-            VALUES (:id, :readable_id, :status, :source);
-            """
-        ),
-        {
-            "id": document_uuid,
-            "readable_id": readable_id,
-            "status": "added",
-            "source": "UTA",
-        },
-    )
-    session.commit()
-    return document_uuid
-
-@app.post("/rate/")
-def rates(rate_request: dict):
-    eur = rate_request["a"]
-    a = nbp_service.change_to_pln("EUR", decimal.Decimal(eur), date.today() - timedelta(days=1))
-    return a
+@app.post("/upload")
+async def upload_uta(
+    file: UploadFile = File(...), type: str = Form(...), source: str = Form(...)
+):
+    try:
+        await processing_map[(source, type)](file)
+    except Exception as e:
+        print(e)
+        return JSONResponse(
+            content={"error": f"Unsupported tile type"},
+            status_code=500,
+        )

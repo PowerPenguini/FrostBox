@@ -16,14 +16,6 @@ type CostsHandler struct {
 	di *di.DI
 }
 
-func UnprocessableEntityInvalidPayload(w http.ResponseWriter) {
-	http.Error(w, "Invalid request payload", http.StatusUnprocessableEntity)
-}
-
-func UnprocessableEntityDataNotAvailable(w http.ResponseWriter) {
-	http.Error(w, "Cannot process data currently", http.StatusUnprocessableEntity)
-}
-
 func NewCostsHandler(di *di.DI) *CostsHandler {
 	return &CostsHandler{di}
 }
@@ -53,25 +45,25 @@ func (h *CostsHandler) PostCosts(w http.ResponseWriter, r *http.Request) { // TO
 
 	err := json.NewDecoder(r.Body).Decode(&cost)
 	if err != nil {
-		http.Error(w, "Invalid request payload", http.StatusBadRequest)
+		badRequestInvalidPayload(w)
 		return
 	}
 
 	value, err := decimal.NewFromString(cost.Value)
 	if err != nil {
-		UnprocessableEntityInvalidPayload(w)
+		unprocessableEntityInvalidPayload(w)
 		return
 	}
 
 	vatRate, err := decimal.NewFromString(cost.VatRate)
 	if err != nil {
-		UnprocessableEntityInvalidPayload(w)
+		unprocessableEntityInvalidPayload(w)
 		return
 	}
 
 	quantity, err := decimal.NewFromString(cost.Quantity)
 	if err != nil {
-		UnprocessableEntityInvalidPayload(w)
+		unprocessableEntityInvalidPayload(w)
 		return
 	}
 
@@ -91,13 +83,12 @@ func (h *CostsHandler) PostCosts(w http.ResponseWriter, r *http.Request) { // TO
 
 	err = logic.AddCost(h.di, params)
 	if errors.Is(err, errs.ErrDataNotAvailable) {
-		UnprocessableEntityDataNotAvailable(w)
+		unprocessableEntityDataNotAvailable(w)
 	}
 	if err != nil {
 		http.Error(w, "Failed to add cost", http.StatusInternalServerError) //TODO: obsłużyć to jako unporcessable entity w zależności od błędu
 		return
 	}
-
+	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(cost)
 }

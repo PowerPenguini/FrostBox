@@ -16,7 +16,7 @@ func NewVehicleViewer(db *sql.DB) *VehicleViewer {
 	return &VehicleViewer{db: db}
 }
 
-func (v *VehicleViewer) GetVehicles() (contract.VehiclesResponse, error) {
+func (v *VehicleViewer) GetVehicles() (contract.GetVehiclesResponse, error) {
 	query := `SELECT 
 		v.id, 
 		v.vin, 
@@ -45,9 +45,9 @@ func (v *VehicleViewer) GetVehicles() (contract.VehiclesResponse, error) {
 	defer rows.Close()
 
 	var last30Cost, last30TollCost, last30FuelCost decimal.Decimal
-	var resp contract.VehiclesResponse
+	var resp contract.GetVehiclesResponse
 	for rows.Next() {
-		var vehicle contract.Vehicle
+		var vehicle contract.GetVehicle
 		if err := rows.Scan(
 			&vehicle.ID,
 			&vehicle.VIN,
@@ -75,7 +75,7 @@ func (v *VehicleViewer) GetVehicles() (contract.VehiclesResponse, error) {
 	return resp, nil
 }
 
-func (v *VehicleViewer) GetVehiclesAvailable() (contract.VehiclesAvailableResponse, error) {
+func (v *VehicleViewer) GetVehiclesAvailable() (contract.GetVehiclesAvailableResponse, error) {
 	query := `SELECT 
 		id, 
 		brand, 
@@ -92,9 +92,9 @@ func (v *VehicleViewer) GetVehiclesAvailable() (contract.VehiclesAvailableRespon
 	}
 	defer rows.Close()
 
-	var resp contract.VehiclesAvailableResponse
+	var resp contract.GetVehiclesAvailableResponse
 	for rows.Next() {
-		var vehicle contract.VehicleAvailable
+		var vehicle contract.GetVehicleAvailable
 		if err := rows.Scan(
 			&vehicle.ID,
 			&vehicle.Brand,

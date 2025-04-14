@@ -1,9 +1,10 @@
 package contract
 
-type VehiclesResponse []Vehicle
-type VehiclesAvailableResponse []VehicleAvailable
+type GetVehiclesResponse []GetVehicle
 
-type Vehicle struct {
+type GetVehiclesAvailableResponse []GetVehicleAvailable
+
+type GetVehicle struct {
 	ID                 string `json:"id"`
 	VIN                string `json:"vin"`
 	Brand              string `json:"brand"`
@@ -14,8 +15,15 @@ type Vehicle struct {
 	Last30DaysFuelCost string `json:"last_30_days_fuel_cost"`
 }
 
-type VehicleAvailable struct {
+type GetVehicleAvailable struct {
 	ID                 string `json:"id"`
+	Brand              string `json:"brand"`
+	Model              string `json:"model"`
+	RegistrationNumber string `json:"registration_number"`
+}
+
+type PostVehicleRequest struct {
+	VIN                string `json:"vin"`
 	Brand              string `json:"brand"`
 	Model              string `json:"model"`
 	RegistrationNumber string `json:"registration_number"`

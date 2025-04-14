@@ -13,8 +13,10 @@ type DI struct {
 	UserRepo       *repos.UserRepo
 	DocumentRepo   *repos.DocumentRepo
 	CostRepo       *repos.CostRepo
+	VehicleRepo    *repos.VehicleRepo
 	DocumentViewer *views.DocumentViewer
 	VehicleViewer  *views.VehicleViewer
+	UserVeiwer     *views.UserViewer
 	CostViewer     *views.CostViewer
 	NBPService     *services.NBPService
 }
@@ -42,8 +44,10 @@ func NewDI(connStr string) (*DI, error) {
 		repos.NewUserRepo(db),
 		repos.NewDocumentRepo(db),
 		repos.NewCostRepository(db),
+		repos.NewVehicleRepository(db),
 		views.NewDocumentViewer(db),
 		views.NewVehicleViewer(db),
+		views.NewUserViewer(db),
 		views.NewCostViewer(db),
 		services.NewNBPService(),
 	}, nil
