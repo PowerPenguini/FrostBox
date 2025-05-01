@@ -33,13 +33,13 @@ export function LoginForm({ className, ...props }) {
       {...props}
     >
       <div className="flex flex-col items-center gap-2 text-center">
-        <h1 className="text-2xl font-bold">Zaloguj się</h1>
-        <p className="text-balance text-sm text-muted-foreground">
+        <h1 className="font-bold text-2xl">Zaloguj się</h1>
+        <p className="text-muted-foreground text-sm text-balance">
           Logujesz się do konta FrostBox
         </p>
       </div>
-      <div className="grid gap-6">
-        <div className="grid gap-2">
+      <div className="gap-6 grid">
+        <div className="gap-2 grid">
           <Label htmlFor="email">Email</Label>
           <Input
             id="email"
@@ -50,12 +50,12 @@ export function LoginForm({ className, ...props }) {
             onChange={(e) => setEmail(e.target.value)}
           />
         </div>
-        <div className="grid gap-2">
+        <div className="gap-2 grid">
           <div className="flex items-center">
             <Label htmlFor="password">Hasło</Label>
             <Link
               href="#"
-              className="ml-auto text-sm underline-offset-4 hover:underline"
+              className="ml-auto text-sm hover:underline underline-offset-4"
             >
               Zapomniałeś hasła?
             </Link>
@@ -68,12 +68,12 @@ export function LoginForm({ className, ...props }) {
             onChange={(e) => setPassword(e.target.value)}
           />
         </div>
-        {error && <p className="text-red-500 font-medium text-sm">{error}</p>}
+        {error && <ErrorText text={error} />}
         <Button type="submit" className="w-full">
           Zaloguj
         </Button>
       </div>
-      <div className="text-center text-sm">
+      <div className="text-sm text-center">
         Nie masz konta? &nbsp;
         <Link href="#" className="underline underline-offset-4">
           Skontaktuj się z obsługą klienta

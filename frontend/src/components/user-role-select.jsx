@@ -8,6 +8,7 @@ import {
 } from "@/components/ui/select";
 import { useAuthContext } from "@/state/auth-context";
 import { translateRole } from "@/formatting/roles";
+import { ErrorText } from "./error-text";
 
 export function UserRoleSelect({ id, value, onChange }) {
   const [roles, setRoles] = useState([]);
@@ -45,7 +46,7 @@ export function UserRoleSelect({ id, value, onChange }) {
   if (error)
     return (
       <div>
-        <p className="text-red-500 text-sm font-medium">{error}</p>
+        <ErrorText text={error}/>
       </div>
     );
 

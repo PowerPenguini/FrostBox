@@ -48,7 +48,7 @@ const data = {
     },
     {
       title: "Przychody",
-      url: "/manager/costs",
+      url: "/manager/revenues",
       icon: IconBusinessplan,
     },
     {

@@ -13,7 +13,6 @@ export default function RootLayout({ children }) {
     >
       <AppSidebar variant="inset" />
       <SidebarInset>
-        <SiteHeader />
         {children}
       </SidebarInset>
       <Toaster />

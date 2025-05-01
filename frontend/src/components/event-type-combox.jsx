@@ -4,6 +4,7 @@ import { Check, ChevronsUpDown } from "lucide-react";
 import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { ErrorText } from "./error-text";
 import {
   Command,
   CommandEmpty,
@@ -18,20 +19,18 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { useAuthContext } from "@/state/auth-context";
-import { translateCostCategory } from "@/formatting/category";
 
-
-export function CategoryCombox({ id, value, onChange }) {
+export function EventTypeCombox({ id, value, onChange }) {
   const [open, setOpen] = useState(false);
-  const [categories, setCategories] = useState([]);
+  const [types, setTypes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const { token } = useAuthContext();
 
   useEffect(() => {
-    const fetchCategories = async () => {
+    const fetchTypes = async () => {
       try {
-        const response = await fetch("/api/v1/costs/categories", {
+        const response = await fetch("/api/v1/events/types", {
           method: "GET",
           headers: {
             Authorization: `Bearer ${token}`,
@@ -42,7 +41,7 @@ export function CategoryCombox({ id, value, onChange }) {
           throw new Error("Sieć niedostępna");
         }
         const data = await response.json();
-        setCategories(data);
+        setTypes(data);
       } catch (error) {
         setError(error.message);
       } finally {
@@ -50,7 +49,7 @@ export function CategoryCombox({ id, value, onChange }) {
       }
     };
 
-    fetchCategories();
+    fetchTypes();
   }, [token]);
 
   if (loading) return <div>Loading...</div>;
@@ -71,9 +70,7 @@ export function CategoryCombox({ id, value, onChange }) {
           aria-controls={id}
           className="justify-between"
         >
-          {value
-            ? translateCostCategory(value)
-            : "Wybierz kategorię..."}
+          {types.find((type) => type.id === value)?.name || "Typ zdarzenia"}
           <ChevronsUpDown className="opacity-50 ml-2 w-4 h-4 shrink-0" />
         </Button>
       </PopoverTrigger>
@@ -81,31 +78,30 @@ export function CategoryCombox({ id, value, onChange }) {
         <Command
           id={id}
           filter={(val, search) =>
-            translateCostCategory(val)
-              .toLowerCase()
-              .includes(search.toLowerCase())
+            val.toLowerCase().includes(search.toLowerCase())
           }
         >
-          <CommandInput placeholder="Wybierz kategorię..." />
+          <CommandInput placeholder="Typ zdarzenia" />
           <CommandList>
-            <CommandEmpty>Nie znaleziono kategorii</CommandEmpty>
+            <CommandEmpty>Nie znaleziono typu zdarzenia</CommandEmpty>
             <CommandGroup>
-              {categories.map((category) => (
+              {types.map((type) => (
                 <CommandItem
-                  key={category}
-                  value={category}
+                  key={type.id}
+                  value={type.name}
                   onSelect={(currentValue) => {
-                    onChange(currentValue === value ? "" : currentValue);
+                    const selected = types.find((t) => t.name === currentValue);
+                    onChange(selected?.id || "");
                     setOpen(false);
                   }}
                 >
                   <Check
                     className={cn(
                       "mr-2 h-4 w-4",
-                      value === category ? "opacity-100" : "opacity-0"
+                      value === type.id ? "opacity-100" : "opacity-0"
                     )}
                   />
-                  {translateCostCategory(category)}
+                  {type.name}
                 </CommandItem>
               ))}
             </CommandGroup>

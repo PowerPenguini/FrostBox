@@ -46,7 +46,6 @@ async def process_uta_cost_breakdown(file):
             )
         session.commit()
     except Exception as e:
-        print("session rollback")
         session.rollback()
         raise e
     finally:
@@ -61,19 +60,19 @@ async def process_gastruck_invoice(file):
         for _, row in pdf_data.iterrows():
             costs.add_cost(
                 session,
-                row["value_main_currency"],
-                row["vat_value_main_currency"],
+                row["value"],
+                row["vat_value"],
                 row["value"],
                 row["registration_number"],
                 row["vat_rate"],
-                row["currency"],
+                "PLN",
                 row["vat_value"],
-                row["country"],
+                "PL",
                 row["cost_date"],
                 row["invoice_date"],
-                row["category"],
-                row["quantity"],
-                row["goods_type"],
+                row["type"],
+                row["amount"],
+                row["title"],
                 document_id,
                 1,
             )
@@ -82,7 +81,6 @@ async def process_gastruck_invoice(file):
             content={"message": "File processed and data inserted successfully."}
         )
     except Exception as e:
-        print("session rollback")
         session.rollback()
         raise e
     finally:
@@ -91,7 +89,7 @@ async def process_gastruck_invoice(file):
 
 processing_map = {
     ("uta", "cost_breakdown"): process_uta_cost_breakdown,
-    ("gastruck", "cars_invoice"): process_uta_cost_breakdown,
+    ("gastruck", "cars_invoice"): process_gastruck_invoice,
 }
 
 
@@ -101,7 +99,7 @@ async def upload_uta(
 ):
     try:
         await processing_map[(source, type)](file)
-    except Exception as e:
+    except KeyError as e:
         print(e)
         return JSONResponse(
             content={"error": f"Unsupported tile type"},

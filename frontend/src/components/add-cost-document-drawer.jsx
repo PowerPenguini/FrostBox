@@ -10,7 +10,7 @@ import {
   DrawerDescription,
   DrawerTitle,
   DrawerFooter,
-  DrawerClose
+  DrawerClose,
 } from "@/components/ui/drawer";
 import { Button } from "./ui/button";
 import { IconPlus } from "@tabler/icons-react";
@@ -149,9 +149,7 @@ export function AddCostDocumentDrawer() {
               </Select>
               <Label htmlFor="file">Plik</Label>
               <Input id="file" type="file" onChange={handleFileChange} />
-              {error && (
-                <p className="text-red-500 text-sm font-medium">{error}</p>
-              )}
+              {error && <ErrorText text={error} />}
             </div>
           </form>
         </div>

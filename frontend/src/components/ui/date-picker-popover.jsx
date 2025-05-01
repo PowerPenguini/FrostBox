@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/popover";
 import { formatDate } from "@/formatting/date";
 
-export function DatePickerPopover({ value, onChange }) {
+export function DatePickerPopover({ text, value, onChange }) {
   return (
     <Popover>
       <PopoverTrigger asChild>
@@ -22,11 +22,11 @@ export function DatePickerPopover({ value, onChange }) {
             !value && "text-muted-foreground"
           )}
         >
-          <CalendarIcon className="mr-2 h-4 w-4" />
-          {value ? formatDate(value) : <span>Wybierz datę...</span>}
+          <CalendarIcon className="mr-2 w-4 h-4" />
+          {value ? formatDate(value) : <span> {text || "Wybierz datę..."}</span>}
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-auto p-0" align="start">
+      <PopoverContent className="p-0 w-auto" align="start">
         <Calendar
           mode="single"
           selected={value ? new Date(value) : null}

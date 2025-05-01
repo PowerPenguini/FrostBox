@@ -86,19 +86,33 @@ func main() {
 	vehiclesHandler := handlers.NewVehiclesHandler(di)
 	costsHandler := handlers.NewCostsHandler(di)
 	usersHandler := handlers.NewUsersHandler(di)
+	intervalsHandler := handlers.NewIntervalsHandler(di)
+	eventsHandler := handlers.NewEventsHandler(di)
 
-	mux.HandleFunc("POST /token", loginHandler(di))
-
-	mux.HandleFunc("GET /documents/cost", authMiddleware(di, documentsHandler.GetDocuments))
-	mux.HandleFunc("GET /vehicles/available", authMiddleware(di, vehiclesHandler.GetVehiclesAvailable))
+	// --- Vehicles ---
 	mux.HandleFunc("GET /vehicles", authMiddleware(di, vehiclesHandler.GetVehicles))
 	mux.HandleFunc("POST /vehicles", authMiddleware(di, vehiclesHandler.PostVehicles))
-	mux.HandleFunc("GET /costs/categories", authMiddleware(di, costsHandler.GetCostsCategories))
+	mux.HandleFunc("GET /vehicles/available", authMiddleware(di, vehiclesHandler.GetVehiclesAvailable))
+	mux.HandleFunc("GET /vehicles/{vehicle_id}/intervals", authMiddleware(di, intervalsHandler.GetIntervals))
+	mux.HandleFunc("GET /vehicles/{vehicle_id}/events", authMiddleware(di, eventsHandler.GetEventsByVehicle))
+
+	mux.HandleFunc("GET /events/types", authMiddleware(di, eventsHandler.GetEventsTypes))
+
+	// --- Costs ---
 	mux.HandleFunc("GET /costs", authMiddleware(di, costsHandler.GetCosts))
 	mux.HandleFunc("POST /costs", authMiddleware(di, costsHandler.PostCosts))
+	mux.HandleFunc("GET /costs/categories", authMiddleware(di, costsHandler.GetCostsCategories))
+
+	// --- Users ---
 	mux.HandleFunc("GET /users", authMiddleware(di, usersHandler.GetUsers))
-	mux.HandleFunc("GET /users/roles", authMiddleware(di, usersHandler.GetUsersRoles))
 	mux.HandleFunc("POST /users", authMiddleware(di, usersHandler.PostUsers))
+	mux.HandleFunc("GET /users/roles", authMiddleware(di, usersHandler.GetUsersRoles))
+
+	// --- Documents ---
+	mux.HandleFunc("GET /documents/cost", authMiddleware(di, documentsHandler.GetDocuments))
+
+	// --- Auth ---
+	mux.HandleFunc("POST /token", loginHandler(di))
 
 	log.Println("Server running on port 8080...")
 	log.Fatal(http.ListenAndServe(":8080", mux))

@@ -21,7 +21,14 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@radix-ui/react-dropdown-menu";
-import { IconTrendingUp } from "@tabler/icons-react";
+import {
+  IconCircleCheckFilled,
+  IconEdit,
+  IconPlus,
+  IconSettings,
+  IconTrash,
+  IconCirclePlusFilled,
+} from "@tabler/icons-react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import {
@@ -37,6 +44,12 @@ import {
   ChartTooltipContent,
 } from "@/components/ui/chart";
 import { Area, AreaChart, CartesianGrid, XAxis } from "recharts";
+import { Progress } from "@/components/ui/progress";
+import { useState, useEffect } from "react";
+import { useAuthContext } from "@/state/auth-context";
+import { formatDate } from "@/formatting/date";
+import { EventList } from "./event-list";
+import { Spinner } from "./spinner";
 
 const chartData = [
   { month: "January", desktop: 186, mobile: 80 },
@@ -61,10 +74,41 @@ const chartConfig = {
 
 export function VehicleCellViewer({ item }) {
   const isMobile = useIsMobile();
+  const [intervals, setIntervals] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
+  const [open, setOpen] = useState(false);
+  const { token } = useAuthContext();
+
+  useEffect(() => {
+    if (!open) return;
+    async function fetchIntervals() {
+      try {
+        const response = await fetch(`/api/v1/vehicles/${item.id}/intervals`, {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        });
+        if (!response.ok) {
+          throw new Error("Failed to fetch intervals");
+        }
+        const data = await response.json();
+        setIntervals(data);
+      } catch (error) {
+        console.error("Error fetching intervals:", error);
+        setError(true);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchIntervals();
+  }, [open, item.id]);
   const dialogMobile = (
     <Drawer direction="bottom">
       <DrawerTrigger asChild>
-        <Button variant="link" className="text-foreground w-fit px-0 text-left">
+        <Button variant="link" className="px-0 w-fit text-foreground text-left">
           {item.registration_number}
         </Button>
       </DrawerTrigger>
@@ -75,243 +119,158 @@ export function VehicleCellViewer({ item }) {
             Showing total visitors for the last 6 months
           </DrawerDescription>
         </DrawerHeader>
-        <div className="flex flex-col gap-4 overflow-y-auto px-4 text-sm">
-          {!isMobile && (
-            <>
-              <ChartContainer config={chartConfig}>
-                <AreaChart
-                  accessibilityLayer
-                  data={chartData}
-                  margin={{
-                    left: 0,
-                    right: 10,
-                  }}
-                >
-                  <CartesianGrid vertical={false} />
-                  <XAxis
-                    dataKey="month"
-                    tickLine={false}
-                    axisLine={false}
-                    tickMargin={8}
-                    tickFormatter={(value) => value.slice(0, 3)}
-                    hide
-                  />
-                  <ChartTooltip
-                    cursor={false}
-                    content={<ChartTooltipContent indicator="dot" />}
-                  />
-                  <Area
-                    dataKey="mobile"
-                    type="natural"
-                    fill="var(--color-mobile)"
-                    fillOpacity={0.6}
-                    stroke="var(--color-mobile)"
-                    stackId="a"
-                  />
-                  <Area
-                    dataKey="desktop"
-                    type="natural"
-                    fill="var(--color-desktop)"
-                    fillOpacity={0.4}
-                    stroke="var(--color-desktop)"
-                    stackId="a"
-                  />
-                </AreaChart>
-              </ChartContainer>
-              <Separator />
-              <div className="grid gap-2">
-                <div className="flex gap-2 leading-none font-medium">
-                  Trending up by 5.2% this month{" "}
-                  <IconTrendingUp className="size-4" />
-                </div>
-                <div className="text-muted-foreground">
-                  Showing total visitors for the last 6 months. This is just
-                  some random text to test the layout. It spans multiple lines
-                  and should wrap around.
-                </div>
-              </div>
-              <Separator />
-            </>
-          )}
-          <form className="flex flex-col gap-4">
-            <div className="flex flex-col gap-3">
-              <Label htmlFor="header">Header</Label>
-              <Input id="header" defaultValue={item.header} />
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="flex flex-col gap-3">
-                <Label htmlFor="type">Type</Label>
-                <Select defaultValue={item.type}>
-                  <SelectTrigger id="type" className="w-full">
-                    <SelectValue placeholder="Select a type" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Table of Contents">
-                      Table of Contents
-                    </SelectItem>
-                    <SelectItem value="Executive Summary">
-                      Executive Summary
-                    </SelectItem>
-                    <SelectItem value="Technical Approach">
-                      Technical Approach
-                    </SelectItem>
-                    <SelectItem value="Design">Design</SelectItem>
-                    <SelectItem value="Capabilities">Capabilities</SelectItem>
-                    <SelectItem value="Focus Documents">
-                      Focus Documents
-                    </SelectItem>
-                    <SelectItem value="Narrative">Narrative</SelectItem>
-                    <SelectItem value="Cover Page">Cover Page</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="flex flex-col gap-3">
-                <Label htmlFor="status">Status</Label>
-                <Select defaultValue={item.status}>
-                  <SelectTrigger id="status" className="w-full">
-                    <SelectValue placeholder="Select a status" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Done">Done</SelectItem>
-                    <SelectItem value="In Progress">In Progress</SelectItem>
-                    <SelectItem value="Not Started">Not Started</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="flex flex-col gap-3">
-                <Label htmlFor="target">Target</Label>
-                <Input id="target" defaultValue={item.target} />
-              </div>
-              <div className="flex flex-col gap-3">
-                <Label htmlFor="limit">Limit</Label>
-                <Input id="limit" defaultValue={item.limit} />
-              </div>
-            </div>
-            <div className="flex flex-col gap-3">
-              <Label htmlFor="reviewer">Reviewer</Label>
-              <Select defaultValue={item.reviewer}>
-                <SelectTrigger id="reviewer" className="w-full">
-                  <SelectValue placeholder="Select a reviewer" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Eddie Lake">Eddie Lake</SelectItem>
-                  <SelectItem value="Jamik Tashpulatov">
-                    Jamik Tashpulatov
-                  </SelectItem>
-                  <SelectItem value="Emily Whalen">Emily Whalen</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </form>
-        </div>
-        <DrawerFooter>
-          <Button>Submit</Button>
-          <DrawerClose asChild>
-            <Button variant="outline">Done</Button>
-          </DrawerClose>
-        </DrawerFooter>
+        <div className="flex flex-col gap-4 px-4 overflow-y-auto text-sm"></div>
       </DrawerContent>
     </Drawer>
   );
   const dialogDesktop = (
-    <Dialog direction="bottom">
+    <Dialog open={open} onOpenChange={setOpen} direction="bottom">
       <DialogTrigger asChild>
-        <Button variant="link" className="text-foreground w-fit px-0 text-left">
+        <Button variant="link" className="px-0 w-fit text-foreground text-left">
           {item.registration_number}
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[800px]">
-        <DialogHeader className="gap-1">
-          <DialogTitle>Pojazd</DialogTitle>
-          <DialogDescription>
-            Rozszerzone dane o pojeździe
-          </DialogDescription>
-        </DialogHeader>
-        <div className="flex flex-col gap-4 overflow-y-auto text-sm">
-          <form className="flex flex-col gap-4">
-            <div className="flex flex-col gap-3">
-              <Label htmlFor="header">Header</Label>
-              <Input id="header" defaultValue={item.header} />
+      <DialogContent className="flex gap-0 p-0 md:max-w-7/8 h-7/8 max-h-[800px]">
+        <div className="flex flex-col gap-6 p-6 w-2/3">
+          <DialogHeader className="gap-1">
+            <DialogTitle>Pojazd</DialogTitle>
+            <DialogDescription>Rozszerzone dane o pojeździe</DialogDescription>
+          </DialogHeader>
+          <div className="flex flex-col gap-4 overflow-y-auto text-sm">
+            <div className="flex items-center gap-4 font-medium text-lg">
+              Interwały
+              <Button className="text-sm" variant="outline">
+                <IconPlus />
+                Dodaj interwał
+              </Button>
             </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="flex flex-col gap-3">
-                <Label htmlFor="type">Type</Label>
-                <Select defaultValue={item.type}>
-                  <SelectTrigger id="type" className="w-full">
-                    <SelectValue placeholder="Select a type" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Table of Contents">
-                      Table of Contents
-                    </SelectItem>
-                    <SelectItem value="Executive Summary">
-                      Executive Summary
-                    </SelectItem>
-                    <SelectItem value="Technical Approach">
-                      Technical Approach
-                    </SelectItem>
-                    <SelectItem value="Design">Design</SelectItem>
-                    <SelectItem value="Capabilities">Capabilities</SelectItem>
-                    <SelectItem value="Focus Documents">
-                      Focus Documents
-                    </SelectItem>
-                    <SelectItem value="Narrative">Narrative</SelectItem>
-                    <SelectItem value="Cover Page">Cover Page</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="flex flex-col gap-3">
-                <Label htmlFor="status">Status</Label>
-                <Select defaultValue={item.status}>
-                  <SelectTrigger id="status" className="w-full">
-                    <SelectValue placeholder="Select a status" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Done">Done</SelectItem>
-                    <SelectItem value="In Progress">In Progress</SelectItem>
-                    <SelectItem value="Not Started">Not Started</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+            <div className="gap-4 grid grid-cols-3">
+              {loading ? (
+                <div className="place-items-center grid col-span-3 p-4 w-full"><Spinner/></div>
+              ) : error ? (
+                <ErrorText text={error} />
+              ) : intervals.length > 0 ? (
+                intervals.map((interval) => (
+                  <VehicleInterval
+                    key={interval.id}
+                    title={
+                      interval.name
+                    }
+                    mileageStart={interval.mileage_start}
+                    mileageEnd={interval.mileage_end}
+                    mileageCurrent={item.current_odometer_km}
+                    dateStart={interval.date_start}
+                    dateEnd={interval.date_end}
+                  />
+                ))
+              ) : (
+                <div className="text-muted-foreground">
+                  Brak zdefiniowanych interwałów.
+                </div>
+              )}
             </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="flex flex-col gap-3">
-                <Label htmlFor="target">Target</Label>
-                <Input id="target" defaultValue={item.target} />
-              </div>
-              <div className="flex flex-col gap-3">
-                <Label htmlFor="limit">Limit</Label>
-                <Input id="limit" defaultValue={item.limit} />
-              </div>
-            </div>
-            <div className="flex flex-col gap-3">
-              <Label htmlFor="reviewer">Reviewer</Label>
-              <Select defaultValue={item.reviewer}>
-                <SelectTrigger id="reviewer" className="w-full">
-                  <SelectValue placeholder="Select a reviewer" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Eddie Lake">Eddie Lake</SelectItem>
-                  <SelectItem value="Jamik Tashpulatov">
-                    Jamik Tashpulatov
-                  </SelectItem>
-                  <SelectItem value="Emily Whalen">Emily Whalen</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </form>
+          </div>
         </div>
-        <DialogFooter>
-          <Button>Submit</Button>
-          <DialogClose asChild>
-            <Button variant="outline">Done</Button>
-          </DialogClose>
-        </DialogFooter>
+        <div className="flex flex-col gap-6 bg-muted p-6 rounded-r-xl w-1/3">
+          {open && <EventList vehicleId={item.id} />}
+        </div>
       </DialogContent>
     </Dialog>
   );
 
   return isMobile ? dialogMobile : dialogDesktop;
+}
+
+function VehicleInterval({
+  title,
+  mileageStart,
+  mileageEnd,
+  mileageCurrent,
+  dateStart,
+  dateEnd,
+}) {
+  return (
+    <div className="group relative flex flex-col gap-4 pt-2 pb-4 border rounded-lg">
+      <div className="flex items-center gap-2 pr-2 pl-4 font-medium">
+        <IconCircleCheckFilled className="fill-green-500 dark:fill-green-400 w-4" />
+        <div>{title}</div>
+        <div className="flex gap-2 opacity-0 group-hover:opacity-100 ml-auto transition-opacity duration-300">
+          <Button variant="ghost" className="p-0">
+            <IconEdit />
+          </Button>
+          <Button variant="ghost" className="p-0 text-destructive">
+            <IconTrash />
+          </Button>
+        </div>
+      </div>
+
+      <div className="flex flex-col gap-2 px-4">
+        <div className="flex justify-between">
+          <div className={mileageStart !== undefined ? "" : "text-gray-500"}>
+            {mileageStart !== undefined ? `${mileageStart} km` : "N/A"}
+          </div>
+          <div className={mileageEnd !== undefined ? "" : "text-gray-500"}>
+            {mileageEnd !== undefined ? `${mileageEnd} km` : "N/A"}
+          </div>
+        </div>
+        <Progress
+          value={
+            mileageStart !== undefined &&
+            mileageEnd !== undefined &&
+            mileageCurrent !== undefined
+              ? calculateMileageProgress(
+                  mileageStart,
+                  mileageEnd,
+                  mileageCurrent
+                )
+              : 0
+          }
+        />
+      </div>
+
+      <div className="flex flex-col gap-2 px-4">
+        <div className="flex justify-between">
+          <div className={dateStart ? "" : "text-gray-500"}>
+            {formatDate(dateStart) || "N/A"}
+          </div>
+          <div className={dateEnd ? "" : "text-gray-500"}>
+            {formatDate(dateEnd) || "N/A"}
+          </div>
+        </div>
+        <Progress
+          value={
+            dateStart && dateEnd
+              ? calculateDatePercentage(dateStart, dateEnd)
+              : 0
+          }
+        />
+      </div>
+    </div>
+  );
+}
+
+function calculateDatePercentage(startDate, endDate) {
+  const today = new Date();
+
+  const start = new Date(startDate);
+  const end = new Date(endDate);
+
+  if (isNaN(start) || isNaN(end) || start >= end) {
+    return 0;
+  }
+  const totalDuration = end - start;
+  const elapsedTime = today - start;
+  const percentage = (elapsedTime / totalDuration) * 100;
+  return Math.min(Math.max(percentage, 0), 100);
+}
+
+function calculateMileageProgress(startValue, endValue, currentValue) {
+  if (startValue >= endValue) {
+    throw new Error("Invalid mileage data!");
+  }
+
+  const totalProgress = endValue - startValue;
+  const achievedProgress = currentValue - startValue;
+  const percentage = (achievedProgress / totalProgress) * 100;
+  return Math.min(Math.max(percentage, 0), 100);
 }

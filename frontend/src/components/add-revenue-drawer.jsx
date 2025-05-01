@@ -17,12 +17,11 @@ import { useCostsDataContext } from "@/state/costs-data-context";
 import { Label } from "./ui/label";
 import { Input } from "./ui/input";
 import { CurrencyCombox } from "./currency-combox";
-import { CategoryCombox } from "./catergory-combox";
 import { toast } from "sonner";
 import { useAuthContext } from "@/state/auth-context";
 import { DatePickerPopover } from "@/components/ui/date-picker-popover";
 
-export function AddCostDrawer() {
+export function AddRevenueDrawer() {
   const { refetchData } = useCostsDataContext();
   const [open, setOpen] = useState(false);
   const [error, setError] = useState("");
@@ -101,9 +100,9 @@ export function AddCostDrawer() {
       </DrawerTrigger>
       <DrawerContent>
         <DrawerHeader className="gap-1">
-          <DrawerTitle>Dodaj koszt</DrawerTitle>
+          <DrawerTitle>Dodaj przychód</DrawerTitle>
           <DrawerDescription>
-            Dodaj pojedynczy koszt, możesz przypisać go do określonych zasobów
+            Dodaj pojedynczy przychód, możesz przypisać go do określonych zasobów
           </DrawerDescription>
         </DrawerHeader>
         <div className="flex flex-col gap-4 overflow-y-auto text-sm">
@@ -143,16 +142,6 @@ export function AddCostDrawer() {
                 onChange={(e) => setVat(e.target.value)}
               />
 
-              <Label htmlFor="quantity">Ilość</Label>
-              <Input
-                type="number"
-                id="quantity"
-                placeholder="1"
-                min="0"
-                value={quantity}
-                onChange={(e) => setQuantity(e.target.value)}
-              />
-
               <Label htmlFor="currency">Waluta</Label>
               <CurrencyCombox
                 id="currency"
@@ -167,32 +156,15 @@ export function AddCostDrawer() {
                 onChange={setVehicle}
               />
 
-              <Label htmlFor="category">Kategoria</Label>
-              <CategoryCombox
-                id="category"
-                value={category}
-                onChange={setCategory}
-              />
-
-              <Label htmlFor="amortization">Amortyzacja (mies.)</Label>
-              <Input
-                type="number"
-                id="amortization"
-                placeholder="1"
-                min="1"
-                max="240"
-                value={amortization}
-                onChange={(e) => setAmortization(e.target.value)}
-              />
-
               <Label htmlFor="invoiceDate">Data faktury</Label>
               <DatePickerPopover
+                id="invoiceDate"
                 value={invoiceDate}
                 onChange={setInvoiceDate}
               />
 
-              <Label htmlFor="costDate">Data kosztu</Label>
-              <DatePickerPopover value={costDate} onChange={setCostDate} />
+              <Label htmlFor="revenueDate">Data przychodu</Label>
+              <DatePickerPopover id="revenueDate" value={costDate} onChange={setCostDate} />
 
               {error && (
                 <ErrorText text={error} />

@@ -137,7 +137,7 @@ export function AddVehicleDrawer() {
               />
 
               {error && (
-                <p className="text-red-500 text-sm font-medium">{error}</p>
+                <ErrorText text={error} />
               )}
             </div>
           </form>
