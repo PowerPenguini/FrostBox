@@ -25,6 +25,7 @@ import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { useAuthContext } from "@/state/auth-context";
 import { UserRoleSelect } from "./user-role-select";
+import { ErrorText } from "@/components/error-text";
 
 export function AddUserDrawer() {
   const { refetchData } = useUsersDataContext();

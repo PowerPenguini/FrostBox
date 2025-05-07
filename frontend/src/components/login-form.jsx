@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { ErrorText } from "@/components/error-text";
 import { useAuthContext } from "@/state/auth-context";
 
 export function LoginForm({ className, ...props }) {

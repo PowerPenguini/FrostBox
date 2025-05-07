@@ -23,11 +23,11 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@radix-ui/react-dropdown-menu";
 import {
   IconCircleCheckFilled,
+  IconAlertTriangleFilled,
+  IconAlertHexagonFilled,
   IconEdit,
   IconPlus,
-  IconSettings,
   IconTrash,
-  IconCirclePlusFilled,
 } from "@tabler/icons-react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -50,6 +50,7 @@ import { useAuthContext } from "@/state/auth-context";
 import { formatDate } from "@/formatting/date";
 import { EventList } from "./event-list";
 import { Spinner } from "./spinner";
+import { ErrorText } from "@/components/error-text";
 
 const chartData = [
   { month: "January", desktop: 186, mobile: 80 },
@@ -146,21 +147,16 @@ export function VehicleCellViewer({ item }) {
             </div>
             <div className="gap-4 grid grid-cols-3">
               {loading ? (
-                <div className="place-items-center grid col-span-3 p-4 w-full"><Spinner/></div>
+                <div className="place-items-center grid col-span-3 p-4 w-full">
+                  <Spinner />
+                </div>
               ) : error ? (
                 <ErrorText text={error} />
               ) : intervals.length > 0 ? (
                 intervals.map((interval) => (
                   <VehicleInterval
                     key={interval.id}
-                    title={
-                      interval.name
-                    }
-                    mileageStart={interval.mileage_start}
-                    mileageEnd={interval.mileage_end}
-                    mileageCurrent={item.current_odometer_km}
-                    dateStart={interval.date_start}
-                    dateEnd={interval.date_end}
+                    interval={interval}
                   />
                 ))
               ) : (
@@ -171,9 +167,7 @@ export function VehicleCellViewer({ item }) {
             </div>
           </div>
         </div>
-        <div className="flex flex-col gap-6 bg-muted p-6 rounded-r-xl w-1/3">
-          {open && <EventList vehicleId={item.id} />}
-        </div>
+        {open && <EventList vehicleId={item.id} />}
       </DialogContent>
     </Dialog>
   );
@@ -182,18 +176,30 @@ export function VehicleCellViewer({ item }) {
 }
 
 function VehicleInterval({
-  title,
-  mileageStart,
-  mileageEnd,
-  mileageCurrent,
-  dateStart,
-  dateEnd,
+  interval
 }) {
   return (
     <div className="group relative flex flex-col gap-4 pt-2 pb-4 border rounded-lg">
       <div className="flex items-center gap-2 pr-2 pl-4 font-medium">
-        <IconCircleCheckFilled className="fill-green-500 dark:fill-green-400 w-4" />
-        <div>{title}</div>
+        {(() => {
+          switch (interval.status) {
+            case "INFO":
+              return (
+                <IconCircleCheckFilled className="fill-green-500 w-4 shrink-0" />
+              );
+            case "WARNING":
+              return (
+                <IconAlertTriangleFilled className="fill-amber-500 w-4 shrink-0" />
+              );
+            case "CRITICAL":
+              return (
+                <IconAlertHexagonFilled className="fill-red-500 w-4 shrink-0" />
+              );
+            default:
+              return null;
+          }
+        })()}
+        <div>{interval.name}</div>
         <div className="flex gap-2 opacity-0 group-hover:opacity-100 ml-auto transition-opacity duration-300">
           <Button variant="ghost" className="p-0">
             <IconEdit />
@@ -206,22 +212,22 @@ function VehicleInterval({
 
       <div className="flex flex-col gap-2 px-4">
         <div className="flex justify-between">
-          <div className={mileageStart !== undefined ? "" : "text-gray-500"}>
-            {mileageStart !== undefined ? `${mileageStart} km` : "N/A"}
+          <div className={interval.mileage_start !== undefined ? "" : "text-gray-500"}>
+            {interval.mileage_start !== undefined ? `${interval.mileage_start} km` : "N/A"}
           </div>
-          <div className={mileageEnd !== undefined ? "" : "text-gray-500"}>
-            {mileageEnd !== undefined ? `${mileageEnd} km` : "N/A"}
+          <div className={interval.mileage_end !== undefined ? "" : "text-gray-500"}>
+            {interval.mileage_end !== undefined ? `${interval.mileage_end} km` : "N/A"}
           </div>
         </div>
         <Progress
           value={
-            mileageStart !== undefined &&
-            mileageEnd !== undefined &&
-            mileageCurrent !== undefined
+            interval.mileage_start !== undefined &&
+            interval.mileage_end !== undefined &&
+            interval.mileage_current !== undefined
               ? calculateMileageProgress(
-                  mileageStart,
-                  mileageEnd,
-                  mileageCurrent
+                  interval.mileage_start,
+                  interval.mileage_end,
+                  interval.mileage_current
                 )
               : 0
           }
@@ -230,17 +236,17 @@ function VehicleInterval({
 
       <div className="flex flex-col gap-2 px-4">
         <div className="flex justify-between">
-          <div className={dateStart ? "" : "text-gray-500"}>
-            {formatDate(dateStart) || "N/A"}
+          <div className={interval.date_start ? "" : "text-gray-500"}>
+            {formatDate(interval.date_start) || "N/A"}
           </div>
-          <div className={dateEnd ? "" : "text-gray-500"}>
-            {formatDate(dateEnd) || "N/A"}
+          <div className={interval.date_end ? "" : "text-gray-500"}>
+            {formatDate(interval.date_end) || "N/A"}
           </div>
         </div>
         <Progress
           value={
-            dateStart && dateEnd
-              ? calculateDatePercentage(dateStart, dateEnd)
+            interval.date_start && interval.date_end
+              ? calculateDatePercentage(interval.date_start, interval.date_end)
               : 0
           }
         />

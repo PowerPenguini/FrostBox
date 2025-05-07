@@ -19,6 +19,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { useAuthContext } from "@/state/auth-context";
+import {IconCloudDown} from "@tabler/icons-react"
 
 export function EventTypeCombox({ id, value, onChange }) {
   const [open, setOpen] = useState(false);
@@ -52,7 +53,6 @@ export function EventTypeCombox({ id, value, onChange }) {
     fetchTypes();
   }, [token]);
 
-  if (loading) return <div>Loading...</div>;
   if (error)
     return (
       <div>
@@ -70,7 +70,11 @@ export function EventTypeCombox({ id, value, onChange }) {
           aria-controls={id}
           className="justify-between"
         >
-          {types.find((type) => type.id === value)?.name || "Typ zdarzenia"}
+          {loading ? (
+            <div className="flex gap-2"> <IconCloudDown/><div>Pobieranie danych... </div></div>
+          ) : (
+            types.find((type) => type.id === value)?.name || "Typ zdarzenia"
+          )}
           <ChevronsUpDown className="opacity-50 ml-2 w-4 h-4 shrink-0" />
         </Button>
       </PopoverTrigger>

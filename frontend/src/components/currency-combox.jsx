@@ -19,11 +19,17 @@ import {
 } from "@/components/ui/popover";
 
 const currencies = [
-  { code: "USD", name: "Dolar amerykański" },
-  { code: "EUR", name: "Euro" },
-  { code: "GBP", name: "Funt brytyjski" },
-  { code: "JPY", name: "Jen japoński" },
   { code: "PLN", name: "Polski złoty" },
+  { code: "EUR", name: "Euro" },
+  {code: "CHF", name: "Frank szwajcarski"},
+  { code: "USD", name: "Dolar amerykański" },
+  { code: "GBP", name: "Funt szteling" },
+  { code: "JPY", name: "Jen" },
+  { code: "HUF", name: "Forint" },
+  {code:"DKK", name: "Korona duńska"},
+  {code:"NOK", name: "Korona norweska"},
+  {code:"UAH", name: "Hrywna"},
+  {code:"CZK", name: "Korona czeska"}
 ];
 
 export function CurrencyCombox({ id, value, onChange }) {
@@ -40,9 +46,9 @@ export function CurrencyCombox({ id, value, onChange }) {
           className="justify-between"
         >
           {value
-            ? currencies.find((currency) => currency.code === value)?.name
+            ? currencies.find((currency) => currency.code === value)?.code
             : "Wybierz walutę..."}
-          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+          <ChevronsUpDown className="opacity-50 ml-2 w-4 h-4 shrink-0" />
         </Button>
       </PopoverTrigger>
       <PopoverContent className="p-0 w-full min-w-[var(--radix-popover-trigger-width)]">
@@ -66,9 +72,9 @@ export function CurrencyCombox({ id, value, onChange }) {
                       value === currency.code ? "opacity-100" : "opacity-0"
                     )}
                   />
-                  {currency.name}{" "}
+                  {currency.code}{" "}
                   <span className="text-muted-foreground">
-                    | {currency.code}
+                    | {currency.name}
                   </span>
                 </CommandItem>
               ))}

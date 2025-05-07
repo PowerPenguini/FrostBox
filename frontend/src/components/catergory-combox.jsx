@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/popover";
 import { useAuthContext } from "@/state/auth-context";
 import { translateCostCategory } from "@/formatting/category";
+import { ErrorText } from "@/components/error-text";
 
 
 export function CategoryCombox({ id, value, onChange }) {

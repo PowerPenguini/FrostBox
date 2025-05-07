@@ -15,6 +15,7 @@ import { Button } from "@/components/ui/button";
 import { IconPlus } from "@tabler/icons-react";
 import { Label } from "./ui/label";
 import { Input } from "@/components/ui/input";
+import { ErrorText } from "@/components/error-text";
 import { toast } from "sonner";
 import { useAuthContext } from "@/state/auth-context";
 

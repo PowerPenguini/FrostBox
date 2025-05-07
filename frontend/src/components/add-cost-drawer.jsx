@@ -21,6 +21,8 @@ import { CategoryCombox } from "./catergory-combox";
 import { toast } from "sonner";
 import { useAuthContext } from "@/state/auth-context";
 import { DatePickerPopover } from "@/components/ui/date-picker-popover";
+import { ErrorText } from "@/components/error-text";
+
 
 export function AddCostDrawer() {
   const { refetchData } = useCostsDataContext();
@@ -61,8 +63,6 @@ export function AddCostDrawer() {
       cost_date: invoiceDate?.toISOString(),
       invoice_date: costDate?.toISOString(),
     };
-    console.log(JSON.stringify(payload));
-    console.log("Bearer ${token}");
     try {
       const response = await fetch("/api/v1/costs", {
         method: "POST",
@@ -79,7 +79,6 @@ export function AddCostDrawer() {
         toast("Błąd podczas przesyłania kosztu.");
       }
     } catch (error) {
-      console.log(error);
       toast("Błąd sieci podczas przesyłania kosztu.");
     } finally {
       refetchData();

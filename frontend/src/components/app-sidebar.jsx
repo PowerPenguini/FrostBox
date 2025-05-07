@@ -33,7 +33,6 @@ const data = {
   user: {
     name: "shadcn",
     email: "m@example.com",
-    avatar: "/avatars/shadcn.jpg",
   },
   navMain: [
     {
@@ -103,7 +102,7 @@ export function AppSidebar({
           <SidebarMenuItem>
             <SidebarMenuButton asChild className="data-[slot=sidebar-menu-button]:!p-1.5">
               <Link href="#">
-                <span className="text-base font-semibold">FrostBox</span>
+                <span className="font-semibold text-base">FrostBox</span>
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>

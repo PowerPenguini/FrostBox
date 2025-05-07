@@ -20,6 +20,7 @@ import { CurrencyCombox } from "./currency-combox";
 import { toast } from "sonner";
 import { useAuthContext } from "@/state/auth-context";
 import { DatePickerPopover } from "@/components/ui/date-picker-popover";
+import { ErrorText } from "@/components/error-text";
 
 export function AddRevenueDrawer() {
   const { refetchData } = useCostsDataContext();
@@ -30,11 +31,8 @@ export function AddRevenueDrawer() {
   const [title, setTitle] = useState("");
   const [value, setValue] = useState("");
   const [vat, setVat] = useState("");
-  const [quantity, setQuantity] = useState("1");
   const [currency, setCurrency] = useState("PLN");
   const [vehicle, setVehicle] = useState("");
-  const [category, setCategory] = useState("");
-  const [amortization, setAmortization] = useState(1);
   const [invoiceDate, setInvoiceDate] = useState(new Date());
   const [costDate, setCostDate] = useState(new Date());
   const { token } = useAuthContext();
@@ -60,8 +58,6 @@ export function AddRevenueDrawer() {
       cost_date: invoiceDate?.toISOString(),
       invoice_date: costDate?.toISOString(),
     };
-    console.log(JSON.stringify(payload));
-    console.log("Bearer ${token}");
     try {
       const response = await fetch("/api/v1/costs", {
         method: "POST",

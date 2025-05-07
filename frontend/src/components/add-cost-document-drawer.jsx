@@ -23,6 +23,8 @@ import {
   SelectItem,
 } from "@/components/ui/select";
 import { Input } from "./ui/input";
+import { ErrorText } from "@/components/error-text";
+
 const typeOptions = {
   uta: [{ value: "cost_breakdown", label: "Zestawienie kosztów" }],
   gastruck: [
@@ -158,7 +160,7 @@ export function AddCostDocumentDrawer() {
             Dodaj
           </Button>
           <DrawerClose asChild>
-            <Button variant="outline">Anuluj</Button>
+            <Button variant="outline" onChange={handleFileChange}>Anuluj</Button>
           </DrawerClose>
         </DrawerFooter>
       </DrawerContent>
