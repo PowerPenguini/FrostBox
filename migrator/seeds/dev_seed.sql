@@ -19,17 +19,20 @@ ON CONFLICT (registration_number) DO NOTHING;
 INSERT INTO event_types (id, name)
 VALUES
     ('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', 'Przegląd techniczny'),
-    ('bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 'Serwis olejowy')
+    ('bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 'Serwis olejowy'),
+    ('cccccccc-cccc-cccc-cccc-cccccccccccc', 'Wymiana płynu chłodniczego')
 ON CONFLICT (id) DO NOTHING;
 
-INSERT INTO event_intervals (id, name, vehicle_id, event_type_id, distance_interval_km, time_interval)
+INSERT INTO event_intervals (id, vehicle_id, event_type_id, distance_interval_km, time_interval, warning_offset)
 VALUES
-    ('cccccccc-cccc-cccc-cccc-cccccccccccc', '11111111-1111-1111-1111-111111111111', 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', 20000, INTERVAL '1 year'),
-    ('dddddddd-dddd-dddd-dddd-dddddddddddd', '11111111-1111-1111-1111-111111111111', 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 15000, INTERVAL '1 year')
+    ('3f6b1c2e-5c3e-4b8e-9b1e-1c2d3e4f5a6b', '11111111-1111-1111-1111-111111111111', 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', NULL, INTERVAL '1 year', INTERVAL '30 day'),
+    ('7a8b9c0d-e1f2-4a3b-8c9d-0e1f2a3b4c5d', '11111111-1111-1111-1111-111111111111', 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 15000, INTERVAL '1 year', INTERVAL '30 day'),
+    ('1a2b3c4d-5e6f-7a8b-9c0d-e1f2a3b4c5d6', '11111111-1111-1111-1111-111111111111', 'cccccccc-cccc-cccc-cccc-cccccccccccc', 1000000, INTERVAL '10 year', INTERVAL '30 day')
 ON CONFLICT (id) DO NOTHING;
 
-INSERT INTO events (id, vehicle_id, event_type_id, event_date, odometer_km, event_interval_id)
+INSERT INTO events (id, vehicle_id, event_type_id, event_date, odometer_km)
 VALUES
-    ('eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', '11111111-1111-1111-1111-111111111111', 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', '2024-05-01', 10000, 'cccccccc-cccc-cccc-cccc-cccccccccccc'),
-    ('ffffffff-ffff-ffff-ffff-ffffffffffff', '11111111-1111-1111-1111-111111111111', 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', '2024-06-01', 8000, 'dddddddd-dddd-dddd-dddd-dddddddddddd')
+    ('9e8f7d6c-5b4a-3c2d-1e0f-9a8b7c6d5e4f', '11111111-1111-1111-1111-111111111111', 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', '2024-05-01', 10000),
+    ('4b3c2d1e-0f9a-8b7c-6d5e-4f3a2b1c0d9e', '11111111-1111-1111-1111-111111111111', 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', '2024-06-01', 8000),
+    ('2c3d4e5f-6a7b-8c9d-0e1f-2a3b4c5d6e7f', '11111111-1111-1111-1111-111111111111', 'cccccccc-cccc-cccc-cccc-cccccccccccc', '2024-06-01', 8000)
 ON CONFLICT (id) DO NOTHING;

@@ -18,21 +18,26 @@ func NewIntervalViewer(db *sql.DB) *IntervalViewer {
 func (r *IntervalViewer) GetIntervalsByVehicle(vehicleID uuid.UUID, currentOdometer int) (contract.GetIntervalsResponse, error) {
 	query := `
 		SELECT
-			et.name AS event_type_name,
-			ei.id AS event_interval_id,
-			e.event_date AS start_date,
-			(e.event_date + ei.time_interval) AS end_date,
-			e.odometer_km AS start_odometer_km,
-			(e.odometer_km + ei.distance_interval_km) AS end_odometer_km
+		et.name AS event_type_name,
+		ei.id AS event_interval_id,
+		e.event_date AS start_date,
+		(e.event_date + ei.time_interval) AS end_date,
+		e.odometer_km AS start_odometer_km,
+		(e.odometer_km + ei.distance_interval_km) AS end_odometer_km,
+		CASE
+			WHEN CURRENT_DATE > (e.event_date + ei.time_interval) THEN 'CRITICAL'
+			WHEN CURRENT_DATE > (e.event_date + ei.time_interval - ei.warning_offset) THEN 'WARNING'
+			ELSE 'INFO'
+		END AS status
 		FROM event_intervals ei
 		INNER JOIN event_types et ON ei.event_type_id = et.id
 		LEFT JOIN LATERAL (
-			SELECT *
-			FROM events ev
-			WHERE ev.vehicle_id = ei.vehicle_id
+		SELECT *
+		FROM events ev
+		WHERE ev.vehicle_id = ei.vehicle_id
 			AND ev.event_type_id = ei.event_type_id
-			ORDER BY ev.odometer_km DESC, ev.event_date DESC
-			LIMIT 1
+		ORDER BY ev.odometer_km DESC, ev.event_date DESC
+		LIMIT 1
 		) e ON TRUE
 		WHERE ei.vehicle_id = $1;
     `
@@ -54,8 +59,7 @@ func (r *IntervalViewer) GetIntervalsByVehicle(vehicleID uuid.UUID, currentOdome
 			&i.DateEnd,
 			&i.MileageStart,
 			&i.MileageEnd,
-			// &i.IsTimeExpired,
-			// &i.IsDistanceExpired,
+			&i.Status,
 		)
 		if err != nil {
 			return nil, err

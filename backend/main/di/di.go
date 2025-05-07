@@ -17,6 +17,7 @@ type DI struct {
 	DocumentViewer *views.DocumentViewer
 	VehicleViewer  *views.VehicleViewer
 	UserVeiwer     *views.UserViewer
+	AuthVeiwer     *views.AuthViewer
 	CostViewer     *views.CostViewer
 	IntervalViewer *views.IntervalViewer
 	EventViewer    *views.EventViewer
@@ -50,6 +51,7 @@ func NewDI(connStr string) (*DI, error) {
 		views.NewDocumentViewer(db),
 		views.NewVehicleViewer(db),
 		views.NewUserViewer(db),
+		views.NewAuthViewer(db),
 		views.NewCostViewer(db),
 		views.NewIntervalViewer(db),
 		views.NewEventViewer(db),

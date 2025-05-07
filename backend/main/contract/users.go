@@ -1,7 +1,5 @@
 package contract
 
-type UsersRolesAvailables []string
-type GetMeResponse GetUser
 type GetUsersResponse []GetUser
 type PostUsersRequest PostUser
 type GetUsersRoles []string

@@ -73,6 +73,16 @@ services:
       - uta-processor
     ports:
       - "80:80"
+  
+  notifications-worker:
+    build: 
+      context: ./notifications-worker
+    volumes:
+      - ./notifications-worker:/app
+    depends_on:
+      - postgres
+    restart: unless-stopped
+    
 
 volumes:
   postgres_storage:

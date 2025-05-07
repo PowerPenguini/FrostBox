@@ -82,6 +82,7 @@ CREATE TABLE
     event_types (
         id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
         name TEXT NOT NULL
+        
     );
 
 CREATE TABLE
@@ -90,7 +91,8 @@ CREATE TABLE
         vehicle_id UUID NOT NULL REFERENCES vehicles (id) ON DELETE CASCADE,
         event_type_id UUID NOT NULL REFERENCES event_types (id) ON DELETE CASCADE,
         distance_interval_km INT,
-        time_interval INTERVAL
+        time_interval INTERVAL,
+        warning_offset INTERVAL NOT NULL
     );
 
 CREATE TABLE
@@ -99,6 +101,5 @@ CREATE TABLE
         vehicle_id UUID NOT NULL REFERENCES vehicles (id) ON DELETE CASCADE,
         event_type_id UUID NOT NULL REFERENCES event_types (id) ON DELETE CASCADE,
         event_date DATE NOT NULL,
-        odometer_km INT,
-        -- event_interval_id UUID REFERENCES event_intervals (id) ON DELETE SET NULL
+        odometer_km INT
     );

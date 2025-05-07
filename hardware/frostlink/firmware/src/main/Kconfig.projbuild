@@ -1,0 +1,84 @@
+menu "FrostLink"
+    menu "Network"
+        config WIFI_SSID
+            string "SSID"
+            default "FrostLink"
+            help
+                Set the SSID for the Wi-Fi connection.
+
+        config WIFI_PASSWORD
+            string "Password"
+            default "12345678"
+            help
+                Set the Wi-Fi password.
+
+        config WIFI_CHANNEL
+            int "Channel"
+            default 1
+            help
+                Set the Wi-Fi channel.
+
+        config WIFI_MAX_CONN
+            int "Max connections"
+            default 1
+            help
+                Set the maximum number of Wi-Fi connections.
+
+        config WIFI_IP
+            string "IP"
+            default "0.0.0.0"
+            help
+                Set the IP address for the Wi-Fi device.
+
+        config WIFI_PORT
+            int "Port"
+            default 9002
+            help
+                Set the port for the Wi-Fi connection.
+    endmenu
+
+    menu "CAN Configuration"
+
+        # Definicja wyboru jednej z prędkości baudrate
+        choice
+            prompt "CAN Baud Rate"
+            default CAN_BAUD_500K
+
+            config CAN_BAUD_125K
+                bool "125K baud rate"
+                help
+                    Select 125K baud rate for CAN bus.
+
+            config CAN_BAUD_250K
+                bool "250K baud rate"
+                help
+                    Select 250K baud rate for CAN bus.
+
+            config CAN_BAUD_500K
+                bool "500K baud rate"
+                help
+                    Select 500K baud rate for CAN bus.
+
+            config CAN_BAUD_1000K
+                bool "1000K baud rate"
+                help
+                    Select 1M baud rate for CAN bus.
+
+        endchoice
+
+        # Opcje pinów dla CAN
+        config CAN_RX_PIN
+            int "CAN RX Pin"
+            default 22
+            help
+                Set the GPIO pin number for CAN RX.
+
+        config CAN_TX_PIN
+            int "CAN TX Pin"
+            default 23
+            help
+                Set the GPIO pin number for CAN TX.
+
+    endmenu
+
+endmenu
