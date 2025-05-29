@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"frostbox/repos"
 	"frostbox/services"
+	"frostbox/validators"
 	"frostbox/views"
 
 	_ "github.com/jackc/pgx/v5/stdlib"
@@ -14,14 +15,18 @@ type DI struct {
 	DocumentRepo   *repos.DocumentRepo
 	CostRepo       *repos.CostRepo
 	VehicleRepo    *repos.VehicleRepo
+	EventTypeRepo  *repos.EventTypeRepo
+	EventRepo      *repos.EventRepo
 	DocumentViewer *views.DocumentViewer
 	VehicleViewer  *views.VehicleViewer
-	UserVeiwer     *views.UserViewer
-	AuthVeiwer     *views.AuthViewer
+	UserViewer     *views.UserViewer
+	AuthViewer     *views.AuthViewer
 	CostViewer     *views.CostViewer
 	IntervalViewer *views.IntervalViewer
 	EventViewer    *views.EventViewer
 	NBPService     *services.NBPService
+	EventValidator *validators.EventValidator
+	CostValidator  *validators.CostValidator
 }
 
 func NewDatabase(connStr string) (*sql.DB, error) {
@@ -43,18 +48,27 @@ func NewDI(connStr string) (*DI, error) {
 		return nil, err
 	}
 
+	vehicleRepo := repos.NewVehicleRepository(db)
+	costRepo := repos.NewCostRepository(db)
+	eventRepo := repos.NewEventRepo(db)
+	eventTypeRepo := repos.NewEventTypeRepo(db)
+
+	eventValidator := validators.NewEventValidator(vehicleRepo, costRepo, eventRepo, eventTypeRepo)
+
 	return &DI{
-		repos.NewUserRepo(db),
-		repos.NewDocumentRepo(db),
-		repos.NewCostRepository(db),
-		repos.NewVehicleRepository(db),
-		views.NewDocumentViewer(db),
-		views.NewVehicleViewer(db),
-		views.NewUserViewer(db),
-		views.NewAuthViewer(db),
-		views.NewCostViewer(db),
-		views.NewIntervalViewer(db),
-		views.NewEventViewer(db),
-		services.NewNBPService(),
+		UserRepo:       repos.NewUserRepo(db),
+		VehicleRepo:    vehicleRepo,
+		CostRepo:       costRepo,
+		EventRepo:      eventRepo,
+		EventTypeRepo:  eventTypeRepo,
+		EventValidator: eventValidator,
+		DocumentViewer: views.NewDocumentViewer(db),
+		VehicleViewer:  views.NewVehicleViewer(db),
+		UserViewer:     views.NewUserViewer(db),
+		AuthViewer:     views.NewAuthViewer(db),
+		CostViewer:     views.NewCostViewer(db),
+		IntervalViewer: views.NewIntervalViewer(db),
+		EventViewer:    views.NewEventViewer(db),
+		NBPService:     services.NewNBPService(),
 	}, nil
 }

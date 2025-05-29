@@ -1,20 +1,21 @@
+version: '3.9'
+
 services:
   go-migrate:
     build:
       context: ./migrator
       dockerfile: Dockerfile.dev
     environment:
-      - POSTGRES_HOST
-      - POSTGRES_PORT
-      - POSTGRES_USER
-      - POSTGRES_PASSWORD
-      - POSTGRES_DB
+      POSTGRES_HOST: ${POSTGRES_HOST}
+      POSTGRES_PORT: ${POSTGRES_PORT}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
     depends_on:
       postgres:
         condition: service_healthy
     networks:
       - internal_net
-
 
   postgres:
     build:
@@ -35,45 +36,49 @@ services:
       retries: 10
 
   backend:
-    build: 
+    build:
       context: ./backend/main
       dockerfile: Dockerfile.dev
     environment:
-      - POSTGRES_HOST
-      - POSTGRES_PORT
-      - POSTGRES_USER
-      - POSTGRES_PASSWORD
-      - POSTGRES_DB
+      POSTGRES_HOST: ${POSTGRES_HOST}
+      POSTGRES_PORT: ${POSTGRES_PORT}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
     restart: unless-stopped
     volumes:
       - ./backend/main:/app
     networks:
       - internal_net
     depends_on:
-      - postgres
-      - go-migrate
+      postgres:
+        condition: service_healthy
+      go-migrate:
+        condition: service_started
 
   uta-processor:
-    build: 
+    build:
       context: ./backend/uta-processor
       dockerfile: Dockerfile.dev
     environment:
-      - POSTGRES_HOST
-      - POSTGRES_PORT
-      - POSTGRES_USER
-      - POSTGRES_PASSWORD
-      - POSTGRES_DB
+      POSTGRES_HOST: ${POSTGRES_HOST}
+      POSTGRES_PORT: ${POSTGRES_PORT}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
     restart: unless-stopped
     volumes:
       - ./backend/uta-processor:/app
     networks:
       - internal_net
     depends_on:
-      - postgres
-      - go-migrate
+      postgres:
+        condition: service_healthy
+      go-migrate:
+        condition: service_started
 
   frontend:
-    build: 
+    build:
       context: ./frontend
       dockerfile: Dockerfile.dev
     volumes:
@@ -81,8 +86,6 @@ services:
     restart: unless-stopped
     networks:
       - internal_net
-
-
 
   nginx:
     build: ./nginx
@@ -95,30 +98,30 @@ services:
     networks:
       - internal_net
 
-
   notification-svc:
-    build: 
+    build:
       context: ./notification-svc
       dockerfile: Dockerfile.dev
     environment:
-      - POSTGRES_HOST
-      - POSTGRES_PORT
-      - POSTGRES_USER
-      - POSTGRES_PASSWORD
-      - POSTGRES_DB
+      POSTGRES_HOST: ${POSTGRES_HOST}
+      POSTGRES_PORT: ${POSTGRES_PORT}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
     volumes:
       - ./notification-svc:/app
-    depends_on:
-      - postgres
     restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      go-migrate:
+        condition: service_started
     networks:
       - internal_net
-
-    
 
 volumes:
   postgres_storage:
 
 networks:
   internal_net:
-    internal: false # true
+    internal: false

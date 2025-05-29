@@ -18,7 +18,7 @@ func NewUsersHandler(di *di.DI) *UsersHandler {
 }
 
 func (h *UsersHandler) GetUsers(w http.ResponseWriter, r *http.Request) {
-	response, err := h.di.UserVeiwer.GetUsers()
+	response, err := h.di.UserViewer.GetUsers()
 	if err != nil {
 		http.Error(w, "Failed to fetch", http.StatusInternalServerError)
 		return
@@ -28,7 +28,7 @@ func (h *UsersHandler) GetUsers(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *UsersHandler) GetUsersRoles(w http.ResponseWriter, r *http.Request) {
-	response, err := h.di.UserVeiwer.GetUsersRoles()
+	response, err := h.di.UserViewer.GetUsersRoles()
 	if err != nil {
 		http.Error(w, "Failed to fetch", http.StatusInternalServerError)
 		return

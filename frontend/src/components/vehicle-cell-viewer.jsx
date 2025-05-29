@@ -51,6 +51,7 @@ import { formatDate } from "@/formatting/date";
 import { EventList } from "./event-list";
 import { Spinner } from "./spinner";
 import { ErrorText } from "@/components/error-text";
+import { toast } from "sonner";
 
 const chartData = [
   { month: "January", desktop: 186, mobile: 80 },
@@ -98,7 +99,7 @@ export function VehicleCellViewer({ item }) {
         const data = await response.json();
         setIntervals(data);
       } catch (error) {
-        console.error("Error fetching intervals:", error);
+        toast("Nie udało się pobrać interwałów pojazdu");
         setError(true);
       } finally {
         setLoading(false);
@@ -212,11 +213,11 @@ function VehicleInterval({
 
       <div className="flex flex-col gap-2 px-4">
         <div className="flex justify-between">
-          <div className={interval.mileage_start !== undefined ? "" : "text-gray-500"}>
-            {interval.mileage_start !== undefined ? `${interval.mileage_start} km` : "N/A"}
+          <div className={interval.mileage_start !== null && interval.mileage_start !== undefined ? "" : "text-gray-500"}>
+            {interval.mileage_start !== null && interval.mileage_start !== undefined ? `${interval.mileage_start} km` : "N/A"}
           </div>
-          <div className={interval.mileage_end !== undefined ? "" : "text-gray-500"}>
-            {interval.mileage_end !== undefined ? `${interval.mileage_end} km` : "N/A"}
+          <div className={interval.mileage_end !== null && interval.mileage_end !== undefined ? "" : "text-gray-500"}>
+            {interval.mileage_end !== null && interval.mileage_end !== undefined  ? `${interval.mileage_end} km` : "N/A"}
           </div>
         </div>
         <Progress

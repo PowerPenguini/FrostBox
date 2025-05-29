@@ -2,6 +2,8 @@ package repos
 
 import (
 	"database/sql"
+
+	"github.com/google/uuid"
 )
 
 type DocumentRepo struct {
@@ -12,28 +14,12 @@ func NewDocumentRepo(db *sql.DB) *DocumentRepo {
 	return &DocumentRepo{db: db}
 }
 
-// func (r *DocumentRepo) GetDocuments() ([]models.Document, error) {
-// 	query := `SELECT id, readable_id, status, source, created_at FROM documents`
-// 	rows, err := r.db.Query(query)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-// 	defer rows.Close()
-
-// 	var documents []view.Document
-// 	for rows.Next() {
-// 		var document models.Document
-// 		if err := rows.Scan(
-// 			&document.ID,
-// 			&document.ReadableID,
-// 			&document.Status,
-// 			&document.Source,
-// 			&document.CreatedAt,
-// 		); err != nil {
-// 			return nil, err
-// 		}
-// 		documents = append(documents, document)
-// 	}
-
-// 	return documents, nil
-// }
+func (r *DocumentRepo) Exists(id uuid.UUID) (bool, error) {
+	query := `SELECT EXISTS (SELECT 1 FROM documents WHERE id = $1)`
+	var exists bool
+	err := r.db.QueryRow(query, id).Scan(&exists)
+	if err != nil {
+		return false, err
+	}
+	return exists, nil
+}

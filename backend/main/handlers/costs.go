@@ -67,10 +67,10 @@ func (h *CostsHandler) PostCosts(w http.ResponseWriter, r *http.Request) { // TO
 		return
 	}
 
-	params := logic.AddCostParams{
-		Value:        value,
-		VATRate:      vatRate,
-		Currency:     cost.Currency,
+	params := &logic.AddCostParams{
+		Value:        &value,
+		VATRate:      &vatRate,
+		Currency:     &cost.Currency,
 		Quantity:     quantity,
 		VehicleID:    cost.VehicleID,
 		Title:        cost.Title,
@@ -81,7 +81,7 @@ func (h *CostsHandler) PostCosts(w http.ResponseWriter, r *http.Request) { // TO
 		Country:      cost.Country,
 	}
 
-	err = logic.AddCost(h.di, params)
+	_, err = logic.AddCost(h.di, params)
 	if errors.Is(err, errs.ErrDataNotAvailable) {
 		unprocessableEntityDataNotAvailable(w)
 	}

@@ -3,6 +3,8 @@ package repos
 import (
 	"database/sql"
 	"frostbox/models"
+
+	"github.com/google/uuid"
 )
 
 type CostRepo struct {
@@ -13,7 +15,7 @@ func NewCostRepository(db *sql.DB) *CostRepo {
 	return &CostRepo{db: db}
 }
 
-func (r *CostRepo) Insert(cost *models.Cost) error {
+func (r *CostRepo) Insert(cost *models.Cost) (*uuid.UUID, error) {
 	query := `
         INSERT INTO costs (
             value, vat_rate, vat_value, currency, 
@@ -26,15 +28,17 @@ func (r *CostRepo) Insert(cost *models.Cost) error {
             $6, $7, $8, $9, $10, 
             $11, $12, $13, $14, 
             $15
-        );`
+        )
+        RETURNING id;`
 
-	_, err := r.db.Exec(query,
+	var id uuid.UUID
+	err := r.db.QueryRow(query,
 		cost.Value,
 		cost.VATRate,
 		cost.VATValue,
 		cost.Currency,
 		cost.ValueMainCurrency,
-		cost.VatValueMainCurrency,
+		cost.VATValueMainCurrency,
 		cost.Quantity,
 		cost.VehicleID,
 		cost.Title,
@@ -44,7 +48,25 @@ func (r *CostRepo) Insert(cost *models.Cost) error {
 		cost.CostDate,
 		cost.DocumentID,
 		cost.Amortization,
-	)
+	).Scan(&id)
 
-	return err
+	return &id, err
+}
+
+func (r *CostRepo) Exists(costID uuid.UUID) (bool, error) {
+	query := `
+		SELECT EXISTS (
+			SELECT 1
+			FROM costs
+			WHERE id = $1
+		);`
+
+	var exists bool
+	err := r.db.QueryRow(query, costID).Scan(&exists)
+
+	if err != nil {
+		return false, err
+	}
+
+	return exists, nil
 }

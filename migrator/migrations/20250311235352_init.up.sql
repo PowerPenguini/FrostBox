@@ -4,7 +4,8 @@ CREATE TYPE user_role AS ENUM ('driver', 'manager', 'admin');
 
 CREATE TYPE document_status AS ENUM ('withdrawn', 'added', 'incorrect');
 
-CREATE TYPE cost_category AS ENUM ('fuel', 'additive', 'toll', 'other');
+CREATE TYPE cost_category AS ENUM ('fuel', 'additive', 'toll', 'service', 'other');
+
 
 CREATE TABLE
     users (
@@ -81,8 +82,8 @@ CREATE TABLE
 CREATE TABLE
     event_types (
         id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-        name TEXT NOT NULL
-        
+        name TEXT NOT NULL,
+        default_cost_category cost_category NOT NULL -- max counter unitl waringing/ reccesive type - 
     );
 
 CREATE TABLE
@@ -92,7 +93,7 @@ CREATE TABLE
         event_type_id UUID NOT NULL REFERENCES event_types (id) ON DELETE CASCADE,
         distance_interval_km INT,
         time_interval INTERVAL,
-        warning_offset INTERVAL NOT NULL
+        warning_offset INTERVAL NOT NULL -- km/data // Counter
     );
 
 CREATE TABLE
@@ -101,5 +102,7 @@ CREATE TABLE
         vehicle_id UUID NOT NULL REFERENCES vehicles (id) ON DELETE CASCADE,
         event_type_id UUID NOT NULL REFERENCES event_types (id) ON DELETE CASCADE,
         event_date DATE NOT NULL,
-        odometer_km INT
+        event_mileage INT,
+        cost_id UUID,
+        FOREIGN KEY (cost_id) REFERENCES costs (id) ON DELETE CASCADE
     );

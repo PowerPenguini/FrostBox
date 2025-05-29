@@ -19,7 +19,7 @@ WITH latest_events AS (
 		e.vehicle_id,
 		e.event_type_id,
 		e.event_date,
-		e.odometer_km,
+		e.event_mileage,
 		ei.distance_interval_km,
 		ei.time_interval
 	FROM events e

@@ -71,7 +71,7 @@ export function EventTypeCombox({ id, value, onChange }) {
           className="justify-between"
         >
           {loading ? (
-            <div className="flex gap-2"> <IconCloudDown/><div>Pobieranie danych... </div></div>
+            <ComboxDownloadState/>
           ) : (
             types.find((type) => type.id === value)?.name || "Typ zdarzenia"
           )}
@@ -114,4 +114,9 @@ export function EventTypeCombox({ id, value, onChange }) {
       </PopoverContent>
     </Popover>
   );
+}
+
+
+function ComboxDownloadState() {
+  return <div className="flex gap-2"> <IconCloudDown/><div>Pobieranie danych... </div></div>
 }

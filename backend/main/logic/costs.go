@@ -2,6 +2,7 @@ package logic
 
 import (
 	"frostbox/di"
+	"frostbox/errs"
 	"frostbox/models"
 	"time"
 
@@ -10,9 +11,9 @@ import (
 )
 
 type AddCostParams struct {
-	Value        decimal.Decimal
-	VATRate      decimal.Decimal
-	Currency     string
+	Value        *decimal.Decimal
+	VATRate      *decimal.Decimal
+	Currency     *string
 	Quantity     decimal.Decimal
 	VehicleID    *uuid.UUID
 	Title        string
@@ -23,26 +24,31 @@ type AddCostParams struct {
 	Country      string
 }
 
-func AddCost(di *di.DI, params AddCostParams) error {
-	vatValue := params.Value.Mul(params.VATRate).Div(decimal.NewFromInt(100))
+type AddCostResult struct {
+	ID *uuid.UUID
+}
+
+func AddCost(di *di.DI, params *AddCostParams) (AddCostResult, error) {
+	vatValue := params.Value.Mul(*params.VATRate).Div(decimal.NewFromInt(100))
 	currencyDate := params.InvoiceDate.AddDate(0, 0, -1)
 
-	valueMainCurrency, err := di.NBPService.ToPLN(params.Currency, params.Value, currencyDate)
+	var result AddCostResult
+	valueMainCurrency, err := di.NBPService.ToPLN(*params.Currency, *params.Value, currencyDate)
 	if err != nil {
-		return err
+		return result, err
 	}
 
-	vatValueMainCurrency, err := di.NBPService.ToPLN(params.Currency, vatValue, currencyDate)
+	vatValueMainCurrency, err := di.NBPService.ToPLN(*params.Currency, vatValue, currencyDate)
 	if err != nil {
-		return err
+		return result, err
 	}
 	cost := &models.Cost{
-		Value:                params.Value,
-		VATRate:              params.VATRate,
+		Value:                *params.Value,
+		VATRate:              *params.VATRate,
 		VATValue:             vatValue,
-		Currency:             params.Currency,
+		Currency:             *params.Currency,
 		ValueMainCurrency:    valueMainCurrency,
-		VatValueMainCurrency: vatValueMainCurrency,
+		VATValueMainCurrency: vatValueMainCurrency,
 		Quantity:             params.Quantity,
 		VehicleID:            params.VehicleID,
 		Title:                params.Title,
@@ -52,6 +58,10 @@ func AddCost(di *di.DI, params AddCostParams) error {
 		CostDate:             params.CostDate,
 		Amortization:         params.Amortization,
 	}
-	err = di.CostRepo.Insert(cost)
-	return err
+	err = di.CostValidator.Validate(cost)
+	if err != nil {
+		return AddCostResult{}, errs.ErrValidationFailed
+	}
+	id, err := di.CostRepo.Insert(cost)
+	return AddCostResult{id}, err
 }

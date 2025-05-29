@@ -56,7 +56,9 @@ services:
       - "8080"
     restart: unless-stopped
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
+
 
   frontend:
     build: 
@@ -80,7 +82,8 @@ services:
     volumes:
       - ./notifications-worker:/app
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
     restart: unless-stopped
     
 

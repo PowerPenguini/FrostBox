@@ -1,7 +1,8 @@
 import {
   IconRoad,
   IconDropletPlus,
-  IconGasStation
+  IconGasStation,
+  IconNut
 } from "@tabler/icons-react"
 import { Badge } from "@/components/ui/badge";
 
@@ -9,6 +10,7 @@ const mnemonics = {
   toll: { name: "Opłata drogowa", icon: IconRoad },
   additive: { name: "Dodatki", icon: IconDropletPlus },
   fuel: { name: "Paliwo", icon: IconGasStation },
+  service: { name: "Serwis", icon: IconNut },
 };
 
 export function translateCostCategory(category) {
@@ -22,7 +24,7 @@ export function renderCostCategory(category) {
   };
 
   return (
-    <Badge variant="outline" className="text-muted-foreground px-1.5">
+    <Badge variant="outline" className="px-1.5 text-muted-foreground">
       {Icon && <Icon />} {name}
     </Badge>
   );

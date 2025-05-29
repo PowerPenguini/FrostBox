@@ -48,7 +48,7 @@ func (h *AuthHandler) GetMe(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	resp, err := h.di.AuthVeiwer.GetUser(user.ID.String())
+	resp, err := h.di.AuthViewer.GetUser(user.ID.String())
 	if err != nil {
 		http.Error(w, "Could not fetch user data", http.StatusInternalServerError)
 		return

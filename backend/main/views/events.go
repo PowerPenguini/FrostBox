@@ -21,7 +21,7 @@ func (r *EventViewer) GetEventsByVehicle(vehicleID uuid.UUID) (contract.GetEvent
 			e.id,
 			et.name AS event_type_name,
 			e.event_date,
-			e.odometer_km
+			e.event_mileage
 		FROM
 			events e
 		JOIN
@@ -39,7 +39,7 @@ func (r *EventViewer) GetEventsByVehicle(vehicleID uuid.UUID) (contract.GetEvent
 	var events contract.GetEventsResponse
 
 	for rows.Next() {
-		var e contract.Event
+		var e contract.GetEvent
 		err := rows.Scan(
 			&e.ID,
 			&e.EventType,

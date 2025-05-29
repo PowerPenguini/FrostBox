@@ -14,7 +14,7 @@ type Cost struct {
 	VATValue             decimal.Decimal `json:"vat_value"`
 	Currency             string          `json:"currency"`
 	ValueMainCurrency    decimal.Decimal `json:"value_main_currency"`
-	VatValueMainCurrency decimal.Decimal `json:"vat_value_main_currency"`
+	VATValueMainCurrency decimal.Decimal `json:"vat_value_main_currency"`
 	Quantity             decimal.Decimal `json:"quantity"`
 	VehicleID            *uuid.UUID      `json:"vehicle_id"`
 	Title                string          `json:"title"`

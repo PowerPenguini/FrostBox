@@ -31,8 +31,7 @@ const currencies = [
   {code:"UAH", name: "Hrywna"},
   {code:"CZK", name: "Korona czeska"}
 ];
-
-export function CurrencyCombox({ id, value, onChange }) {
+export function CurrencyCombox({ id, value, onChange, disabled = false }) {
   const [open, setOpen] = useState(false);
 
   return (
@@ -44,6 +43,7 @@ export function CurrencyCombox({ id, value, onChange }) {
           aria-expanded={open}
           aria-controls={id}
           className="justify-between"
+          disabled={disabled}
         >
           {value
             ? currencies.find((currency) => currency.code === value)?.code
@@ -51,37 +51,39 @@ export function CurrencyCombox({ id, value, onChange }) {
           <ChevronsUpDown className="opacity-50 ml-2 w-4 h-4 shrink-0" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="p-0 w-full min-w-[var(--radix-popover-trigger-width)]">
-        <Command id={id}>
-          <CommandInput placeholder="Wyszukaj walutę..." />
-          <CommandList>
-            <CommandEmpty>Nie znaleziono walut</CommandEmpty>
-            <CommandGroup>
-              {currencies.map((currency) => (
-                <CommandItem
-                  key={currency.code}
-                  value={currency.code}
-                  onSelect={(currentValue) => {
-                    onChange(currentValue === value ? "" : currentValue);
-                    setOpen(false);
-                  }}
-                >
-                  <Check
-                    className={cn(
-                      "mr-2 h-4 w-4",
-                      value === currency.code ? "opacity-100" : "opacity-0"
-                    )}
-                  />
-                  {currency.code}{" "}
-                  <span className="text-muted-foreground">
-                    | {currency.name}
-                  </span>
-                </CommandItem>
-              ))}
-            </CommandGroup>
-          </CommandList>
-        </Command>
-      </PopoverContent>
+      {!disabled && (
+        <PopoverContent className="p-0 w-full min-w-[var(--radix-popover-trigger-width)]">
+          <Command id={id}>
+            <CommandInput placeholder="Wyszukaj walutę..." />
+            <CommandList>
+              <CommandEmpty>Nie znaleziono walut</CommandEmpty>
+              <CommandGroup>
+                {currencies.map((currency) => (
+                  <CommandItem
+                    key={currency.code}
+                    value={currency.code}
+                    onSelect={(currentValue) => {
+                      onChange(currentValue === value ? "" : currentValue);
+                      setOpen(false);
+                    }}
+                  >
+                    <Check
+                      className={cn(
+                        "mr-2 h-4 w-4",
+                        value === currency.code ? "opacity-100" : "opacity-0"
+                      )}
+                    />
+                    {currency.code}{" "}
+                    <span className="text-muted-foreground">
+                      | {currency.name}
+                    </span>
+                  </CommandItem>
+                ))}
+              </CommandGroup>
+            </CommandList>
+          </Command>
+        </PopoverContent>
+      )}
     </Popover>
   );
 }

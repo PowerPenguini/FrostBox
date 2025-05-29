@@ -3,6 +3,8 @@ package repos
 import (
 	"database/sql"
 	"frostbox/models"
+
+	"github.com/google/uuid"
 )
 
 type VehicleRepo struct {
@@ -29,4 +31,14 @@ func (r *VehicleRepo) Insert(vehicle *models.Vehicle) error {
 	)
 
 	return err
+}
+
+func (r *VehicleRepo) Exists(vehicleID uuid.UUID) (bool, error) {
+	var exists bool
+	query := `SELECT EXISTS (SELECT 1 FROM vehicles WHERE id = $1)`
+	err := r.db.QueryRow(query, vehicleID).Scan(&exists)
+	if err != nil {
+		return false, err
+	}
+	return exists, nil
 }

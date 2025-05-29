@@ -3,7 +3,6 @@ package handlers
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"frostbox/contract"
 	"frostbox/di"
 	"frostbox/errs"
@@ -48,10 +47,10 @@ func (h *VehiclesHandler) PostVehicles(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	params := logic.AddVehicleParams{ // TOOD: add json keys
-		vehicle.VIN,
-		vehicle.Brand,
-		vehicle.Model,
-		vehicle.RegistrationNumber,
+		VIN:                vehicle.VIN,
+		Brand:              vehicle.Brand,
+		Model:              vehicle.Model,
+		RegistrationNumber: vehicle.RegistrationNumber,
 	}
 
 	err = logic.AddVehicle(h.di, params)
@@ -59,7 +58,6 @@ func (h *VehiclesHandler) PostVehicles(w http.ResponseWriter, r *http.Request) {
 		unprocessableEntityInvalidPayload(w)
 	}
 	if err != nil {
-		fmt.Println(err)
 		http.Error(w, "Failed to add vehicle", http.StatusInternalServerError) //TODO: obsłużyć to jako unporcessable entity w zależności od błędu
 		return
 	}
