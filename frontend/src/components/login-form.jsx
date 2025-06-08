@@ -1,31 +1,40 @@
-"use client";
-
-import { cn } from "@/lib/utils";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { useAuthContext } from "@/state/auth-context";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
-import Link from "next/link";
 import { ErrorText } from "@/components/error-text";
-import { useAuthContext } from "@/state/auth-context";
+import { cn } from "@/lib/utils";
+import Link from "next/link";
+import { Spinner } from "@/components/spinner";
 
 export function LoginForm({ className, ...props }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const { error, login } = useAuthContext();
+  const { token, error, login, loading } = useAuthContext(); // loading - czy trwa sprawdzanie tokena
   const router = useRouter();
+
+  useEffect(() => {
+    if (token) {
+      router.push("/manager/dashboard");
+    }
+  }, [token]);
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    login(email, password);
+    await login(email, password);
   };
 
-  // useEffect(() => {
-  //   if (!error) {
-  //     router.push("/manager/dashboard");
-  //   }
-  // }, [error]);
+  if (loading || token) {
+    return (
+      <div className="flex flex-col space-y-4"> 
+        <Spinner />
+        <div className="text-center"> Proszę czekać...</div>
+        
+      </div>
+    );
+  }
 
   return (
     <form
