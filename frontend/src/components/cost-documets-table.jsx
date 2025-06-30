@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { AddCostDocumentDrawer } from "@/components/add-cost-document-drawer";
+import { AddDocumentDrawer } from "@/components/add-document-drawer";
 import {
   IconChevronDown,
   IconChevronLeft,
@@ -56,11 +56,18 @@ import { useState } from "react";
 import { useCostDocumentsDataContext } from "@/state/cost-documents-data-context";
 import { Spinner } from "./spinner";
 
+const documentTypes = {
+  uta: [{ value: "cost_breakdown", label: "Zestawienie kosztów" }],
+  gastruck: [
+    { value: "cars_invoice", label: "Faktura z podziałem na pojazdy" },
+  ],
+};
+
 const renderStatus = (status) => {
   if (status === "added") {
     return (
       <>
-        <IconCircleCheckFilled className="w-8 fill-green-500 dark:fill-green-400" />{" "}
+        <IconCircleCheckFilled className="fill-green-500 dark:fill-green-400 w-8" />{" "}
         Dodany
       </>
     );
@@ -97,7 +104,7 @@ const columns = [
     accessorKey: "ID",
     header: "ID dokumentu",
     cell: ({ row }) => {
-      return <div className="text-foreground w-32">{row.original.id}</div>;
+      return <div className="w-32 text-foreground">{row.original.id}</div>;
     },
     enableHiding: false,
   },
@@ -107,7 +114,7 @@ const columns = [
     header: "Źródło",
     cell: ({ row }) => (
       <div className="w-32">
-        <Badge variant="outline" className="text-muted-foreground px-1.5">
+        <Badge variant="outline" className="px-1.5 text-muted-foreground">
           {row.original.source}
         </Badge>
       </div>
@@ -117,7 +124,7 @@ const columns = [
     accessorKey: "Status",
     header: "Status",
     cell: ({ row }) => (
-      <Badge variant="outline" className="text-muted-foreground px-1.5">
+      <Badge variant="outline" className="px-1.5 text-muted-foreground">
         {renderStatus(row.original.status)}
       </Badge>
     ),
@@ -150,7 +157,7 @@ const columns = [
         <DropdownMenuTrigger asChild>
           <Button
             variant="ghost"
-            className="data-[state=open]:bg-muted text-muted-foreground flex size-8"
+            className="flex data-[state=open]:bg-muted size-8 text-muted-foreground"
             size="icon"
           >
             <IconDotsVertical />
@@ -219,7 +226,7 @@ export function CostDocumentsTable() {
 
   return (
     <>
-      <div className="flex items-center justify-between gap-2">
+      <div className="flex justify-between items-center gap-2">
         <div className="flex items-center gap-2">
           <Input type="text" placeholder="Wyszukaj dokument" />
         </div>
@@ -257,13 +264,17 @@ export function CostDocumentsTable() {
                 })}
             </DropdownMenuContent>
           </DropdownMenu>
-          <AddCostDocumentDrawer></AddCostDocumentDrawer>
+          <AddDocumentDrawer
+            title="Dodaj dokument kosztowy"
+            description="Dodaj znane dokumenty, aby zautomatyzować rejestrację kosztów"
+            documentTypes={documentTypes}
+          ></AddDocumentDrawer>
         </div>
       </div>
 
-      <div className="overflow-hidden rounded-lg border">
+      <div className="border rounded-lg overflow-hidden">
         <Table>
-          <TableHeader className="bg-muted sticky top-0 z-10">
+          <TableHeader className="top-0 z-10 sticky bg-muted">
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => {
@@ -308,10 +319,10 @@ export function CostDocumentsTable() {
           </TableBody>
         </Table>
       </div>
-      <div className="flex items-center justify-end px-4">
-        <div className="flex w-full items-center gap-8 lg:w-fit">
-          <div className="hidden items-center gap-2 lg:flex">
-            <Label htmlFor="rows-per-page" className="text-sm font-medium">
+      <div className="flex justify-end items-center px-4">
+        <div className="flex items-center gap-8 w-full lg:w-fit">
+          <div className="hidden lg:flex items-center gap-2">
+            <Label htmlFor="rows-per-page" className="font-medium text-sm">
               Wiersze na stronę
             </Label>
             <Select
@@ -334,14 +345,14 @@ export function CostDocumentsTable() {
               </SelectContent>
             </Select>
           </div>
-          <div className="flex w-fit items-center justify-center text-sm font-medium">
+          <div className="flex justify-center items-center w-fit font-medium text-sm">
             Strona {table.getState().pagination.pageIndex + 1} z{" "}
             {table?.getPageCount()}
           </div>
-          <div className="ml-auto flex items-center gap-2 lg:ml-0">
+          <div className="flex items-center gap-2 ml-auto lg:ml-0">
             <Button
               variant="outline"
-              className="hidden h-8 w-8 p-0 lg:flex"
+              className="hidden lg:flex p-0 w-8 h-8"
               onClick={() => table.setPageIndex(0)}
               disabled={!table.getCanPreviousPage()}
             >
@@ -370,7 +381,7 @@ export function CostDocumentsTable() {
             </Button>
             <Button
               variant="outline"
-              className="hidden size-8 lg:flex"
+              className="hidden lg:flex size-8"
               size="icon"
               onClick={() => table.setPageIndex(table.getPageCount() - 1)}
               disabled={!table.getCanNextPage()}

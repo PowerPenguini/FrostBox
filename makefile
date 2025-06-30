@@ -12,11 +12,14 @@ start-dev:
 	docker compose --env-file $(DEV_ENV_FILE) -f $(DEV_COMPOSE_FILE) up
 
 build:
-	docker compose --env-file $(PROD_ENV_FILE) down -v
 	docker compose --env-file $(PROD_ENV_FILE) build
+	docker compose --env-file $(PROD_ENV_FILE) down --remove-orphans
 
 start:
 	docker compose --env-file $(PROD_ENV_FILE) up -d
+
+start-debug:
+	docker compose --env-file $(PROD_ENV_FILE) up
 
 package:
 	tar -czvf prod.tar.gz \

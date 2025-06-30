@@ -38,12 +38,12 @@ func verifyPassword(plain, hashed string) bool {
 	return err == nil
 }
 
-func createAccessToken(uuid uuid.UUID, expires time.Duration) (string, error) {
+func createAccessToken(userID uuid.UUID, expires time.Duration) (string, error) {
 	claims := jwt.MapClaims{
-		"sub": uuid,
+		"sub": userID.String(),
 		"exp": time.Now().Add(expires).Unix(),
 	}
 
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	return token.SignedString(config.SecretKey)
+	token := jwt.NewWithClaims(jwt.SigningMethodES256, claims)
+	return token.SignedString(config.PrivateJWTKey)
 }

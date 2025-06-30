@@ -46,11 +46,15 @@ services:
     restart: always
     networks:
       - internal_net
+    volumes:
+      - secrets:/secrets:ro
     depends_on:
       postgres:
         condition: service_healthy
       go-migrate:
         condition: service_started
+      security-svc:
+        condition: service_completed_successfully
 
   uta-processor:
     build:
@@ -70,6 +74,9 @@ services:
         condition: service_healthy
       go-migrate:
         condition: service_started
+      security-svc:
+        condition: service_completed_successfully
+
 
   frontend:
     build:
@@ -81,12 +88,19 @@ services:
 
   nginx:
     build: ./nginx
+    environment:
+      DOMAIN_NAME: ${DOMAIN_NAME}
+    volumes:
+      - certbot_etc:/etc/letsencrypt
+      - certbot_www:/var/www/certbot
     depends_on:
       - backend
       - frontend
       - uta-processor
+      - certbot
     ports:
       - "80:80"
+      - "443:443"
     networks:
       - external_net
       - internal_net
@@ -108,12 +122,37 @@ services:
         condition: service_healthy
       go-migrate:
         condition: service_started
+      security-svc:
+        condition: service_completed_successfully
+
     networks:
       - internal_net
+  certbot:
+    build:
+      context: ./certbot
+      dockerfile: Dockerfile
+    volumes:
+      - certbot_etc:/etc/letsencrypt
+      - certbot_www:/var/www/certbot
+    environment:
+      LETSENCRYPT_STAGING: ${LETSENCRYPT_STAGING}
+      DOMAIN_NAME: ${DOMAIN_NAME}
+    networks:
+      - external_net
+    restart: always
+
+  security-svc:
+    build:
+      context: ./security-svc
+      dockerfile: Dockerfile
+    volumes:
+      - secrets:/secrets:rw
 
 volumes:
   postgres_storage:
-
+  certbot_etc:
+  certbot_www:
+  secrets:
 
 networks:
   internal_net:

@@ -21,8 +21,11 @@ func AuthMiddleware(di *di.DI, next http.HandlerFunc) http.HandlerFunc {
 		}
 
 		tokenString := strings.TrimPrefix(authHeader, "Bearer ")
-		token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
-			return config.SecretKey, nil
+		token, err := jwt.Parse(tokenString, func(token *jwt.Token) (any, error) {
+			if _, ok := token.Method.(*jwt.SigningMethodECDSA); !ok || token.Method.Alg() != jwt.SigningMethodES256.Alg() {
+				return nil, http.ErrAbortHandler
+			}
+			return config.PublicJWTKey, nil
 		})
 		if err != nil || !token.Valid {
 			http.Error(w, "Invalid token", http.StatusUnauthorized)

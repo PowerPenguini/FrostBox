@@ -37,20 +37,19 @@ export function NotificationsCard({ className, ...props }) {
         <CardDescription>
           {loading
             ? "Ładowanie powiadomień..."
-            : getNotificationMessage(notifications.length)}
+            : getNotificationMessage(notifications?.length)}
         </CardDescription>
       </CardHeader>
       <ScrollArea className="relative flex-1 min-h-0">
         <CardContent>
           <div className="py-6">
-            {notifications.map((notification, index) => (
+            {notifications?.map((notification, index) => (
               <Notification notification={notification} key={index} />
             ))}
           </div>
           <div className="top-0 left-0 absolute bg-gradient-to-t from-transparent to-white w-full h-6 pointer-events-none" />
-          <div className="bottom-0 left-0 absolute bg-gradient-to-t from-white to-transparent w-full h-6 pointer-events-none" />
+          <div className="bottom-0 left-0 absolute bg-gradient-to-t from-white to-transparent w-full h-6 pointer-events-none" /> 
         </CardContent>
-        
       </ScrollArea>
     </Card>
   );
@@ -97,7 +96,7 @@ function Notification({ notification }) {
 }
 
 function getNotificationMessage(count) {
-  if (count === 0) {
+  if (count === 0 || !count) {
     return "Nie masz spraw, którymi musisz się zająć";
   }
 

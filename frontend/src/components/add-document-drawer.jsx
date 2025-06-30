@@ -25,14 +25,7 @@ import {
 import { Input } from "./ui/input";
 import { ErrorText } from "@/components/error-text";
 
-const typeOptions = {
-  uta: [{ value: "cost_breakdown", label: "Zestawienie kosztów" }],
-  gastruck: [
-    { value: "cars_invoice", label: "Faktura z podziałem na pojazdy" },
-  ],
-};
-
-export function AddCostDocumentDrawer() {
+export function AddDocumentDrawer( {title, description, documentTypes} ) {
   const { refetchData } = useCostDocumentsDataContext();
   const [open, setOpen] = useState(false);
   const [error, setError] = useState("");
@@ -104,9 +97,9 @@ export function AddCostDocumentDrawer() {
       </DrawerTrigger>
       <DrawerContent>
         <DrawerHeader className="gap-1">
-          <DrawerTitle>Dodaj dokument kosztowy</DrawerTitle>
+          <DrawerTitle>{title}</DrawerTitle>
           <DrawerDescription>
-            Dodaj znane dokumenty, aby zautomatyzować rejestrację kosztów
+            {description}
           </DrawerDescription>
         </DrawerHeader>
         <div className="flex flex-col gap-4 overflow-y-auto text-sm">
@@ -142,7 +135,7 @@ export function AddCostDocumentDrawer() {
                 </SelectTrigger>
                 <SelectContent>
                   {source &&
-                    typeOptions[source].map((option) => (
+                    documentTypes[source].map((option) => (
                       <SelectItem key={option.value} value={option.value}>
                         {option.label}
                       </SelectItem>

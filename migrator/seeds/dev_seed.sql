@@ -21,7 +21,6 @@ VALUES
     ('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', 'Przegląd techniczny', 'service'),
     ('bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 'Serwis olejowy', 'service'),
     ('cccccccc-cccc-cccc-cccc-cccccccccccc', 'Wymiana płynu chłodniczego', 'service')
-    
 ON CONFLICT (id) DO NOTHING;
 
 INSERT INTO event_intervals (id, vehicle_id, event_type_id, distance_interval_km, time_interval, warning_offset)

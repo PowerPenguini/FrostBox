@@ -86,7 +86,7 @@ const data = {
     },
     {
       name: "Dokumenty przychodowe",
-      url: "#",
+      url: "/manager/documents/revenues",
       icon: IconFileDollar,
     },
   ],

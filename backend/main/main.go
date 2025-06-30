@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"frostbox/config"
 	"frostbox/di"
 	"frostbox/handlers"
 	"frostbox/middleware"
@@ -17,6 +18,10 @@ import (
 // }
 
 func main() {
+	if err := config.LoadJWTKeys("/secrets/jwt-private.pem", "/secrets/jwt-public.pem"); err != nil {
+		log.Fatalf("❌ Failed to load EC keys: %v", err)
+	}
+
 	mux := http.NewServeMux()
 
 	connStr := fmt.Sprintf(

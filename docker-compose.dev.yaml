@@ -1,5 +1,3 @@
-version: '3.9'
-
 services:
   go-migrate:
     build:
@@ -48,6 +46,7 @@ services:
     restart: unless-stopped
     volumes:
       - ./backend/main:/app
+      - secrets:/secrets:ro
     networks:
       - internal_net
     depends_on:
@@ -55,6 +54,9 @@ services:
         condition: service_healthy
       go-migrate:
         condition: service_started
+      security-svc:
+        condition: service_completed_successfully
+
 
   uta-processor:
     build:
@@ -76,6 +78,9 @@ services:
         condition: service_healthy
       go-migrate:
         condition: service_started
+      security-svc:
+        condition: service_completed_successfully
+
 
   frontend:
     build:
@@ -88,7 +93,9 @@ services:
       - internal_net
 
   nginx:
-    build: ./nginx
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile.dev
     depends_on:
       - backend
       - frontend
@@ -116,11 +123,22 @@ services:
         condition: service_healthy
       go-migrate:
         condition: service_started
+      security-svc:
+        condition: service_completed_successfully
+
     networks:
       - internal_net
 
+  security-svc:
+    build:
+      context: ./security-svc
+      dockerfile: Dockerfile
+    volumes:
+      - secrets:/secrets:rw
+
 volumes:
   postgres_storage:
+  secrets:
 
 networks:
   internal_net:
