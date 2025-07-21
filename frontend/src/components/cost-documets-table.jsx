@@ -55,49 +55,29 @@ import {
 import { useState } from "react";
 import { useCostDocumentsDataContext } from "@/state/cost-documents-data-context";
 import { Spinner } from "./spinner";
+import { formatDateTime } from "@/formatting/date";
+import { StatusBadge } from "./ui/status-badge";
 
 const documentTypes = {
-  uta: [{ value: "cost_breakdown", label: "Zestawienie kosztów" }],
-  gastruck: [
-    { value: "cars_invoice", label: "Faktura z podziałem na pojazdy" },
-  ],
+  uta: {
+    name: "UTA",
+    types: [
+      {
+        value: "cost_breakdown",
+        label: "Zestawienie kosztów",
+      },
+    ],
+  },
+  gastruck: {
+    name: "GasTruck",
+    types: [
+      {
+        value: "cars_invoice",
+        label: "Faktura z podziałem na pojazdy",
+      },
+    ],
+  },
 };
-
-const renderStatus = (status) => {
-  if (status === "added") {
-    return (
-      <>
-        <IconCircleCheckFilled className="fill-green-500 dark:fill-green-400 w-8" />{" "}
-        Dodany
-      </>
-    );
-  } else if (status === "withdrawn") {
-    return (
-      <>
-        <IconCircleXFilled className="fill-red-700" /> Wycofany
-      </>
-    );
-  } else if (status === "incorrect") {
-    return (
-      <>
-        <IconAlertTriangleFilled className="fill-amber-600" />
-        Nieprawidłowy
-      </>
-    );
-  }
-};
-
-function formatDateTime(jsonDate) {
-  const dateObject = new Date(jsonDate);
-
-  const day = String(dateObject.getDate()).padStart(2, "0");
-  const month = String(dateObject.getMonth() + 1).padStart(2, "0");
-  const year = dateObject.getFullYear();
-  const hours = String(dateObject.getHours()).padStart(2, "0");
-  const minutes = String(dateObject.getMinutes()).padStart(2, "0");
-
-  return `${day}.${month}.${year} ${hours}:${minutes}`;
-}
 
 const columns = [
   {
@@ -123,11 +103,7 @@ const columns = [
   {
     accessorKey: "Status",
     header: "Status",
-    cell: ({ row }) => (
-      <Badge variant="outline" className="px-1.5 text-muted-foreground">
-        {renderStatus(row.original.status)}
-      </Badge>
-    ),
+    cell: ({ row }) => <StatusBadge status={row.original.status} />,
   },
   {
     accessorKey: "Liczba kosztów",
@@ -197,7 +173,7 @@ function Row({ row }) {
 
 export function CostDocumentsTable() {
   // TODO: If empty rerenders into oblivion
-  const { data, loading, error } = useCostDocumentsDataContext(); // TODO: Make error
+  const { data, loading, error, refetchData } = useCostDocumentsDataContext(); // TODO: Make error
 
   const [columnVisibility, setColumnVisibility] = useState({});
   const [pagination, setPagination] = useState({
@@ -268,6 +244,7 @@ export function CostDocumentsTable() {
             title="Dodaj dokument kosztowy"
             description="Dodaj znane dokumenty, aby zautomatyzować rejestrację kosztów"
             documentTypes={documentTypes}
+            refetchData={refetchData}
           ></AddDocumentDrawer>
         </div>
       </div>

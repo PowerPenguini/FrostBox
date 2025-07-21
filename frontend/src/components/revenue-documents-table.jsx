@@ -1,18 +1,19 @@
 "use client";
 
 import * as React from "react";
+import { AddDocumentDrawer } from "@/components/add-document-drawer";
+import { formatDateTime } from "@/formatting/date";
 import {
   IconChevronDown,
   IconChevronLeft,
   IconChevronRight,
   IconChevronsLeft,
   IconChevronsRight,
+  IconCircleCheckFilled,
   IconDotsVertical,
   IconLayoutColumns,
-  IconPlus,
-  IconRoad,
-  IconGasStation,
-  IconDropletPlus,
+  IconCircleXFilled,
+  IconAlertTriangleFilled,
 } from "@tabler/icons-react";
 import {
   flexRender,
@@ -25,13 +26,14 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
@@ -53,48 +55,62 @@ import {
 } from "@/components/ui/table";
 import { useState } from "react";
 import { Spinner } from "./spinner";
-import { AddRevenueDrawer } from "@/components/add-revenue-drawer";
-import { formatDate } from "@/formatting/date";
-import { useRevenuesDataContext } from "@/state/revenues-data-context";
+import { useRevenueDocumentsDataContext } from "@/state/revenues-documents-data-context";
+import { StatusBadge } from "./ui/status-badge";
+const documentTypes = {
+  cargolink: {
+    name: "CargoLink",
+    types: [
+      { value: "income_report", label: "Raport przychodów" }
+    ]
+  },
+};
 
 const columns = [
   {
-    accessorKey: "Tytuł",
-    header: "Tytuł",
-    cell: ({ row }) => row.original.title,
+    accessorKey: "ID",
+    header: "ID dokumentu",
+    cell: ({ row }) => {
+      return <div className="w-32 text-foreground">{row.original.id}</div>;
+    },
     enableHiding: false,
   },
+
   {
-    accessorKey: "Kwota",
-    header: "Kwota netto",
+    accessorKey: "Źródło",
+    header: "Źródło",
     cell: ({ row }) => (
-      <div className="text-right">{row.original.value} zł</div>
+      <div className="w-32">
+        <Badge variant="outline" className="px-1.5 text-muted-foreground">
+          {row.original.source}
+        </Badge>
+      </div>
     ),
   },
   {
-    accessorKey: "Kwota VAT",
-    header: "Kwota VAT",
-    cell: ({ row }) => (
-      <div className="text-right">{row.original.vat_value} zł</div>
-    ),
+    accessorKey: "Status",
+    header: "Status",
+    cell: ({ row }) => <StatusBadge status={row.original.status} />,
   },
   {
-    accessorKey: "Stawka VAT",
-    header: "Stawka VAT",
+    accessorKey: "Liczba przychodów",
+    header: () => <div className="w-full">Liczba przychodów</div>,
     cell: ({ row }) => (
-      <div className="text-right">{row.original.vat_rate}%</div>
-    ),
+      <div className="w-full">{row.original.costs_number}</div>
+    ), // TODO: maybe cost_quantity?
   },
   {
-    accessorKey: "ID Dokumentu",
-    header: () => <div className="w-full">ID Dokumentu</div>,
-    cell: ({ row }) => <div className="w-full">{row.original.document_id}</div>,
+    accessorKey: "Dodał/a",
+    header: "Dodał/a",
+    cell: ({ row }) => {
+      return row.original.owner;
+    },
   },
   {
-    accessorKey: "Data przychodu",
-    header: "Data przychodu",
+    accessorKey: "Data dodania",
+    header: "Data dodania",
     cell: ({ row }) => (
-      <div className="w-32">{formatDate(row.original.revenue_date)}</div>
+      <div className="w-32">{formatDateTime(row.original.created_at)}</div>
     ),
   },
   {
@@ -112,7 +128,18 @@ const columns = [
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-32">
-          <DropdownMenuItem variant="destructive">Wycofaj</DropdownMenuItem>
+          {row.original.status === "incorrect" ? (
+            <>
+              <DropdownMenuItem>Popraw</DropdownMenuItem>{" "}
+              <DropdownMenuSeparator />
+            </>
+          ) : null}
+
+          {row.original.status === "withdrawn" ? (
+            <DropdownMenuItem variant="destructive">Ukryj</DropdownMenuItem>
+          ) : (
+            <DropdownMenuItem variant="destructive">Wycofaj</DropdownMenuItem>
+          )}
         </DropdownMenuContent>
       </DropdownMenu>
     ),
@@ -131,16 +158,20 @@ function Row({ row }) {
   );
 }
 
-export function RevenuesTable() {
-  const { data, loading, error } = useRevenuesDataContext(); // TODO: Make error
+export function RevenueDocumentsTable() {
+  // TODO: If empty rerenders into oblivion
+  const { data, loading, refetchData, error } =
+    useRevenueDocumentsDataContext(); // TODO: Make error
+
   const [columnVisibility, setColumnVisibility] = useState({});
   const [pagination, setPagination] = useState({
     pageIndex: 0,
     pageSize: 10,
   });
+
   const table = useReactTable({
-    data: data || [],
-    columns,
+    data: data,
+    columns: columns,
     state: {
       columnVisibility,
       pagination,
@@ -197,7 +228,12 @@ export function RevenuesTable() {
                 })}
             </DropdownMenuContent>
           </DropdownMenu>
-          <AddRevenueDrawer></AddRevenueDrawer>
+          <AddDocumentDrawer
+            title="Dodaj dokument przychodowy"
+            description="Dodaj znane przychodowe, aby ocenić rentonwność Twojej firmy."
+            documentTypes={documentTypes}
+            refetchData={refetchData}
+          ></AddDocumentDrawer>
         </div>
       </div>
 
@@ -241,7 +277,7 @@ export function RevenuesTable() {
                   colSpan={columns.length}
                   className="h-24 text-center"
                 >
-                  Nie znaleziono przychodów.
+                  Nie znaleziono dokumentów.
                 </TableCell>
               </TableRow>
             )}

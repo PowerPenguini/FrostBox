@@ -4,3 +4,4 @@ __pycache__/
 *.pyc
 tmp
 prod.tar.gz
+__pycache__

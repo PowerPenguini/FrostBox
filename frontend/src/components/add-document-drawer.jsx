@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { useCostDocumentsDataContext } from "@/state/cost-documents-data-context";
 import { toast } from "sonner";
 import {
   Drawer,
@@ -25,8 +24,12 @@ import {
 import { Input } from "./ui/input";
 import { ErrorText } from "@/components/error-text";
 
-export function AddDocumentDrawer( {title, description, documentTypes} ) {
-  const { refetchData } = useCostDocumentsDataContext();
+export function AddDocumentDrawer({
+  title,
+  description,
+  documentTypes,
+  refetchData,
+}) {
   const [open, setOpen] = useState(false);
   const [error, setError] = useState("");
   const [source, setSource] = useState("");
@@ -98,9 +101,7 @@ export function AddDocumentDrawer( {title, description, documentTypes} ) {
       <DrawerContent>
         <DrawerHeader className="gap-1">
           <DrawerTitle>{title}</DrawerTitle>
-          <DrawerDescription>
-            {description}
-          </DrawerDescription>
+          <DrawerDescription>{description}</DrawerDescription>
         </DrawerHeader>
         <div className="flex flex-col gap-4 overflow-y-auto text-sm">
           <form
@@ -121,8 +122,11 @@ export function AddDocumentDrawer( {title, description, documentTypes} ) {
                   <SelectValue placeholder="Wybierz źródło" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="uta">UTA</SelectItem>
-                  <SelectItem value="gastruck">GasTruck</SelectItem>
+                  {Object.entries(documentTypes).map(([key, provider]) => (
+                    <SelectItem key={key} value={key}>
+                      {provider.name}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
               <Label htmlFor="type">Typ dokumentu</Label>
@@ -135,7 +139,7 @@ export function AddDocumentDrawer( {title, description, documentTypes} ) {
                 </SelectTrigger>
                 <SelectContent>
                   {source &&
-                    documentTypes[source].map((option) => (
+                    documentTypes[source].types.map((option) => (
                       <SelectItem key={option.value} value={option.value}>
                         {option.label}
                       </SelectItem>
@@ -153,7 +157,9 @@ export function AddDocumentDrawer( {title, description, documentTypes} ) {
             Dodaj
           </Button>
           <DrawerClose asChild>
-            <Button variant="outline" onChange={handleFileChange}>Anuluj</Button>
+            <Button variant="outline" onChange={handleFileChange}>
+              Anuluj
+            </Button>
           </DrawerClose>
         </DrawerFooter>
       </DrawerContent>

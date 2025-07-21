@@ -22,6 +22,7 @@ type DI struct {
 	UserViewer     *views.UserViewer
 	AuthViewer     *views.AuthViewer
 	CostViewer     *views.CostViewer
+	RevenueViewer  *views.RevenueViewer
 	IntervalViewer *views.IntervalViewer
 	EventViewer    *views.EventViewer
 	NBPService     *services.NBPService
@@ -67,6 +68,7 @@ func NewDI(connStr string) (*DI, error) {
 		UserViewer:     views.NewUserViewer(db),
 		AuthViewer:     views.NewAuthViewer(db),
 		CostViewer:     views.NewCostViewer(db),
+		RevenueViewer:  views.NewRevenueViewer(db),
 		IntervalViewer: views.NewIntervalViewer(db),
 		EventViewer:    views.NewEventViewer(db),
 		NBPService:     services.NewNBPService(),

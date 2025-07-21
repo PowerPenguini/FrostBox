@@ -1,9 +1,7 @@
-
-
 import random
 import string
 import uuid
-from sqlalchemy import text 
+from sqlalchemy import text
 
 
 def generate_id(length):
@@ -11,15 +9,15 @@ def generate_id(length):
     return "".join(random.choice(characters) for _ in range(length))
 
 
-def add_document(session, source):
+def add_document(session, source, type):
     document_uuid = uuid.uuid4()
     readable_id = generate_id(8)
 
     session.execute(
         text(
             """
-            INSERT INTO documents (id, readable_id, status, source)
-            VALUES (:id, :readable_id, :status, :source);
+            INSERT INTO documents (id, readable_id, status, source, type)
+            VALUES (:id, :readable_id, :status, :source, :type);
             """
         ),
         {
@@ -27,6 +25,7 @@ def add_document(session, source):
             "readable_id": readable_id,
             "status": "added",
             "source": source,
+            "type": type,
         },
     )
     return document_uuid

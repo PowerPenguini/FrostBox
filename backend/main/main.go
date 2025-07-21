@@ -40,6 +40,7 @@ func main() {
 	documentsHandler := handlers.NewDocumentsHandler(di)
 	vehiclesHandler := handlers.NewVehiclesHandler(di)
 	costsHandler := handlers.NewCostsHandler(di)
+	revenuesHandler := handlers.NewRevenuesHandler(di)
 	usersHandler := handlers.NewUsersHandler(di)
 	intervalsHandler := handlers.NewIntervalsHandler(di)
 	eventsHandler := handlers.NewEventsHandler(di)
@@ -49,6 +50,7 @@ func main() {
 	mux.HandleFunc("GET /vehicles", middleware.AuthMiddleware(di, vehiclesHandler.GetVehicles))
 	mux.HandleFunc("POST /vehicles", middleware.AuthMiddleware(di, vehiclesHandler.PostVehicles))
 	mux.HandleFunc("GET /vehicles/available", middleware.AuthMiddleware(di, vehiclesHandler.GetVehiclesAvailable))
+	mux.HandleFunc("GET /vehicles/{vehicle_id}/tolls", middleware.AuthMiddleware(di, vehiclesHandler.GetVehicleTolls))
 	mux.HandleFunc("GET /vehicles/{vehicle_id}/intervals", middleware.AuthMiddleware(di, intervalsHandler.GetIntervals))
 	mux.HandleFunc("GET /vehicles/{vehicle_id}/events", middleware.AuthMiddleware(di, eventsHandler.GetEventsByVehicle))
 	mux.HandleFunc("POST /vehicles/{vehicle_id}/events", middleware.AuthMiddleware(di, eventsHandler.PostEventsByVehicle))
@@ -61,13 +63,17 @@ func main() {
 	mux.HandleFunc("POST /costs", middleware.AuthMiddleware(di, costsHandler.PostCosts))
 	mux.HandleFunc("GET /costs/categories", middleware.AuthMiddleware(di, costsHandler.GetCostsCategories))
 
+	// --- Revenues ---
+	mux.HandleFunc("GET /revenues", middleware.AuthMiddleware(di, revenuesHandler.GetRevenues))
+
 	// --- Users ---
 	mux.HandleFunc("GET /users", middleware.AuthMiddleware(di, usersHandler.GetUsers))
 	mux.HandleFunc("POST /users", middleware.AuthMiddleware(di, usersHandler.PostUsers))
 	mux.HandleFunc("GET /users/roles", middleware.AuthMiddleware(di, usersHandler.GetUsersRoles))
 
 	// --- Documents ---
-	mux.HandleFunc("GET /documents/cost", middleware.AuthMiddleware(di, documentsHandler.GetDocuments))
+	mux.HandleFunc("GET /documents/cost", middleware.AuthMiddleware(di, documentsHandler.GetCostDocuments))
+	mux.HandleFunc("GET /documents/revenue", middleware.AuthMiddleware(di, documentsHandler.GetRevenueDocuments))
 
 	// --- Auth ---
 	mux.HandleFunc("POST /auth/token", authHandler.PostToken)

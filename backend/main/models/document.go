@@ -7,17 +7,24 @@ import (
 )
 
 type DocumentStatus string
+type DocumentType string
 
 const (
-	Withdrawn UserRole = "withdrawn"
-	Added     UserRole = "added"
-	Incorrect UserRole = "incorrect"
+	StatusWithdrawn DocumentStatus = "withdrawn"
+	StatusAdded     DocumentStatus = "added"
+	StatusIncorrect DocumentStatus = "incorrect"
+)
+
+const (
+	TypeRevenue DocumentType = "revenue"
+	TypeCost    DocumentType = "cost"
 )
 
 type Document struct {
 	ID         uuid.UUID
 	ReadableID string
 	Status     DocumentStatus
+	Type       DocumentType
 	Source     string
 	CreatedBy  uuid.UUID
 	CreatedAt  time.Time

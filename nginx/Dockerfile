@@ -11,5 +11,3 @@ RUN chmod +x /reload.sh
 EXPOSE 80
 
 CMD ["/reload.sh"]
-
-

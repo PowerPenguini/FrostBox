@@ -1,6 +1,6 @@
 "use client";
 
-import { CalendarIcon } from "lucide-react";
+import { IconCalendar } from "@tabler/icons-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
@@ -22,8 +22,12 @@ export function DatePickerPopover({ text, value, onChange }) {
             !value && "text-muted-foreground"
           )}
         >
-          <CalendarIcon className="mr-2 w-4 h-4" />
-          {value ? formatDate(value) : <span> {text || "Wybierz datę..."}</span>}
+          <IconCalendar className="mr-2 w-4 h-4" />
+          {value ? (
+            formatDate(value)
+          ) : (
+            <span> {text || "Wybierz datę..."}</span>
+          )}
         </Button>
       </PopoverTrigger>
       <PopoverContent className="p-0 w-auto" align="start">

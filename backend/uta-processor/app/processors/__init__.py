@@ -1,0 +1,4 @@
+from app.processors.uta import UTACostBreakdownProcessor
+from app.processors.gastruck import GasTruckInvoiceProcessor
+from app.processors.cargolink import CargoLinkIncomeReportProcessor
+from app.processors.base_file_processor import BaseFileProcessor

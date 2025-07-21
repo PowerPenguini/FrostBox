@@ -7,6 +7,7 @@ import (
 	"frostbox/di"
 	"frostbox/errs"
 	"frostbox/logic"
+	"log"
 	"net/http"
 )
 
@@ -20,6 +21,49 @@ func NewVehiclesHandler(di *di.DI) *VehiclesHandler {
 
 func (h *VehiclesHandler) GetVehicles(w http.ResponseWriter, r *http.Request) {
 	response, err := h.di.VehicleViewer.GetVehicles()
+	if err != nil {
+		http.Error(w, "Failed to fetch", http.StatusInternalServerError)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(response)
+}
+
+func (h *VehiclesHandler) GetVehicleStatistics(w http.ResponseWriter, r *http.Request) {
+	vehicleID, err := parseVehicleID(w, r)
+	if err != nil {
+		return
+	}
+
+	startDate, endDate, err := parseDateRange(r)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	response, err := h.di.VehicleViewer.GetVehicleStatistics(vehicleID, startDate, endDate)
+	if err != nil {
+		http.Error(w, "Failed to fetch", http.StatusInternalServerError)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(response)
+}
+
+func (h *VehiclesHandler) GetVehicleTolls(w http.ResponseWriter, r *http.Request) {
+	vehicleID, err := parseVehicleID(w, r)
+	if err != nil {
+		return
+	}
+
+	startDate, endDate, err := parseDateRange(r)
+	if err != nil {
+		log.Println(err)
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	response, err := h.di.VehicleViewer.GetVehiclesTolls(vehicleID, startDate, endDate)
 	if err != nil {
 		http.Error(w, "Failed to fetch", http.StatusInternalServerError)
 		return

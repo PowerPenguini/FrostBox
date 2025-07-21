@@ -12,8 +12,6 @@ import { IconPlus } from "@tabler/icons-react";
 import { Button } from "@/components/ui/button";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useState } from "react";
-import { VehiclesCombox } from "./vehicles-combox";
-import { useCostsDataContext } from "@/state/costs-data-context";
 import { Label } from "./ui/label";
 import { Input } from "./ui/input";
 import { CurrencyCombox } from "./currency-combox";
@@ -21,9 +19,11 @@ import { toast } from "sonner";
 import { useAuthContext } from "@/state/auth-context";
 import { DatePickerPopover } from "@/components/ui/date-picker-popover";
 import { ErrorText } from "@/components/error-text";
+import { useRevenuesDataContext } from "@/state/revenues-data-context";
+import { VehiclesCombox } from "./vehicles-combox";
 
 export function AddRevenueDrawer() {
-  const { refetchData } = useCostsDataContext();
+  const { refetchData } = useRevenuesDataContext();
   const [open, setOpen] = useState(false);
   const [error, setError] = useState("");
   const isMobile = useIsMobile();

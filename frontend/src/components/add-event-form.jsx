@@ -53,6 +53,7 @@ export function AddEventForm({ vehicleId, fetchEvents, setShowForm }) {
       setError("Wypełnij wszystkie wymagane pola.");
       return;
     }
+    setError("");
     
 
     const payload = {
@@ -227,6 +228,8 @@ export function AddEventForm({ vehicleId, fetchEvents, setShowForm }) {
                   e.preventDefault();
                   if (isStep1Valid()) {
                     setFormStep(formStep + 1);
+                    console.log("valid")
+                    setError("")
                   } else {
                     setError("Wypełnij wszystkie wymagane pola.");
                   }

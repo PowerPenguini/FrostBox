@@ -21,13 +21,10 @@ func NewEventsHandler(di *di.DI) *EventsHandler {
 }
 
 func (h *EventsHandler) GetEventsByVehicle(w http.ResponseWriter, r *http.Request) {
-	vehicleIDStr := r.PathValue("vehicle_id")
-	vehicleID, err := uuid.Parse(vehicleIDStr)
+	vehicleID, err := parseVehicleID(w, r)
 	if err != nil {
-		errs.WriteError(w, errs.NewError("invalid_vehicle_id", "Vehicle ID is not a valid UUID", errs.ValidationType, err))
 		return
 	}
-
 	response, err := h.di.EventViewer.GetEventsByVehicle(vehicleID)
 	if err != nil {
 		errs.WriteError(w, err)
