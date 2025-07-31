@@ -45,18 +45,24 @@ func main() {
 	intervalsHandler := handlers.NewIntervalsHandler(di)
 	eventsHandler := handlers.NewEventsHandler(di)
 	authHandler := handlers.NewAuthHandler(di)
+	enventsTypesHandler := handlers.NewEventsTypesHandler(di)
 
 	// --- Vehicles ---
 	mux.HandleFunc("GET /vehicles", middleware.AuthMiddleware(di, vehiclesHandler.GetVehicles))
 	mux.HandleFunc("POST /vehicles", middleware.AuthMiddleware(di, vehiclesHandler.PostVehicles))
 	mux.HandleFunc("GET /vehicles/available", middleware.AuthMiddleware(di, vehiclesHandler.GetVehiclesAvailable))
 	mux.HandleFunc("GET /vehicles/{vehicle_id}/tolls", middleware.AuthMiddleware(di, vehiclesHandler.GetVehicleTolls))
+	mux.HandleFunc("GET /vehicles/{vehicle_id}/profitability", middleware.AuthMiddleware(di, vehiclesHandler.GetVehicleProfitability))
+	mux.HandleFunc("GET /vehicles/{vehicle_id}/fuel", middleware.AuthMiddleware(di, vehiclesHandler.GetVehicleFuel))
 	mux.HandleFunc("GET /vehicles/{vehicle_id}/intervals", middleware.AuthMiddleware(di, intervalsHandler.GetIntervals))
+
+	// --- Events ---
 	mux.HandleFunc("GET /vehicles/{vehicle_id}/events", middleware.AuthMiddleware(di, eventsHandler.GetEventsByVehicle))
 	mux.HandleFunc("POST /vehicles/{vehicle_id}/events", middleware.AuthMiddleware(di, eventsHandler.PostEventsByVehicle))
 
-	// --- Events ---
-	mux.HandleFunc("GET /events/types", middleware.AuthMiddleware(di, eventsHandler.GetEventsTypes))
+	// -- Eevents Types --
+	mux.HandleFunc("GET /events/types", middleware.AuthMiddleware(di, enventsTypesHandler.GetEventsTypes))
+	mux.HandleFunc("GET /events/types/categories", middleware.AuthMiddleware(di, enventsTypesHandler.GetEventsTypesCategories))
 
 	// --- Costs ---
 	mux.HandleFunc("GET /costs", middleware.AuthMiddleware(di, costsHandler.GetCosts))

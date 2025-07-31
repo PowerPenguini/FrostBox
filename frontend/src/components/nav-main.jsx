@@ -18,15 +18,15 @@ export function NavMain({ items }) {
         <SidebarMenu>
           <SidebarMenuItem className="flex items-center gap-2">
             <SidebarMenuButton
-              tooltip="Quick Create"
-              className="bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground active:bg-primary/90 active:text-primary-foreground min-w-8 duration-200 ease-linear"
+              tooltip="Dodaj fracht"
+              className="bg-primary hover:bg-primary/90 active:bg-primary/90 min-w-8 text-primary-foreground hover:text-primary-foreground active:text-primary-foreground duration-200 ease-linear"
             >
               <IconCirclePlusFilled />
-              <span>Quick Create</span>
+              <span>Dodaj fracht</span>
             </SidebarMenuButton>
             <Button
               size="icon"
-              className="size-8 group-data-[collapsible=icon]:opacity-0"
+              className="group-data-[collapsible=icon]:opacity-0 size-8"
               variant="outline"
             >
               <IconMail />

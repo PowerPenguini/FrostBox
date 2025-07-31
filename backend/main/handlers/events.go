@@ -37,19 +37,6 @@ func (h *EventsHandler) GetEventsByVehicle(w http.ResponseWriter, r *http.Reques
 	_ = json.NewEncoder(w).Encode(response)
 }
 
-func (h *EventsHandler) GetEventsTypes(w http.ResponseWriter, r *http.Request) {
-	response, err := h.di.EventViewer.GetEventsTypes()
-	if err != nil {
-		errs.WriteError(w, err)
-		return
-	}
-	if response == nil {
-		response = contract.GetEventsTypes{}
-	}
-	w.Header().Set("Content-Type", "application/json")
-	_ = json.NewEncoder(w).Encode(response)
-}
-
 func (h *EventsHandler) PostEventsByVehicle(w http.ResponseWriter, r *http.Request) {
 	vehicleID, err := uuid.Parse(r.PathValue("vehicle_id"))
 	if err != nil {

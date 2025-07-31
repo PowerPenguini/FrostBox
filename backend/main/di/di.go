@@ -11,23 +11,24 @@ import (
 )
 
 type DI struct {
-	UserRepo       *repos.UserRepo
-	DocumentRepo   *repos.DocumentRepo
-	CostRepo       *repos.CostRepo
-	VehicleRepo    *repos.VehicleRepo
-	EventTypeRepo  *repos.EventTypeRepo
-	EventRepo      *repos.EventRepo
-	DocumentViewer *views.DocumentViewer
-	VehicleViewer  *views.VehicleViewer
-	UserViewer     *views.UserViewer
-	AuthViewer     *views.AuthViewer
-	CostViewer     *views.CostViewer
-	RevenueViewer  *views.RevenueViewer
-	IntervalViewer *views.IntervalViewer
-	EventViewer    *views.EventViewer
-	NBPService     *services.NBPService
-	EventValidator *validators.EventValidator
-	CostValidator  *validators.CostValidator
+	UserRepo        *repos.UserRepo
+	DocumentRepo    *repos.DocumentRepo
+	CostRepo        *repos.CostRepo
+	VehicleRepo     *repos.VehicleRepo
+	EventTypeRepo   *repos.EventTypeRepo
+	EventRepo       *repos.EventRepo
+	DocumentViewer  *views.DocumentViewer
+	VehicleViewer   *views.VehicleViewer
+	UserViewer      *views.UserViewer
+	AuthViewer      *views.AuthViewer
+	CostViewer      *views.CostViewer
+	RevenueViewer   *views.RevenueViewer
+	IntervalViewer  *views.IntervalViewer
+	EventViewer     *views.EventViewer
+	EventTypeViewer *views.EventTypeViewer
+	NBPService      *services.NBPService
+	EventValidator  *validators.EventValidator
+	CostValidator   *validators.CostValidator
 }
 
 func NewDatabase(connStr string) (*sql.DB, error) {
@@ -57,20 +58,21 @@ func NewDI(connStr string) (*DI, error) {
 	eventValidator := validators.NewEventValidator(vehicleRepo, costRepo, eventRepo, eventTypeRepo)
 
 	return &DI{
-		UserRepo:       repos.NewUserRepo(db),
-		VehicleRepo:    vehicleRepo,
-		CostRepo:       costRepo,
-		EventRepo:      eventRepo,
-		EventTypeRepo:  eventTypeRepo,
-		EventValidator: eventValidator,
-		DocumentViewer: views.NewDocumentViewer(db),
-		VehicleViewer:  views.NewVehicleViewer(db),
-		UserViewer:     views.NewUserViewer(db),
-		AuthViewer:     views.NewAuthViewer(db),
-		CostViewer:     views.NewCostViewer(db),
-		RevenueViewer:  views.NewRevenueViewer(db),
-		IntervalViewer: views.NewIntervalViewer(db),
-		EventViewer:    views.NewEventViewer(db),
-		NBPService:     services.NewNBPService(),
+		UserRepo:        repos.NewUserRepo(db),
+		VehicleRepo:     vehicleRepo,
+		CostRepo:        costRepo,
+		EventRepo:       eventRepo,
+		EventTypeRepo:   eventTypeRepo,
+		EventValidator:  eventValidator,
+		DocumentViewer:  views.NewDocumentViewer(db),
+		VehicleViewer:   views.NewVehicleViewer(db),
+		UserViewer:      views.NewUserViewer(db),
+		AuthViewer:      views.NewAuthViewer(db),
+		CostViewer:      views.NewCostViewer(db),
+		RevenueViewer:   views.NewRevenueViewer(db),
+		IntervalViewer:  views.NewIntervalViewer(db),
+		EventViewer:     views.NewEventViewer(db),
+		EventTypeViewer: views.NewEventTypeViewer(db),
+		NBPService:      services.NewNBPService(),
 	}, nil
 }

@@ -16,12 +16,12 @@ VALUES
     ('55555555-5555-5555-5555-555555555555', 'Volvo', 'FH Aero', '5N1AR2MN8FC123456', 'WGM6482H', 'semitruck')
 ON CONFLICT (registration_number) DO NOTHING;
 
-INSERT INTO event_types (id, name, default_cost_category)
+INSERT INTO event_types (id, name, category, system)
 VALUES
-    ('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', 'Przegląd techniczny', 'service'),
-    ('bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 'Serwis olejowy', 'service'),
-    ('cccccccc-cccc-cccc-cccc-cccccccccccc', 'Kolizja', 'service')
-    ('dddddddd-dddd-dddd-dddd-dddddddddddd', '', 'service')
+    ('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', 'Przegląd techniczny', 'service', TRUE),
+    ('bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 'Serwis olejowy', 'service', TRUE),
+    ('cccccccc-cccc-cccc-cccc-cccccccccccc', 'Kolizja', 'service', TRUE),
+    ('dddddddd-dddd-dddd-dddd-dddddddddddd', 'ASDF', 'service', FALSE)
 ON CONFLICT (id) DO NOTHING;
 
 INSERT INTO event_intervals (id, vehicle_id, event_type_id, distance_interval_km, time_interval, warning_offset)

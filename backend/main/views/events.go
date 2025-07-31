@@ -61,7 +61,7 @@ func (r *EventViewer) GetEventsByVehicle(vehicleID uuid.UUID) (contract.GetEvent
 
 func (r *EventViewer) GetEventsTypes() (contract.GetEventsTypes, error) {
 	query := `
-		SELECT id, name FROM event_types;
+		SELECT id, name, category, system FROM event_types;
     `
 
 	rows, err := r.db.Query(query)
@@ -77,6 +77,8 @@ func (r *EventViewer) GetEventsTypes() (contract.GetEventsTypes, error) {
 		err := rows.Scan(
 			&e.ID,
 			&e.Name,
+			&e.Category,
+			&e.System,
 		)
 		if err != nil {
 			return nil, err

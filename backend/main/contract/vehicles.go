@@ -58,9 +58,38 @@ type GetVehiclesTolls struct {
 	EfficiencyAfterToll   decimal.Decimal           `json:"efficiency_after_toll"`
 	AvgTollCost           decimal.Decimal           `json:"avg_toll_cost"`
 	RevenueAfterTolls     decimal.Decimal           `json:"revenue_after_tolls"`
+	TollsROI              decimal.Decimal           `json:"tolls_roi"`
 	CountryDistribution   map[string]CountryTollSum `json:"country_distribution"`
 }
 
 type GetVehicleStatistics struct {
 	TollCountryDistribution map[string]CountryTollSum `json:"toll_country_distribution"`
+}
+
+type GetVehicleProfitability struct {
+	TotalCost          string        `json:"total_cost"`
+	TotalRevenue       string        `json:"total_revenue"`
+	Profit             string        `json:"profit"`
+	ProfitabilityRatio AssessedValue `json:"profitability_ratio"`
+	ROI                string        `json:"roi"`
+}
+
+type GetVehiclesFuel struct {
+	VehicleID             uuid.UUID                 `json:"vehicle_id"`
+	Period                TollPeriod                `json:"period"`
+	TotalFuelMainCurrency decimal.Decimal           `json:"total_toll_main_currency"`
+	TotalFuelLiters       decimal.Decimal           `json:"total_fuel_liters"`
+	FuelPricePerLiter     decimal.Decimal           `json:"fuel_price_per_liter"`
+	FuelPercentInCost     decimal.Decimal           `json:"fuel_percent_in_cost"`
+	OperatingExpenseRatio decimal.Decimal           `json:"operating_expense_ratio"`
+	RevenuePerFuelUnit    decimal.Decimal           `json:"revenue_per_fuel_unit"`
+	EfficiencyAfterFuel   decimal.Decimal           `json:"efficiency_after_fuel"`
+	RevenueAfterFuel      decimal.Decimal           `json:"revenue_after_fuel"`
+	FuelROI               decimal.Decimal           `json:"fuel_roi"`
+	CountryDistribution   map[string]CountryTollSum `json:"country_distribution"`
+}
+
+type AssessedValue struct {
+	Rating int    `json:"rating"`
+	Value  string `json:"value"`
 }

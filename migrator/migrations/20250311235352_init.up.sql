@@ -10,6 +10,8 @@ CREATE TYPE cost_category AS ENUM ('fuel', 'additive', 'toll', 'service', 'other
 
 CREATE TYPE vehicle_type AS ENUM ('semitruck', 'semitrailer');
 
+CREATE TYPE event_type_category AS ENUM ('maintenance', 'service', 'administrative');
+
 CREATE TABLE
     users (
         id UUID PRIMARY KEY DEFAULT uuid_generate_v4 (),
@@ -87,12 +89,13 @@ CREATE TABLE
 
 -- TODO: Add settlement date
 
-CREATE TABLE
-    event_types (
-        id UUID PRIMARY KEY DEFAULT uuid_generate_v4 (),
-        name TEXT NOT NULL,
-        default_cost_category cost_category NOT NULL -- max counter unitl waringing/ reccesive type - 
-    );
+CREATE TABLE event_types (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    name TEXT NOT NULL,
+    category event_type_category NOT NULL,
+    system BOOLEAN NOT NULL DEFAULT FALSE
+    -- default_cost_category cost_category NOT NULL
+);
 
 CREATE TABLE
     event_intervals (

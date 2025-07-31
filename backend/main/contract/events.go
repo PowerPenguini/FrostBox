@@ -8,18 +8,11 @@ import (
 
 type GetEventsResponse []GetEvent
 
-type GetEventsTypes []EventType
-
 type GetEvent struct {
 	ID        uuid.UUID `json:"id"`
 	EventType string    `json:"event_type"`
 	EventDate time.Time `json:"date"`
 	Mileage   *int      `json:"mileage"`
-}
-
-type EventType struct {
-	ID   uuid.UUID `json:"id"`
-	Name string    `json:"name"`
 }
 
 type PostVehicleEventRequest struct {

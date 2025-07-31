@@ -180,29 +180,32 @@ func (v *VehicleViewer) GetVehiclesTolls(vehicleID uuid.UUID, startDate, endDate
 		WITH 
 			totals AS (
 				SELECT 
-					SUM(CASE WHEN category = 'toll' THEN value_main_currency ELSE 0 END) AS total_toll,
-					COUNT(CASE WHEN category = 'toll' THEN 1 END) AS toll_count,
-					SUM(value_main_currency) AS total_costs
+					COALESCE(SUM(CASE WHEN category = 'toll' THEN value_main_currency ELSE 0 END), 0) AS total_toll,
+					COALESCE(COUNT(CASE WHEN category = 'toll' THEN 1 END), 0) AS toll_count,
+					COALESCE(SUM(value_main_currency), 0) AS total_costs
 				FROM costs
 				WHERE vehicle_id = $1
 				AND cost_date BETWEEN $2 AND $3
 			),
 			revenue_sum AS (
-				SELECT SUM(value_main_currency) AS total_revenue
+				SELECT COALESCE(SUM(value_main_currency), 0) AS total_revenue
 				FROM revenues
 				WHERE vehicle_id = $1
 				AND revenue_date BETWEEN $2 AND $3
 			)
 
 		SELECT
-			COALESCE(t.total_toll, 0) AS total_toll,
-			ROUND((COALESCE(t.total_toll, 0) / NULLIF(t.total_costs, 0)) * 100, 2) AS toll_percent_in_costs,
-			ROUND((COALESCE(t.total_toll, 0) / NULLIF(r.total_revenue, 0)) * 100, 2) AS toll_percent_in_revenue,
-			ROUND((COALESCE(r.total_revenue, 0) / NULLIF(t.total_toll, 0)), 2) AS revenue_per_toll_unit,
-			ROUND(r.total_revenue - COALESCE(t.total_toll, 0), 2) AS revenue_minus_toll,
-			ROUND(((r.total_revenue - COALESCE(t.total_toll, 0)) / NULLIF(r.total_revenue, 0)) * 100, 2) AS efficiency_after_toll,
-			ROUND(COALESCE(t.total_toll, 0) / NULLIF(t.toll_count, 0), 2) AS avg_toll_cost
-		FROM totals t, revenue_sum r;
+			t.total_toll,
+			COALESCE(ROUND(t.total_toll / NULLIF(t.total_costs, 0) * 100, 2), 0) AS toll_percent_in_costs,
+			COALESCE(ROUND(t.total_toll / NULLIF(r.total_revenue, 0) * 100, 2), 0) AS toll_percent_in_revenue,
+			COALESCE(ROUND(r.total_revenue / NULLIF(t.total_toll, 0), 2), 0) AS revenue_per_toll_unit,
+			COALESCE(ROUND(r.total_revenue - t.total_toll, 2), 0) AS revenue_minus_toll,
+			COALESCE(ROUND((r.total_revenue - t.total_toll) / NULLIF(r.total_revenue, 0) * 100, 2), 0) AS efficiency_after_toll,
+			COALESCE(ROUND(t.total_toll / NULLIF(t.toll_count, 0), 2), 0) AS avg_toll_cost,
+			COALESCE(ROUND((r.total_revenue - t.total_toll) / NULLIF(t.total_toll, 0) * 100, 2), 0) AS roi_toll_only
+		FROM totals t
+		LEFT JOIN revenue_sum r ON TRUE;
+
 	`
 
 	const byCountryQuery = `
@@ -240,6 +243,7 @@ func (v *VehicleViewer) GetVehiclesTolls(vehicleID uuid.UUID, startDate, endDate
 		&result.RevenueAfterTolls,
 		&result.EfficiencyAfterToll,
 		&result.AvgTollCost,
+		&result.TollsROI,
 	)
 	if err != nil {
 		return contract.GetVehiclesTolls{}, fmt.Errorf("scan stats: %w", err)
@@ -254,8 +258,7 @@ func (v *VehicleViewer) GetVehiclesTolls(vehicleID uuid.UUID, startDate, endDate
 	distribution := make(map[string]contract.CountryTollSum)
 	for rows.Next() {
 		var country string
-		var tollSum decimal.Decimal
-		var tollPercent decimal.Decimal
+		var tollSum, tollPercent decimal.Decimal
 		if err := rows.Scan(&country, &tollSum, &tollPercent); err != nil {
 			return contract.GetVehiclesTolls{}, fmt.Errorf("scan toll by country: %w", err)
 		}
@@ -274,4 +277,169 @@ func (v *VehicleViewer) GetVehiclesTolls(vehicleID uuid.UUID, startDate, endDate
 	result.CountryDistribution = distribution
 	result.TotalTollMainCurrency = result.TotalTollMainCurrency.RoundCeil(2)
 	return result, nil
+}
+
+func (v *VehicleViewer) GetVehiclesFuel(vehicleID uuid.UUID, startDate, endDate time.Time) (contract.GetVehiclesFuel, error) {
+	const statsQuery = `
+		WITH totals AS (
+			SELECT 
+				COALESCE(SUM(CASE WHEN category = 'fuel' THEN value_main_currency ELSE 0 END), 0) AS total_fuel_cost,
+				COALESCE(SUM(CASE WHEN category = 'fuel' THEN quantity ELSE 0 END), 0) AS total_fuel_quantity,
+				COALESCE(SUM(value_main_currency), 0) AS total_costs
+			FROM costs
+			WHERE vehicle_id = $1
+			AND cost_date BETWEEN $2 AND $3
+		),
+		revenue_sum AS (
+			SELECT COALESCE(SUM(value_main_currency), 0) AS total_revenue
+			FROM revenues
+			WHERE vehicle_id = $1
+			AND revenue_date BETWEEN $2 AND $3
+		)
+
+		SELECT
+			t.total_fuel_cost,
+			t.total_fuel_quantity,
+			COALESCE(ROUND(t.total_fuel_cost / NULLIF(t.total_costs, 0) * 100, 2), 0) AS fuel_percent_in_costs,
+			COALESCE(ROUND(t.total_fuel_cost / NULLIF(r.total_revenue, 0) * 100, 2), 0) AS operating_expense_ratio,
+			COALESCE(ROUND(r.total_revenue / NULLIF(t.total_fuel_quantity, 0), 2), 0) AS revenue_per_fuel_unit,
+			COALESCE(ROUND(r.total_revenue - t.total_fuel_cost, 2), 0) AS revenue_after_fuel,
+			COALESCE(ROUND((r.total_revenue - t.total_fuel_cost) / NULLIF(r.total_revenue, 0) * 100, 2), 0) AS efficiency_after_fuel,
+			COALESCE(ROUND(t.total_fuel_cost / NULLIF(t.total_fuel_quantity, 0), 2), 0) AS fuel_price_per_litre,
+			COALESCE(ROUND((r.total_revenue - t.total_fuel_cost) / NULLIF(t.total_fuel_cost, 0), 2), 0) AS fuel_roi
+		FROM totals t
+		LEFT JOIN revenue_sum r ON TRUE;
+	`
+
+	const byCountryQuery = `
+		WITH total_fuel AS (
+		SELECT 
+			COALESCE(SUM(value_main_currency), 0) AS total
+		FROM costs
+		WHERE vehicle_id = $1
+			AND category = 'fuel'
+			AND cost_date BETWEEN $2 AND $3
+		)
+		SELECT 
+			c.country,
+			COALESCE(SUM(c.value_main_currency), 0) AS total_fuel,
+			ROUND(
+				(COALESCE(SUM(c.value_main_currency), 0) / NULLIF(tf.total, 0)) * 100, 2
+			) AS toll_percentage_of_total
+			FROM costs c
+			CROSS JOIN total_fuel tf
+			WHERE c.vehicle_id = $1
+			AND c.category = 'fuel'
+			AND c.cost_date BETWEEN $2 AND $3
+		GROUP BY c.country, tf.total
+		ORDER BY c.country;
+
+	`
+	var result contract.GetVehiclesFuel
+
+	row := v.db.QueryRow(statsQuery, vehicleID, startDate, endDate)
+	err := row.Scan(
+		&result.TotalFuelMainCurrency,
+		&result.TotalFuelLiters,
+		&result.FuelPercentInCost,
+		&result.OperatingExpenseRatio,
+		&result.RevenuePerFuelUnit,
+		&result.RevenueAfterFuel,
+		&result.EfficiencyAfterFuel,
+		&result.FuelPricePerLiter,
+		&result.FuelROI,
+	)
+	if err != nil {
+		return contract.GetVehiclesFuel{}, fmt.Errorf("scan stats: %w", err)
+	}
+
+	rows, err := v.db.Query(byCountryQuery, vehicleID, startDate, endDate)
+	if err != nil {
+		return contract.GetVehiclesFuel{}, fmt.Errorf("query tolls by country: %w", err)
+	}
+	defer rows.Close()
+
+	distribution := make(map[string]contract.CountryTollSum)
+	for rows.Next() {
+		var country string
+		var tollSum, tollPercent decimal.Decimal
+		if err := rows.Scan(&country, &tollSum, &tollPercent); err != nil {
+			return contract.GetVehiclesFuel{}, fmt.Errorf("scan toll by country: %w", err)
+		}
+		distribution[country] = contract.CountryTollSum{
+			TollDistributionMainCurrency: tollSum.RoundCeil(2),
+			TollDistributionPercentage:   tollPercent.RoundCeil(2),
+		}
+	}
+
+	if err := rows.Err(); err != nil {
+		return contract.GetVehiclesFuel{}, fmt.Errorf("iterate toll rows: %w", err)
+	}
+
+	result.VehicleID = vehicleID
+	result.Period = contract.TollPeriod{From: startDate, To: endDate}
+	result.CountryDistribution = distribution
+	result.TotalFuelMainCurrency = result.TotalFuelMainCurrency.RoundCeil(2)
+	return result, nil
+}
+
+func (v *VehicleViewer) GetVehicleProfitability(vehicleID uuid.UUID, startDate, endDate time.Time) (contract.GetVehicleProfitability, error) {
+	query := `
+	WITH totals AS (
+			SELECT 
+				COALESCE(SUM(c.value_main_currency), 0) AS total_costs,
+				COALESCE(SUM(r.value_main_currency), 0) AS total_revenue
+			FROM 
+				costs c
+			FULL OUTER JOIN 
+				revenues r ON c.vehicle_id = r.vehicle_id 
+			WHERE 
+				c.vehicle_id = $1 
+				AND (c.cost_date BETWEEN $2 AND $3 OR c.cost_date IS NULL)
+				AND (r.revenue_date BETWEEN $2 AND $3 OR r.revenue_date IS NULL)
+		)
+		SELECT 
+			total_costs,
+			total_revenue,
+			CASE 
+				WHEN total_costs > 0 THEN 
+					((total_revenue - total_costs) / total_costs) * 100
+				ELSE 
+					NULL
+			END AS roi,
+			CASE 
+				WHEN total_costs > 0 THEN 
+					ROUND(((total_revenue - total_costs) / total_revenue) * 100, 2)
+				ELSE 
+					NULL
+			END AS profitability_ratio
+		FROM 
+			totals;
+	`
+
+	row := v.db.QueryRow(query, vehicleID, startDate, endDate)
+
+	var totalCost, totalRevenue, profitabilityRatio, roi decimal.Decimal
+	if err := row.Scan(&totalCost, &totalRevenue, &roi, &profitabilityRatio); err != nil {
+		log.Println("Error scanning financials:", err)
+		return contract.GetVehicleProfitability{}, err
+	}
+
+	return contract.GetVehicleProfitability{
+		TotalCost:          roundUp(totalCost),
+		TotalRevenue:       roundUp(totalRevenue),
+		Profit:             roundUp(totalRevenue.Sub(totalCost)),
+		ProfitabilityRatio: contract.AssessedValue{Value: roundUp(profitabilityRatio), Rating: rateProfitabilityRatio(profitabilityRatio)},
+		ROI:                roundUp(roi),
+	}, nil
+}
+
+func rateProfitabilityRatio(val decimal.Decimal) int {
+	if val.Cmp(decimal.NewFromInt(10)) > 0 {
+		return 2
+	}
+	if val.Cmp(decimal.NewFromInt(5)) < 0 {
+		return 0
+	}
+	return 1
 }

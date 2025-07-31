@@ -35,6 +35,7 @@ import {
 } from "@/components/ui/sidebar";
 
 import { useState, useEffect } from "react";
+import { useAuthContext } from "@/state/auth-context";
 
 import {
   Breadcrumb,
@@ -53,15 +54,17 @@ import {
   IconInfoCircle,
   IconSettings,
   IconNotebook,
-  IconHelpHexagon,
+  IconGasStation,
 } from "@tabler/icons-react";
 import { VehicleServiceView } from "./vehicle-service-view";
-
+import { VehicleProfitabilityView } from "@/components/vehicle-profitability-view";
+import { VehicleFuelView } from "./vehicle-fuel-view";
 export function VehicleCellViewer({ item }) {
   const data = {
     nav: [
       { name: "Rentowność", icon: IconBusinessplan },
       { name: "Opłaty drogowe", icon: IconRoad },
+      { name: "Paliwo", icon: IconGasStation },
       { name: "Interwały serwisowe", icon: IconEngine },
       { name: "Dziennik zdarzeń", icon: IconNotebook },
       { name: "Spedycja", icon: IconWorld },
@@ -78,9 +81,11 @@ export function VehicleCellViewer({ item }) {
   function renderActiveView(open, item) {
     switch (activeView) {
       case "Rentowność":
-        return <div>📊 Rentowność (placeholder)</div>;
+        return <VehicleProfitabilityView open={open} item={item} />;
       case "Opłaty drogowe":
-        return <VehicleTollView />;
+        return <VehicleTollView open={open} item={item}/>;
+      case "Paliwo":
+        return <VehicleFuelView open={open} item={item} />;
       case "Telemetria":
         return <div>📡 Telemetria (placeholder)</div>;
       case "Interwały serwisowe":

@@ -19,7 +19,7 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import * as React from "react";
+import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { AddVehicleDrawer } from "./add-vehicle-drawer";
@@ -106,7 +106,7 @@ const columns = [
         <DropdownMenuTrigger asChild>
           <Button
             variant="ghost"
-            className="data-[state=open]:bg-muted text-muted-foreground flex size-8"
+            className="flex data-[state=open]:bg-muted size-8 text-muted-foreground"
             size="icon"
           >
             <IconDotsVertical />
@@ -135,8 +135,8 @@ function Row({ row }) {
 
 export function VehiclesTable() {
   const { data, loading, error } = useVehiclesDataContext(); // TODO: Make error
-  const [columnVisibility, setColumnVisibility] = React.useState({});
-  const [pagination, setPagination] = React.useState({
+  const [columnVisibility, setColumnVisibility] = useState({});
+  const [pagination, setPagination] = useState({
     pageIndex: 0,
     pageSize: 10,
   });
@@ -161,7 +161,7 @@ export function VehiclesTable() {
 
   return (
     <>
-      <div className="flex items-center justify-between gap-2">
+      <div className="flex justify-between items-center gap-2">
         <div className="flex items-center gap-2">
           <Input type="text" placeholder="Wyszukaj dokument" />
         </div>
@@ -203,9 +203,9 @@ export function VehiclesTable() {
         </div>
       </div>
 
-      <div className="overflow-hidden rounded-lg border">
+      <div className="border rounded-lg overflow-hidden">
         <Table>
-          <TableHeader className="bg-muted sticky top-0 z-10">
+          <TableHeader className="top-0 z-10 sticky bg-muted">
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => {
@@ -250,10 +250,10 @@ export function VehiclesTable() {
           </TableBody>
         </Table>
       </div>
-      <div className="flex items-center justify-end px-4">
-        <div className="flex w-full items-center gap-8 lg:w-fit">
-          <div className="hidden items-center gap-2 lg:flex">
-            <Label htmlFor="rows-per-page" className="text-sm font-medium">
+      <div className="flex justify-end items-center px-4">
+        <div className="flex items-center gap-8 w-full lg:w-fit">
+          <div className="hidden lg:flex items-center gap-2">
+            <Label htmlFor="rows-per-page" className="font-medium text-sm">
               Wiersze na stronę
             </Label>
             <Select
@@ -276,14 +276,14 @@ export function VehiclesTable() {
               </SelectContent>
             </Select>
           </div>
-          <div className="flex w-fit items-center justify-center text-sm font-medium">
+          <div className="flex justify-center items-center w-fit font-medium text-sm">
             Strona {table.getState().pagination.pageIndex + 1} z{" "}
             {table?.getPageCount()}
           </div>
-          <div className="ml-auto flex items-center gap-2 lg:ml-0">
+          <div className="flex items-center gap-2 ml-auto lg:ml-0">
             <Button
               variant="outline"
-              className="hidden h-8 w-8 p-0 lg:flex"
+              className="hidden lg:flex p-0 w-8 h-8"
               onClick={() => table.setPageIndex(0)}
               disabled={!table.getCanPreviousPage()}
             >
@@ -312,7 +312,7 @@ export function VehiclesTable() {
             </Button>
             <Button
               variant="outline"
-              className="hidden size-8 lg:flex"
+              className="hidden lg:flex size-8"
               size="icon"
               onClick={() => table.setPageIndex(table.getPageCount() - 1)}
               disabled={!table.getCanNextPage()}

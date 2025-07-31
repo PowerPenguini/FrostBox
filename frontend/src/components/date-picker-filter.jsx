@@ -1,5 +1,5 @@
 "use client";
-import * as React from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import {
@@ -11,8 +11,8 @@ import { IconCalendar } from "@tabler/icons-react";
 import { cn } from "@/lib/utils";
 
 export function DatePickerFilter() {
-  const [open, setOpen] = React.useState(false);
-  const [dateRange, setDateRange] = React.useState({});
+  const [open, setOpen] = useState(false);
+  const [dateRange, setDateRange] = useState({});
 
   const formatDateRange = (range) => {
     if (range?.from && range?.to) {
@@ -36,7 +36,7 @@ export function DatePickerFilter() {
           <Button
             variant="outline"
             className={cn(
-              "justify-start text-left font-normal",
+              "justify-start font-normal text-left",
               !dateRange && "text-muted-foreground"
             )}
           >

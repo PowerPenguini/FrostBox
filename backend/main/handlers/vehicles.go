@@ -65,6 +65,52 @@ func (h *VehiclesHandler) GetVehicleTolls(w http.ResponseWriter, r *http.Request
 
 	response, err := h.di.VehicleViewer.GetVehiclesTolls(vehicleID, startDate, endDate)
 	if err != nil {
+		log.Println(err)
+		http.Error(w, "Failed to fetch", http.StatusInternalServerError)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(response)
+}
+
+func (h *VehiclesHandler) GetVehicleFuel(w http.ResponseWriter, r *http.Request) {
+	vehicleID, err := parseVehicleID(w, r)
+	if err != nil {
+		return
+	}
+
+	startDate, endDate, err := parseDateRange(r)
+	if err != nil {
+		log.Println(err)
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	response, err := h.di.VehicleViewer.GetVehiclesFuel(vehicleID, startDate, endDate)
+	if err != nil {
+		log.Println(err)
+		http.Error(w, "Failed to fetch", http.StatusInternalServerError)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(response)
+}
+
+func (h *VehiclesHandler) GetVehicleProfitability(w http.ResponseWriter, r *http.Request) {
+	vehicleID, err := parseVehicleID(w, r)
+	if err != nil {
+		return
+	}
+
+	startDate, endDate, err := parseDateRange(r)
+	if err != nil {
+		log.Println(err)
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	response, err := h.di.VehicleViewer.GetVehicleProfitability(vehicleID, startDate, endDate)
+	if err != nil {
 		http.Error(w, "Failed to fetch", http.StatusInternalServerError)
 		return
 	}

@@ -1,6 +1,6 @@
 "use client"
 
-import * as React from "react"
+import {useState, useId, useMemo, useSensors} from "react"
 import {
   DndContext,
   KeyboardSensor,
@@ -121,8 +121,8 @@ function DragHandle({
       {...listeners}
       variant="ghost"
       size="icon"
-      className="text-muted-foreground size-7 hover:bg-transparent">
-      <IconGripVertical className="text-muted-foreground size-3" />
+      className="hover:bg-transparent size-7 text-muted-foreground">
+      <IconGripVertical className="size-3 text-muted-foreground" />
       <span className="sr-only">Drag to reorder</span>
     </Button>)
   );
@@ -137,7 +137,7 @@ const columns = [
   {
     id: "select",
     header: ({ table }) => (
-      <div className="flex items-center justify-center">
+      <div className="flex justify-center items-center">
         <Checkbox
           checked={
             table.getIsAllPageRowsSelected() ||
@@ -148,7 +148,7 @@ const columns = [
       </div>
     ),
     cell: ({ row }) => (
-      <div className="flex items-center justify-center">
+      <div className="flex justify-center items-center">
         <Checkbox
           checked={row.getIsSelected()}
           onCheckedChange={(value) => row.toggleSelected(!!value)}
@@ -171,7 +171,7 @@ const columns = [
     header: "Section Type",
     cell: ({ row }) => (
       <div className="w-32">
-        <Badge variant="outline" className="text-muted-foreground px-1.5">
+        <Badge variant="outline" className="px-1.5 text-muted-foreground">
           {row.original.type}
         </Badge>
       </div>
@@ -181,7 +181,7 @@ const columns = [
     accessorKey: "status",
     header: "Status",
     cell: ({ row }) => (
-      <Badge variant="outline" className="text-muted-foreground px-1.5">
+      <Badge variant="outline" className="px-1.5 text-muted-foreground">
       </Badge>
     ),
   },
@@ -202,7 +202,7 @@ const columns = [
           Target
         </Label>
         <Input
-          className="hover:bg-input/30 focus-visible:bg-background dark:hover:bg-input/30 dark:focus-visible:bg-input/30 h-8 w-16 border-transparent bg-transparent text-right shadow-none focus-visible:border dark:bg-transparent"
+          className="bg-transparent hover:bg-input/30 focus-visible:bg-background dark:bg-transparent dark:hover:bg-input/30 dark:focus-visible:bg-input/30 shadow-none focus-visible:border border-transparent w-16 h-8 text-right"
           defaultValue={row.original.target}
           id={`${row.original.id}-target`} />
       </form>
@@ -225,7 +225,7 @@ const columns = [
           Limit
         </Label>
         <Input
-          className="hover:bg-input/30 focus-visible:bg-background dark:hover:bg-input/30 dark:focus-visible:bg-input/30 h-8 w-16 border-transparent bg-transparent text-right shadow-none focus-visible:border dark:bg-transparent"
+          className="bg-transparent hover:bg-input/30 focus-visible:bg-background dark:bg-transparent dark:hover:bg-input/30 dark:focus-visible:bg-input/30 shadow-none focus-visible:border border-transparent w-16 h-8 text-right"
           defaultValue={row.original.limit}
           id={`${row.original.id}-limit`} />
       </form>
@@ -247,7 +247,7 @@ const columns = [
         </Label>
         <Select>
           <SelectTrigger
-            className="w-38 **:data-[slot=select-value]:block **:data-[slot=select-value]:truncate"
+            className="**:data-[slot=select-value]:block w-38 **:data-[slot=select-value]:truncate"
             size="sm"
             id={`${row.original.id}-reviewer`}>
             <SelectValue placeholder="Assign reviewer" />
@@ -269,7 +269,7 @@ const columns = [
         <DropdownMenuTrigger asChild>
           <Button
             variant="ghost"
-            className="data-[state=open]:bg-muted text-muted-foreground flex size-8"
+            className="flex data-[state=open]:bg-muted size-8 text-muted-foreground"
             size="icon">
             <IconDotsVertical />
             <span className="sr-only">Open menu</span>
@@ -299,7 +299,7 @@ function DraggableRow({
       data-state={row.getIsSelected() && "selected"}
       data-dragging={isDragging}
       ref={setNodeRef}
-      className="relative z-0 data-[dragging=true]:z-10 data-[dragging=true]:opacity-80"
+      className="z-0 data-[dragging=true]:z-10 relative data-[dragging=true]:opacity-80"
       style={{
         transform: CSS.Transform.toString(transform),
         transition: transition,
@@ -314,21 +314,21 @@ function DraggableRow({
 }
 
 export function DataTable() {
-  const [data, setData] = React.useState(() => initialData)
+  const [data, setData] = useState(() => initialData)
   const [columnVisibility, setColumnVisibility] =
-    React.useState({})
-  const [pagination, setPagination] = React.useState({
+    useState({})
+  const [pagination, setPagination] = useState({
     pageIndex: 0,
     pageSize: 10,
   })
-  const sortableId = React.useId()
+  const sortableId = useId()
   const sensors = useSensors(
     useSensor(MouseSensor, {}),
     useSensor(TouchSensor, {}),
     useSensor(KeyboardSensor, {})
   )
 
-  const dataIds = React.useMemo(() => data?.map(({ id }) => id) || [], [data])
+  const dataIds = useMemo(() => data?.map(({ id }) => id) || [], [data])
 
   const table = useReactTable({
     data,
@@ -361,13 +361,13 @@ export function DataTable() {
   }
 
   return (
-    (<Tabs defaultValue="outline" className="w-full flex-col justify-start gap-6">
-      <div className="flex items-center justify-between px-4 lg:px-6">
+    (<Tabs defaultValue="outline" className="flex-col justify-start gap-6 w-full">
+      <div className="flex justify-between items-center px-4 lg:px-6">
         <Label htmlFor="view-selector" className="sr-only">
           View
         </Label>
         <Select defaultValue="outline">
-          <SelectTrigger className="flex w-fit @4xl/main:hidden" size="sm" id="view-selector">
+          <SelectTrigger className="@4xl/main:hidden flex w-fit" size="sm" id="view-selector">
             <SelectValue placeholder="Select a view" />
           </SelectTrigger>
           <SelectContent>
@@ -378,7 +378,7 @@ export function DataTable() {
           </SelectContent>
         </Select>
         <TabsList
-          className="**:data-[slot=badge]:bg-muted-foreground/30 hidden **:data-[slot=badge]:size-5 **:data-[slot=badge]:rounded-full **:data-[slot=badge]:px-1 @4xl/main:flex">
+          className="hidden @4xl/main:flex **:data-[slot=badge]:bg-muted-foreground/30 **:data-[slot=badge]:px-1 **:data-[slot=badge]:rounded-full **:data-[slot=badge]:size-5">
           <TabsTrigger value="outline">Outline</TabsTrigger>
           <TabsTrigger value="past-performance">
             Past Performance <Badge variant="secondary">3</Badge>
@@ -427,8 +427,8 @@ export function DataTable() {
       </div>
       <TabsContent
         value="outline"
-        className="relative flex flex-col gap-4 overflow-auto px-4 lg:px-6">
-        <div className="overflow-hidden rounded-lg border">
+        className="relative flex flex-col gap-4 px-4 lg:px-6 overflow-auto">
+        <div className="border rounded-lg overflow-hidden">
           <DndContext
             collisionDetection={closestCenter}
             modifiers={[restrictToVerticalAxis]}
@@ -436,7 +436,7 @@ export function DataTable() {
             sensors={sensors}
             id={sortableId}>
             <Table>
-              <TableHeader className="bg-muted sticky top-0 z-10">
+              <TableHeader className="top-0 z-10 sticky bg-muted">
                 {table.getHeaderGroups().map((headerGroup) => (
                   <TableRow key={headerGroup.id}>
                     {headerGroup.headers.map((header) => {
@@ -469,14 +469,14 @@ export function DataTable() {
             </Table>
           </DndContext>
         </div>
-        <div className="flex items-center justify-between px-4">
-          <div className="text-muted-foreground hidden flex-1 text-sm lg:flex">
+        <div className="flex justify-between items-center px-4">
+          <div className="hidden lg:flex flex-1 text-muted-foreground text-sm">
             {table.getFilteredSelectedRowModel().rows.length} of{" "}
             {table.getFilteredRowModel().rows.length} row(s) selected.
           </div>
-          <div className="flex w-full items-center gap-8 lg:w-fit">
-            <div className="hidden items-center gap-2 lg:flex">
-              <Label htmlFor="rows-per-page" className="text-sm font-medium">
+          <div className="flex items-center gap-8 w-full lg:w-fit">
+            <div className="hidden lg:flex items-center gap-2">
+              <Label htmlFor="rows-per-page" className="font-medium text-sm">
                 Rows per page
               </Label>
               <Select
@@ -496,14 +496,14 @@ export function DataTable() {
                 </SelectContent>
               </Select>
             </div>
-            <div className="flex w-fit items-center justify-center text-sm font-medium">
+            <div className="flex justify-center items-center w-fit font-medium text-sm">
               Page {table.getState().pagination.pageIndex + 1} of{" "}
               {table.getPageCount()}
             </div>
-            <div className="ml-auto flex items-center gap-2 lg:ml-0">
+            <div className="flex items-center gap-2 ml-auto lg:ml-0">
               <Button
                 variant="outline"
-                className="hidden h-8 w-8 p-0 lg:flex"
+                className="hidden lg:flex p-0 w-8 h-8"
                 onClick={() => table.setPageIndex(0)}
                 disabled={!table.getCanPreviousPage()}>
                 <span className="sr-only">Go to first page</span>
@@ -529,7 +529,7 @@ export function DataTable() {
               </Button>
               <Button
                 variant="outline"
-                className="hidden size-8 lg:flex"
+                className="hidden lg:flex size-8"
                 size="icon"
                 onClick={() => table.setPageIndex(table.getPageCount() - 1)}
                 disabled={!table.getCanNextPage()}>
@@ -541,13 +541,13 @@ export function DataTable() {
         </div>
       </TabsContent>
       <TabsContent value="past-performance" className="flex flex-col px-4 lg:px-6">
-        <div className="aspect-video w-full flex-1 rounded-lg border border-dashed"></div>
+        <div className="flex-1 border border-dashed rounded-lg w-full aspect-video"></div>
       </TabsContent>
       <TabsContent value="key-personnel" className="flex flex-col px-4 lg:px-6">
-        <div className="aspect-video w-full flex-1 rounded-lg border border-dashed"></div>
+        <div className="flex-1 border border-dashed rounded-lg w-full aspect-video"></div>
       </TabsContent>
       <TabsContent value="focus-documents" className="flex flex-col px-4 lg:px-6">
-        <div className="aspect-video w-full flex-1 rounded-lg border border-dashed"></div>
+        <div className="flex-1 border border-dashed rounded-lg w-full aspect-video"></div>
       </TabsContent>
     </Tabs>)
   );
@@ -582,7 +582,7 @@ function TableCellViewer({
   return (
     (<Drawer direction={isMobile ? "bottom" : "right"}>
       <DrawerTrigger asChild>
-        <Button variant="link" className="text-foreground w-fit px-0 text-left">
+        <Button variant="link" className="px-0 w-fit text-foreground text-left">
           {item.header}
         </Button>
       </DrawerTrigger>
@@ -593,7 +593,7 @@ function TableCellViewer({
             Showing total visitors for the last 6 months
           </DrawerDescription>
         </DrawerHeader>
-        <div className="flex flex-col gap-4 overflow-y-auto px-4 text-sm">
+        <div className="flex flex-col gap-4 px-4 overflow-y-auto text-sm">
           {!isMobile && (
             <>
               <ChartContainer config={chartConfig}>
@@ -630,8 +630,8 @@ function TableCellViewer({
                 </AreaChart>
               </ChartContainer>
               <Separator />
-              <div className="grid gap-2">
-                <div className="flex gap-2 leading-none font-medium">
+              <div className="gap-2 grid">
+                <div className="flex gap-2 font-medium leading-none">
                   Trending up by 5.2% this month{" "}
                   <IconTrendingUp className="size-4" />
                 </div>
@@ -649,7 +649,7 @@ function TableCellViewer({
               <Label htmlFor="header">Header</Label>
               <Input id="header" defaultValue={item.header} />
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="gap-4 grid grid-cols-2">
               <div className="flex flex-col gap-3">
                 <Label htmlFor="type">Type</Label>
                 <Select defaultValue={item.type}>
@@ -690,7 +690,7 @@ function TableCellViewer({
                 </Select>
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="gap-4 grid grid-cols-2">
               <div className="flex flex-col gap-3">
                 <Label htmlFor="target">Target</Label>
                 <Input id="target" defaultValue={item.target} />

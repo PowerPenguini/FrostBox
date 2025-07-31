@@ -2,7 +2,9 @@ import {
   IconRoad,
   IconDropletPlus,
   IconGasStation,
-  IconNut
+  IconNut,
+  IconFileDescription,
+  IconBucketDroplet
 } from "@tabler/icons-react"
 import { Badge } from "@/components/ui/badge";
 
@@ -11,16 +13,18 @@ const mnemonics = {
   additive: { name: "Dodatki", icon: IconDropletPlus },
   fuel: { name: "Paliwo", icon: IconGasStation },
   service: { name: "Serwis", icon: IconNut },
+  administrative: { name: "Administracyjne", icon: IconFileDescription },
+  maintenance: { name: "Gospodarcze", icon: IconBucketDroplet },
 };
 
-export function translateCostCategory(category) {
+export function translateCategory(category) {
   return mnemonics[category] ? mnemonics[category].name : "Inne";
 }
 
-export function renderCostCategory(category) {
+export function renderCategory(category) {
   const { icon: Icon, name } = mnemonics[category] || {
     icon: null,
-    name: translateCostCategory(category),
+    name: translateCategory(category),
   };
 
   return (
