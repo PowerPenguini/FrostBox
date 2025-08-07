@@ -27,18 +27,20 @@ type view struct {
 }
 
 type repo struct {
-	UserRepo      *repos.UserRepo
-	DocumentRepo  *repos.DocumentRepo
-	CostRepo      *repos.CostRepo
-	VehicleRepo   *repos.VehicleRepo
-	EventTypeRepo *repos.EventTypeRepo
-	EventRepo     *repos.EventRepo
+	UserRepo          *repos.UserRepo
+	DocumentRepo      *repos.DocumentRepo
+	CostRepo          *repos.CostRepo
+	VehicleRepo       *repos.VehicleRepo
+	EventTypeRepo     *repos.EventTypeRepo
+	EventRepo         *repos.EventRepo
+	EventIntervalRepo *repos.EventIntervalRepo
 }
 
 type val struct {
-	EventValidator     *validators.EventValidator
-	EventTypeValidator *validators.EventTypeValidator
-	CostValidator      *validators.CostValidator
+	EventValidator         *validators.EventValidator
+	EventTypeValidator     *validators.EventTypeValidator
+	EventIntervalValidator *validators.EventIntervalValidator
+	CostValidator          *validators.CostValidator
 }
 
 type DI struct {
@@ -59,20 +61,20 @@ func NewDI(connStr string) (*DI, error) {
 	eventRepo := repos.NewEventRepo(db)
 	eventTypeRepo := repos.NewEventTypeRepo(db)
 	documentRepo := repos.NewDocumentRepo(db)
-
-	eventValidator := validators.NewEventValidator(vehicleRepo, costRepo, eventRepo, eventTypeRepo)
+	eventIntervalRepo := repos.NewEventIntervalRepo(db)
 
 	return &DI{
 		svc: svc{
 			NBPService: services.NewNBPService(),
 		},
 		repo: repo{
-			UserRepo:      repos.NewUserRepo(db),
-			VehicleRepo:   vehicleRepo,
-			CostRepo:      costRepo,
-			EventRepo:     eventRepo,
-			EventTypeRepo: eventTypeRepo,
-			DocumentRepo:  documentRepo,
+			UserRepo:          repos.NewUserRepo(db),
+			VehicleRepo:       vehicleRepo,
+			CostRepo:          costRepo,
+			EventRepo:         eventRepo,
+			EventTypeRepo:     eventTypeRepo,
+			EventIntervalRepo: eventIntervalRepo,
+			DocumentRepo:      documentRepo,
 		},
 		view: view{
 			DocumentViewer:  views.NewDocumentViewer(db),
@@ -86,9 +88,10 @@ func NewDI(connStr string) (*DI, error) {
 			EventTypeViewer: views.NewEventTypeViewer(db),
 		},
 		val: val{
-			EventValidator:     eventValidator,
-			EventTypeValidator: validators.NewEventTypeValidator(eventTypeRepo),
-			CostValidator:      validators.NewCostValidator(vehicleRepo, documentRepo),
+			EventValidator:         validators.NewEventValidator(vehicleRepo, costRepo, eventRepo, eventTypeRepo),
+			EventTypeValidator:     validators.NewEventTypeValidator(eventTypeRepo),
+			EventIntervalValidator: validators.NewEventIntervalValidator(vehicleRepo, eventIntervalRepo),
+			CostValidator:          validators.NewCostValidator(vehicleRepo, documentRepo),
 		},
 	}, nil
 }

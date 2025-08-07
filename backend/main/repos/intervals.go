@@ -6,15 +6,15 @@ import (
 	"github.com/google/uuid"
 )
 
-type IntervalRepo struct {
+type EventIntervalRepo struct {
 	db *sql.DB
 }
 
-func NewIntervalRepo(db *sql.DB) *IntervalRepo {
-	return &IntervalRepo{db: db}
+func NewEventIntervalRepo(db *sql.DB) *EventIntervalRepo {
+	return &EventIntervalRepo{db: db}
 }
 
-func (r *IntervalRepo) Delete(id uuid.UUID) error {
+func (r *EventIntervalRepo) Delete(id uuid.UUID) error {
 	query := `
         DELETE FROM event_intervals
         WHERE id = $1
@@ -33,6 +33,16 @@ func (r *IntervalRepo) Delete(id uuid.UUID) error {
 		return sql.ErrNoRows
 	}
 	return nil
+}
+
+func (r *EventIntervalRepo) Exists(id uuid.UUID) (bool, error) {
+	query := `SELECT EXISTS (SELECT 1 FROM event_intervals WHERE id = $1)`
+	var exists bool
+	err := r.db.QueryRow(query, id).Scan(&exists)
+	if err != nil {
+		return false, err
+	}
+	return exists, nil
 }
 
 // CREATE TABLE

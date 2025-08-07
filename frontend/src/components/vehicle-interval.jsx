@@ -10,7 +10,7 @@ import { Progress } from "@/components/ui/progress";
 import { formatDate } from "@/formatting/date";
 import { Button } from "./ui/button";
 
-export function VehicleInterval({ interval }) {
+export function VehicleInterval({ interval, onDelete }) {
   return (
     <div className="group relative flex flex-col gap-4 pt-2 pb-4 border rounded-lg">
       <div className="flex items-center gap-2 pr-2 pl-4 font-medium">
@@ -37,7 +37,7 @@ export function VehicleInterval({ interval }) {
           <Button variant="ghost" className="p-0">
             <IconEdit />
           </Button>
-          <Button variant="ghost" className="p-0 text-destructive">
+          <Button variant="ghost" className="p-0 text-destructive" onClick={() => onDelete(interval.id)}> 
             <IconTrash />
           </Button>
         </div>

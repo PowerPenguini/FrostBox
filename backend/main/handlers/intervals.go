@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"frostbox/contract"
 	"frostbox/di"
+	"frostbox/errs"
+	"frostbox/logic"
 	"log"
 	"net/http"
 
@@ -37,4 +39,25 @@ func (h *IntervalsHandler) GetIntervals(w http.ResponseWriter, r *http.Request) 
 	}
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(response)
+}
+
+func (h *IntervalsHandler) DeleteIntervals(w http.ResponseWriter, r *http.Request) {
+	id, err := parseID(w, r, "event_interval_id")
+	if err != nil {
+		log.Println(err)
+		errs.WriteError(w, err)
+		return
+	}
+
+	act := logic.DeleteIntervalParams{
+		ID: id,
+	}
+	err = act.Execute(h.di)
+	if err != nil {
+		log.Println(err)
+		errs.WriteError(w, err)
+		return
+	}
+
+	w.WriteHeader(http.StatusNoContent)
 }

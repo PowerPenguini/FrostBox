@@ -56,6 +56,9 @@ func main() {
 	mux.HandleFunc("GET /vehicles/{vehicle_id}/fuel", middleware.AuthMiddleware(di, vehiclesHandler.GetVehicleFuel))
 	mux.HandleFunc("GET /vehicles/{vehicle_id}/intervals", middleware.AuthMiddleware(di, intervalsHandler.GetIntervals))
 
+	// --- Intervals ---
+	mux.HandleFunc("DELETE /intervals/{event_interval_id}", middleware.AuthMiddleware(di, intervalsHandler.DeleteIntervals))
+
 	// --- Events ---
 	mux.HandleFunc("GET /vehicles/{vehicle_id}/events", middleware.AuthMiddleware(di, eventsHandler.GetEventsByVehicle))
 	mux.HandleFunc("POST /vehicles/{vehicle_id}/events", middleware.AuthMiddleware(di, eventsHandler.PostEventsByVehicle))

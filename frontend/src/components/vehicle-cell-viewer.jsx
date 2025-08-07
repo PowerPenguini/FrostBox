@@ -78,22 +78,22 @@ export function VehicleCellViewer({ item }) {
   const [open, setOpen] = useState(false);
   const [activeView, setActiveView] = useState("Rentowność");
 
-  function renderActiveView(open, item) {
+  function renderActiveView(open, vehicle) {
     switch (activeView) {
       case "Rentowność":
-        return <VehicleProfitabilityView open={open} item={item} />;
+        return <VehicleProfitabilityView open={open} item={vehicle} />;
       case "Opłaty drogowe":
-        return <VehicleTollView open={open} item={item}/>;
+        return <VehicleTollView open={open} item={vehicle}/>;
       case "Paliwo":
-        return <VehicleFuelView open={open} item={item} />;
+        return <VehicleFuelView open={open} item={vehicle} />;
       case "Telemetria":
         return <div>📡 Telemetria (placeholder)</div>;
       case "Interwały serwisowe":
-        return <VehicleServiceView open={open} item={item} />;
+        return <VehicleServiceView open={open} vehicle={vehicle} />;
       case "Spedycja":
         return <div>🚛 Spedycja (placeholder)</div>;
       case "Dziennik zdarzeń":
-        return <VehicleEventListView vehicleId={item.id} />;
+        return <VehicleEventListView vehicleId={vehicle.id} />;
       default:
         return <div className="text-muted-foreground">Nieznany widok</div>;
     }

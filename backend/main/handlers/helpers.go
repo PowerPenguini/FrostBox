@@ -9,11 +9,21 @@ import (
 	"github.com/google/uuid"
 )
 
+func parseID(w http.ResponseWriter, r *http.Request, key string) (uuid.UUID, error) {
+	vehicleIDStr := r.PathValue(key)
+	vehicleID, err := uuid.Parse(vehicleIDStr)
+	if err != nil {
+		errs.WriteError(w, errs.NewError("invlaid_"+key, key+" is not a valid UUID", errs.BadRequestType, err))
+		return uuid.UUID{}, err
+	}
+	return vehicleID, nil
+}
+
 func parseEventTypeID(w http.ResponseWriter, r *http.Request) (uuid.UUID, error) {
 	vehicleIDStr := r.PathValue("event_type_id")
 	vehicleID, err := uuid.Parse(vehicleIDStr)
 	if err != nil {
-		errs.WriteError(w, errs.NewError("invalid_event_type_id", "Event type ID is not a valid UUID", errs.ValidationType, err))
+		errs.WriteError(w, errs.NewError("invalid_event_type_id", "Event type ID is not a valid UUID", errs.BadRequestType, err))
 		return uuid.UUID{}, err
 	}
 	return vehicleID, nil
@@ -23,7 +33,7 @@ func parseVehicleID(w http.ResponseWriter, r *http.Request) (uuid.UUID, error) {
 	vehicleIDStr := r.PathValue("vehicle_id")
 	vehicleID, err := uuid.Parse(vehicleIDStr)
 	if err != nil {
-		errs.WriteError(w, errs.NewError("invalid_vehicle_id", "Vehicle ID is not a valid UUID", errs.ValidationType, err))
+		errs.WriteError(w, errs.NewError("invalid_vehicle_id", "Vehicle ID is not a valid UUID", errs.BadRequestType, err))
 		return uuid.UUID{}, err
 	}
 	return vehicleID, nil
