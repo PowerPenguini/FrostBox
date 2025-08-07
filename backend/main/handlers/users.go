@@ -2,10 +2,10 @@ package handlers
 
 import (
 	"encoding/json"
-	"fmt"
 	"frostbox/contract"
 	"frostbox/di"
 	"frostbox/logic"
+	"log"
 	"net/http"
 )
 
@@ -55,7 +55,7 @@ func (h *UsersHandler) PostUsers(w http.ResponseWriter, r *http.Request) {
 	}
 	err = logic.AddUser(h.di, params)
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		http.Error(w, "Failed to add user", http.StatusInternalServerError)
 		return
 	}

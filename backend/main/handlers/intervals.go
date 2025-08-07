@@ -2,9 +2,9 @@ package handlers
 
 import (
 	"encoding/json"
-	"fmt"
 	"frostbox/contract"
 	"frostbox/di"
+	"log"
 	"net/http"
 
 	"github.com/google/uuid"
@@ -28,7 +28,7 @@ func (h *IntervalsHandler) GetIntervals(w http.ResponseWriter, r *http.Request) 
 
 	response, err := h.di.IntervalViewer.GetIntervalsByVehicle(vehicle_uuid, 0)
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		http.Error(w, "Failed to fetch", http.StatusInternalServerError)
 		return
 	}

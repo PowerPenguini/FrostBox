@@ -1,4 +1,5 @@
 "use client";
+
 import { useEffect, useState } from "react";
 import {
   Accordion,
@@ -9,7 +10,6 @@ import {
 import {
   Table,
   TableBody,
-  TableCaption,
   TableCell,
   TableHead,
   TableHeader,
@@ -19,140 +19,144 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import {
-  IconDotsVertical,
-  IconDeviceFloppy,
-  IconPlus,
-} from "@tabler/icons-react";
+import { IconDotsVertical, IconPlus , IconDeviceFloppy} from "@tabler/icons-react";
 import { Spinner } from "@/components/spinner";
 import { ErrorText } from "@/components/error-text";
 import { useAuthContext } from "@/state/auth-context";
 import { renderCategory } from "@/formatting/category";
+import { DeleteDialog } from "@/components/delete-dialog";
 import { Input } from "@/components/ui/input";
 import { EventTypeCategoryCombobox } from "@/components/event-type-category-combox";
 
 export default function Page() {
-  const [events, setEvents] = useState([]);
+  const [eventTypes, setEventTypes] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState("");
+  const [selectedId, setSelectedId] = useState(null);
+
   const { token } = useAuthContext();
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await fetch("/api/v1/events/types", {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        });
-        if (!response.ok) {
-          throw new Error("Błąd sieci");
-        }
-        const data = await response.json();
-        setEvents(data);
-      } catch (error) {
-        setError(error.message);
-      } finally {
-        setLoading(false);
-      }
-    };
+  const fetchData = async () => {
+    try {
+      const res = await fetch("/api/v1/events/types", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+      if (!res.ok) throw new Error("Błąd sieci");
+      const data = await res.json();
+      setEventTypes(data);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  const handleDelete = (id) => {
+    setEventTypes((prev) => prev.filter((e) => e.id !== id));
+  };
+
+  const handleOpenChange = (isOpen) => {
+    if (!isOpen) setSelectedId(null);
+  };
+
+  useEffect(() => {
     fetchData();
   }, []);
 
   return (
-    <div className="flex flex-col flex-1">
-      <div className="@container/main flex flex-col flex-1 gap-2">
-        <div className="flex flex-col gap-4 md:gap-6 px-4 lg:px-6 py-4 lg:py-6">
-          <Accordion type="single" collapsible>
-            <AccordionItem value="item-1">
-              <AccordionTrigger>Typy zdarzeń</AccordionTrigger>
-              <AccordionContent>
-                {loading ? (
-                  <div className="flex flex-col space-y-4">
-                    <Spinner />
-                    <div className="text-center">Pobieranie danych...</div>
-                  </div>
-                ) : error ? (
-                  <div>
-                    <ErrorText>{error}</ErrorText>
-                  </div>
-                ) : (
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead className="w-[200px]">Nazwa</TableHead>
-                        <TableHead>Kategoria</TableHead>
-                        <TableHead>Systemowe</TableHead>
-                        <TableHead>Akcje</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {events.map((event) => (
-                        <TableRow key={event.id}>
-                          <TableCell>{event.name}</TableCell>
-                          {/* proper component here */}
-                          <TableCell>
-                            {renderCategory(event.category)}
-                          </TableCell>
-                          <TableCell>{event.system ? "Tak" : "Nie"}</TableCell>
-                          <TableCell>
-                            {!event.system && (
-                              <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                  <Button
-                                    variant="ghost"
-                                    className="flex data-[state=open]:bg-muted size-8 text-muted-foreground"
-                                    size="icon"
-                                  >
-                                    <IconDotsVertical />
-                                    <span className="sr-only">Open menu</span>
-                                  </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent
-                                  align="end"
-                                  className="w-32"
-                                >
-                                  <DropdownMenuItem variant="destructive">
-                                    Usuń
-                                  </DropdownMenuItem>
-                                </DropdownMenuContent>
-                              </DropdownMenu>
-                            )}
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                      <AddEventTypeRow
-                        onAdd={(newEvent) =>
-                          setEvents((prev) => [...prev, newEvent])
-                        }
-                        token={token}
-                      />
-                    </TableBody>
-                  </Table>
-                )}
-              </AccordionContent>
-            </AccordionItem>
-            <AccordionItem value="item-2">
-              <AccordionTrigger>Informacje o systemie</AccordionTrigger>
-              <AccordionContent>
-                <div className="text-muted-foreground text-sm">
-                  Produkt: FrostBox&trade;
-                  <br />
-                  Wersja: v0.0.1
-                </div>
-              </AccordionContent>
-            </AccordionItem>
-          </Accordion>
-        </div>
-      </div>
+    <div className="flex flex-col flex-1 p-4 lg:p-6">
+      <Accordion type="single" collapsible>
+        <AccordionItem value="item-1">
+          <AccordionTrigger>Typy zdarzeń</AccordionTrigger>
+          <AccordionContent>
+            {loading ? (
+              <div className="space-y-4 text-center">
+                <Spinner />
+                <div>Pobieranie danych...</div>
+              </div>
+            ) : error ? (
+              <ErrorText text={error}/>
+            ) : (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="w-[200px]">Nazwa</TableHead>
+                    <TableHead>Kategoria</TableHead>
+                    <TableHead>Systemowe</TableHead>
+                    <TableHead>Akcje</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {eventTypes.map((eventType) => (
+                    <TableRow key={eventType.id}>
+                      <TableCell>{eventType.name}</TableCell>
+                      <TableCell>
+                        {renderCategory(eventType.category)}
+                      </TableCell>
+                      <TableCell>{eventType.system ? "Tak" : "Nie"}</TableCell>
+                      <TableCell>
+                        {!eventType.system && (
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button
+                                variant="ghost"
+                                className="size-8 text-muted-foreground"
+                              >
+                                <IconDotsVertical />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end" className="w-32">
+                              <DropdownMenuItem variant="destructive"
+                                onSelect={(e) => {
+                                  e.preventDefault();
+                                  setSelectedId(eventType.id);
+                                }}
+                              >
+                                Usuń
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        )}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                  <AddEventTypeRow
+                    onAdd={(e) => setEventTypes((prev) => [...prev, e])}
+                    token={token}
+                  />
+                </TableBody>
+              </Table>
+            )}
+          </AccordionContent>
+        </AccordionItem>
+        <AccordionItem value="item-2">
+          <AccordionTrigger>Informacje o systemie</AccordionTrigger>
+          <AccordionContent>
+            <div className="text-muted-foreground text-sm">
+              Produkt: FrostBox™
+              <br />
+              Wersja: v0.0.1
+            </div>
+          </AccordionContent>
+        </AccordionItem>
+      </Accordion>
+
+      {/* Dialog usuwania */}
+      <DeleteDialog
+        title="Jesteś pewny?"
+        description="Usunięcie typu zdarzenia jest nieodwracalne. Typ zdarzenia nie będzie mógł być używany w systemie."
+        id={selectedId}
+        endpoint="/api/v1/events/types"
+        open={selectedId !== null}
+        onOpenChange={handleOpenChange}
+        onDeleted={handleDelete}
+      />
     </div>
   );
 }
@@ -173,7 +177,6 @@ function AddEventTypeRow({ onAdd }) {
     }
 
     setSubmitting(true);
-    setError("");
 
     try {
       const response = await fetch("/api/v1/events/types", {
@@ -185,12 +188,13 @@ function AddEventTypeRow({ onAdd }) {
         body: JSON.stringify({ name, category, system }),
       });
 
-      if (!response.ok) throw new Error("Nie udało się dodać typu.");
+      if (!response.ok) throw new Error("Typ zdarzenia już istnieje");
 
       const data = await response.json();
       onAdd(data);
       setName("");
       setCategory("");
+      setError("")
       setSystem(false);
       setExpanded(false);
     } catch (err) {
@@ -242,7 +246,8 @@ function AddEventTypeRow({ onAdd }) {
             onClick={handleAdd}
             disabled={submitting || !name || !category}
           >
-            <IconDeviceFloppy/>Zapisz
+            <IconDeviceFloppy />
+            Zapisz
           </Button>
           <Button
             variant="ghost"
@@ -256,7 +261,7 @@ function AddEventTypeRow({ onAdd }) {
       {error && (
         <TableRow>
           <TableCell colSpan={4}>
-            <ErrorText>{error}</ErrorText>
+            <ErrorText text={error}/>
           </TableCell>
         </TableRow>
       )}

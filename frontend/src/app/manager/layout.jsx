@@ -61,7 +61,7 @@ export default function RootLayout({ children }) {
     >
       <AppSidebar variant="inset" />
       <SidebarInset>{children}</SidebarInset>
-      <Toaster />
+      <Toaster richColors />
     </SidebarProvider>
   );
 }

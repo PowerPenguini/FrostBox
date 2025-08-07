@@ -40,5 +40,8 @@ func AddVehicle(di *di.DI, params AddVehicleParams) error {
 		Model:              params.Model,
 		RegistrationNumber: normalizeRegistrationNumber(params.RegistrationNumber),
 	}
-	return di.VehicleRepo.Insert(vehicle)
+	if err := di.VehicleRepo.Insert(vehicle); err != nil {
+		return errs.GenericInternal
+	}
+	return nil
 }

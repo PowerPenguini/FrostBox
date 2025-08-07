@@ -62,6 +62,8 @@ func main() {
 
 	// -- Eevents Types --
 	mux.HandleFunc("GET /events/types", middleware.AuthMiddleware(di, enventsTypesHandler.GetEventsTypes))
+	mux.HandleFunc("POST /events/types", middleware.AuthMiddleware(di, enventsTypesHandler.PostEventsTypes))
+	mux.HandleFunc("DELETE /events/types/{event_type_id}", middleware.AuthMiddleware(di, enventsTypesHandler.DeleteEventsTypes))
 	mux.HandleFunc("GET /events/types/categories", middleware.AuthMiddleware(di, enventsTypesHandler.GetEventsTypesCategories))
 
 	// --- Costs ---

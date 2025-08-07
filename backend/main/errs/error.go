@@ -5,6 +5,7 @@ import "fmt"
 const InternalType = "INTERNAL"
 const ValidationType = "VALIDATION"
 const BadRequestType = "BAD_REQUEST"
+const NotFoundType = "NOT_FOUND"
 
 type Error struct {
 	Code    string

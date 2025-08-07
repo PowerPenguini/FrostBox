@@ -18,7 +18,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { useAuthContext } from "@/state/auth-context";
-import { translateCostCategory } from "@/formatting/category";
+import { translateCategory } from "@/formatting/category";
 import { ErrorText } from "@/components/error-text";
 
 
@@ -73,7 +73,7 @@ export function CategoryCombox({ id, value, onChange }) {
           className="justify-between"
         >
           {value
-            ? translateCostCategory(value)
+            ? translateCategory(value)
             : "Wybierz kategorię..."}
           <ChevronsUpDown className="opacity-50 ml-2 w-4 h-4 shrink-0" />
         </Button>
@@ -82,7 +82,7 @@ export function CategoryCombox({ id, value, onChange }) {
         <Command
           id={id}
           filter={(val, search) =>
-            translateCostCategory(val)
+            translateCategory(val)
               .toLowerCase()
               .includes(search.toLowerCase())
           }
@@ -102,11 +102,11 @@ export function CategoryCombox({ id, value, onChange }) {
                 >
                   <Check
                     className={cn(
-                      "mr-2 h-4 w-4",
+                      "mr-2 w-4 h-4",
                       value === category ? "opacity-100" : "opacity-0"
                     )}
                   />
-                  {translateCostCategory(category)}
+                  {translateCategory(category)}
                 </CommandItem>
               ))}
             </CommandGroup>

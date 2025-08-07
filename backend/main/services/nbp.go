@@ -43,7 +43,6 @@ func (s *NBPService) getRate(currencyCode string, date time.Time) (decimal.Decim
 	url := fmt.Sprintf("https://api.nbp.pl/api/exchangerates/rates/a/%s/%s?format=json", currencyCode, dateStr)
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
-		fmt.Println(1)
 		return decimal.Decimal{}, err
 	}
 	req.Header.Set("User-Agent", "FrostBox/NBPClient/0.1")
@@ -55,8 +54,6 @@ func (s *NBPService) getRate(currencyCode string, date time.Time) (decimal.Decim
 	}
 	defer resp.Body.Close()
 	if resp.StatusCode != http.StatusOK {
-		fmt.Println(url)
-		fmt.Println(resp.Status)
 		return decimal.Decimal{}, errs.ErrDataNotAvailable
 	}
 
@@ -79,7 +76,6 @@ func (s *NBPService) getRate(currencyCode string, date time.Time) (decimal.Decim
 }
 
 func (s *NBPService) ToPLN(currency string, amount decimal.Decimal, date time.Time) (decimal.Decimal, error) {
-	fmt.Println(currency, amount)
 	if strings.ToLower(currency) == "pln" {
 		return amount, nil
 	}

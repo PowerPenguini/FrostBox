@@ -62,6 +62,7 @@ func (h *EventsHandler) PostEventsByVehicle(w http.ResponseWriter, r *http.Reque
 		currency   *string
 	)
 
+	// ?? validation rule
 	if req.CostValue != "" {
 		val, err := decimal.NewFromString(req.CostValue)
 		if err != nil {

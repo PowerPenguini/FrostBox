@@ -39,7 +39,7 @@ func AddEventWithCost(di *di.DI, params *AddEventWithCostParams) error {
 		EventMileage: &params.EventMileage,
 	}
 
-	if err := di.EventValidator.Validate(event); err != nil {
+	if err := di.EventValidator.ValidateModel(event); err != nil {
 		return err // już zawiera typ i kod błędu z walidatora
 	}
 

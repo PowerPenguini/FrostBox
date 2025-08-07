@@ -13,4 +13,10 @@ type EventType struct {
 	System   bool      `json:"system"`
 }
 
+type PostEventsTypesReq struct {
+	Name     string `json:"name"`
+	Category string `json:"category"`
+}
+type PostEventsTypesResp EventType
+
 type GetEventsTypesCategoriesResponse []string

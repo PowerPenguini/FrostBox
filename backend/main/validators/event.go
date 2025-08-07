@@ -25,7 +25,7 @@ func NewEventValidator(vr *repos.VehicleRepo, cr *repos.CostRepo, er *repos.Even
 	}
 }
 
-func (v *EventValidator) Validate(event *models.Event) error {
+func (v *EventValidator) ValidateModel(event *models.Event) error {
 	if event.VehicleID == uuid.Nil {
 		return errs.NewError("vehicle_id_required", "vehicle ID is required", errs.ValidationType, nil)
 	}

@@ -11,13 +11,14 @@ import (
 )
 
 type CostValidator struct {
-	VehicleRepo  repos.VehicleRepo
-	DocumentRepo repos.DocumentRepo
+	VehicleRepo  *repos.VehicleRepo
+	DocumentRepo *repos.DocumentRepo
 }
 
-func NewCostValidator(vr repos.VehicleRepo) *CostValidator {
+func NewCostValidator(vr *repos.VehicleRepo, dr *repos.DocumentRepo) *CostValidator {
 	return &CostValidator{
-		VehicleRepo: vr,
+		DocumentRepo: dr,
+		VehicleRepo:  vr,
 	}
 }
 

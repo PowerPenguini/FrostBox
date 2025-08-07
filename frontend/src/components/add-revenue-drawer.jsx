@@ -74,7 +74,6 @@ export function AddRevenueDrawer() {
         toast("Błąd podczas przesyłania kosztu.");
       }
     } catch (error) {
-      console.log(error);
       toast("Błąd sieci podczas przesyłania kosztu.");
     } finally {
       refetchData();

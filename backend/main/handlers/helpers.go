@@ -9,6 +9,16 @@ import (
 	"github.com/google/uuid"
 )
 
+func parseEventTypeID(w http.ResponseWriter, r *http.Request) (uuid.UUID, error) {
+	vehicleIDStr := r.PathValue("event_type_id")
+	vehicleID, err := uuid.Parse(vehicleIDStr)
+	if err != nil {
+		errs.WriteError(w, errs.NewError("invalid_event_type_id", "Event type ID is not a valid UUID", errs.ValidationType, err))
+		return uuid.UUID{}, err
+	}
+	return vehicleID, nil
+}
+
 func parseVehicleID(w http.ResponseWriter, r *http.Request) (uuid.UUID, error) {
 	vehicleIDStr := r.PathValue("vehicle_id")
 	vehicleID, err := uuid.Parse(vehicleIDStr)
