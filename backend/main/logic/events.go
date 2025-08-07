@@ -10,7 +10,7 @@ import (
 	"github.com/shopspring/decimal"
 )
 
-type AddEventWithCostParams struct {
+type AddEventWithCostsParams struct {
 	EventType    uuid.UUID
 	Value        *decimal.Decimal
 	VATRate      *decimal.Decimal
@@ -21,8 +21,8 @@ type AddEventWithCostParams struct {
 }
 
 // TODO: Add transactions
-func AddEventWithCost(di *di.DI, params *AddEventWithCostParams) error {
-	eventType, err := di.EventTypeRepo.GetEventType(params.EventType)
+func (p *AddEventWithCostsParams) Execute(di *di.DI) error {
+	eventType, err := di.EventTypeRepo.GetEventType(p.EventType)
 	if err != nil {
 		return errs.NewError(
 			"get_event_type_failed",
@@ -33,10 +33,10 @@ func AddEventWithCost(di *di.DI, params *AddEventWithCostParams) error {
 	}
 
 	event := &models.Event{
-		VehicleID:    *params.VehicleID,
-		EventTypeID:  params.EventType,
-		EventDate:    params.EventDate,
-		EventMileage: &params.EventMileage,
+		VehicleID:    *p.VehicleID,
+		EventTypeID:  p.EventType,
+		EventDate:    p.EventDate,
+		EventMileage: &p.EventMileage,
 	}
 
 	if err := di.EventValidator.ValidateModel(event); err != nil {
@@ -44,17 +44,17 @@ func AddEventWithCost(di *di.DI, params *AddEventWithCostParams) error {
 	}
 
 	var result AddCostResult
-	if params.VATRate != nil && params.Currency != nil && params.Value != nil && *params.Currency != "" {
+	if p.VATRate != nil && p.Currency != nil && p.Value != nil && *p.Currency != "" {
 		result, err = AddCost(di, &AddCostParams{
-			Value:        params.Value,
-			VATRate:      params.VATRate,
-			Currency:     params.Currency,
+			Value:        p.Value,
+			VATRate:      p.VATRate,
+			Currency:     p.Currency,
 			Quantity:     decimal.NewFromInt(1),
-			VehicleID:    params.VehicleID,
+			VehicleID:    p.VehicleID,
 			Title:        eventType.Name,
 			Category:     eventType.DefaultCostCategory,
-			InvoiceDate:  params.EventDate,
-			CostDate:     params.EventDate,
+			InvoiceDate:  p.EventDate,
+			CostDate:     p.EventDate,
 			Amortization: 1,
 		})
 		if err != nil {

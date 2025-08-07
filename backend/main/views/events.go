@@ -27,7 +27,10 @@ func (r *EventViewer) GetEventsByVehicle(vehicleID uuid.UUID) (contract.GetEvent
 		JOIN
 			event_types et ON e.event_type_id = et.id
 		WHERE
-			e.vehicle_id = $1;
+			e.vehicle_id = $1
+		ORDER BY
+			e.event_date DESC,
+			e.event_mileage DESC;
     `
 
 	rows, err := r.db.Query(query, vehicleID)

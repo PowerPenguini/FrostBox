@@ -5,12 +5,14 @@ import {
   IconEdit,
   IconTrash,
 } from "@tabler/icons-react";
-
+import { useState } from "react";
 import { Progress } from "@/components/ui/progress";
 import { formatDate } from "@/formatting/date";
 import { Button } from "./ui/button";
+import { DeleteDialog } from "./delete-dialog";
 
 export function VehicleInterval({ interval, onDelete }) {
+  const [open, setOpen] = useState(false)
   return (
     <div className="group relative flex flex-col gap-4 pt-2 pb-4 border rounded-lg">
       <div className="flex items-center gap-2 pr-2 pl-4 font-medium">
@@ -37,7 +39,8 @@ export function VehicleInterval({ interval, onDelete }) {
           <Button variant="ghost" className="p-0">
             <IconEdit />
           </Button>
-          <Button variant="ghost" className="p-0 text-destructive" onClick={() => onDelete(interval.id)}> 
+          
+          <Button variant="ghost" className="p-0 text-destructive" onClick={() => setOpen(true)}> 
             <IconTrash />
           </Button>
         </div>
@@ -103,6 +106,7 @@ export function VehicleInterval({ interval, onDelete }) {
           }
         />
       </div>
+      <DeleteDialog title="Jesteś pewny?" description="Usunięcie interwału jest nieodwracalne i może spowodować utratę jego stanu. Czy na pewno chcesz usunąć interwał?" open={open} onCancel={() => setOpen(false)} onDelete={onDelete}/>
     </div>
   );
 }

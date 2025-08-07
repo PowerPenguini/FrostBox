@@ -35,14 +35,11 @@ export function VehicleServiceView({ open, vehicle }) {
       toast.error(err.message);
     }
   };
-  
 
   useEffect(() => {
     if (!open) return;
     fetchIntervals();
   }, [open, vehicle.id, token]);
-
- 
 
   return (
     <>
@@ -65,7 +62,7 @@ export function VehicleServiceView({ open, vehicle }) {
             <VehicleInterval
               key={interval.id}
               interval={interval}
-              onDelete={handleDelete}
+              onDelete={() => handleDelete(interval.id) }
             />
           ))
         ) : (

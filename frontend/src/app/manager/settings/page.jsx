@@ -30,6 +30,8 @@ import { renderCategory } from "@/formatting/category";
 import { DeleteDialog } from "@/components/delete-dialog";
 import { Input } from "@/components/ui/input";
 import { EventTypeCategoryCombobox } from "@/components/event-type-category-combox";
+import { deleteEventType } from "@/api/eventsTypes";
+import { toast } from "sonner";
 
 export default function Page() {
   const [eventTypes, setEventTypes] = useState([]);
@@ -57,13 +59,15 @@ export default function Page() {
     }
   };
 
-  const handleDelete = (id) => {
-    setEventTypes((prev) => prev.filter((e) => e.id !== id));
-  };
-
-  const handleOpenChange = (isOpen) => {
-    if (!isOpen) setSelectedId(null);
-  };
+  const handleDelete = async (id) => {
+  try {
+    await deleteEventType(id, token);
+    setEventTypes((prev) => prev.filter(eventType => eventType.id !== id));
+    setSelectedId(null);
+  } catch (error) {
+    toast.error(error.message);
+  }
+};
 
   useEffect(() => {
     fetchData();
@@ -147,15 +151,12 @@ export default function Page() {
         </AccordionItem>
       </Accordion>
 
-      {/* Dialog usuwania */}
       <DeleteDialog
         title="Jesteś pewny?"
         description="Usunięcie typu zdarzenia jest nieodwracalne. Typ zdarzenia nie będzie mógł być używany w systemie."
-        id={selectedId}
-        endpoint="/api/v1/events/types"
         open={selectedId !== null}
-        onOpenChange={handleOpenChange}
-        onDeleted={handleDelete}
+        onCancel={() => setSelectedId(null)}
+        onDelete={() => handleDelete(selectedId)}
       />
     </div>
   );

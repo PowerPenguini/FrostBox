@@ -85,7 +85,7 @@ func (h *EventsHandler) PostEventsByVehicle(w http.ResponseWriter, r *http.Reque
 		currency = &req.Currency
 	}
 
-	params := &logic.AddEventWithCostParams{
+	params := &logic.AddEventWithCostsParams{
 		EventType:    eventTypeID,
 		Value:        eventValue,
 		VATRate:      vatRate,
