@@ -8,10 +8,10 @@ import (
 )
 
 type EventTypeRepo struct {
-	db *sql.DB
+	db DBTX
 }
 
-func NewEventTypeRepo(db *sql.DB) *EventTypeRepo {
+func NewEventTypeRepo(db DBTX) *EventTypeRepo {
 	return &EventTypeRepo{db: db}
 }
 

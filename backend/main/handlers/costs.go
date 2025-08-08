@@ -7,6 +7,7 @@ import (
 	"frostbox/di"
 	"frostbox/errs"
 	"frostbox/logic"
+	"log"
 	"net/http"
 
 	"github.com/shopspring/decimal"
@@ -67,7 +68,7 @@ func (h *CostsHandler) PostCosts(w http.ResponseWriter, r *http.Request) { // TO
 		return
 	}
 
-	params := &logic.AddCostParams{
+	act := &logic.AddCost{
 		Value:        &value,
 		VATRate:      &vatRate,
 		Currency:     &cost.Currency,
@@ -81,11 +82,12 @@ func (h *CostsHandler) PostCosts(w http.ResponseWriter, r *http.Request) { // TO
 		Country:      cost.Country,
 	}
 
-	_, err = logic.AddCost(h.di, params)
+	_, err = act.Execute(h.di)
 	if errors.Is(err, errs.ErrDataNotAvailable) {
 		unprocessableEntityDataNotAvailable(w)
 	}
 	if err != nil {
+		log.Println(err)
 		http.Error(w, "Failed to add cost", http.StatusInternalServerError) //TODO: obsłużyć to jako unporcessable entity w zależności od błędu
 		return
 	}

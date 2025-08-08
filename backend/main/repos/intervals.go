@@ -7,10 +7,10 @@ import (
 )
 
 type EventIntervalRepo struct {
-	db *sql.DB
+	db DBTX
 }
 
-func NewEventIntervalRepo(db *sql.DB) *EventIntervalRepo {
+func NewEventIntervalRepo(db DBTX) *EventIntervalRepo {
 	return &EventIntervalRepo{db: db}
 }
 

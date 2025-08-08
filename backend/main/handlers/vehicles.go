@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"encoding/json"
-	"errors"
 	"frostbox/contract"
 	"frostbox/di"
 	"frostbox/errs"
@@ -144,11 +143,8 @@ func (h *VehiclesHandler) PostVehicles(w http.ResponseWriter, r *http.Request) {
 	}
 
 	err = logic.AddVehicle(h.di, params)
-	if errors.Is(err, errs.ErrValidationFailed) {
-		unprocessableEntityInvalidPayload(w)
-	}
 	if err != nil {
-		http.Error(w, "Failed to add vehicle", http.StatusInternalServerError) //TODO: obsłużyć to jako unporcessable entity w zależności od błędu
+		errs.WriteError(w, err)
 		return
 	}
 

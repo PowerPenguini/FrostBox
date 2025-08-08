@@ -1,6 +1,7 @@
 package logic
 
 import (
+	"errors"
 	"frostbox/di"
 	"frostbox/errs"
 	"frostbox/models"
@@ -31,7 +32,7 @@ func AddVehicle(di *di.DI, params AddVehicleParams) error {
 	vin := strings.ToUpper(params.VIN)
 	if !validators.ValidateVIN(vin) ||
 		!validators.ValidatePLRegistrationNumber(params.RegistrationNumber) {
-		return errs.ErrValidationFailed
+		return errors.New("vehicle validation failed") // TODO: Get proper fuckin validator here
 	}
 
 	vehicle := &models.Vehicle{

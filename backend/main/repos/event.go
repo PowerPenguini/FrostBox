@@ -8,10 +8,10 @@ import (
 )
 
 type EventRepo struct {
-	db *sql.DB
+	db DBTX
 }
 
-func NewEventRepo(db *sql.DB) *EventRepo {
+func NewEventRepo(db DBTX) *EventRepo {
 	return &EventRepo{db: db}
 }
 
@@ -53,4 +53,22 @@ func (r *EventRepo) GetLastEventByVehicle(vehicleID uuid.UUID) (*models.Event, e
 	}
 
 	return &e, nil
+}
+
+func (r *EventRepo) Exists(id uuid.UUID) (bool, error) {
+	query := `
+		SELECT EXISTS (
+			SELECT 1
+			FROM events
+			WHERE id = $1
+		);`
+
+	var exists bool
+	err := r.db.QueryRow(query, id).Scan(&exists)
+
+	if err != nil {
+		return false, err
+	}
+
+	return exists, nil
 }

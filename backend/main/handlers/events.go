@@ -9,7 +9,6 @@ import (
 	"net/http"
 
 	"github.com/google/uuid"
-	"github.com/shopspring/decimal"
 )
 
 type EventsHandler struct {
@@ -38,9 +37,9 @@ func (h *EventsHandler) GetEventsByVehicle(w http.ResponseWriter, r *http.Reques
 }
 
 func (h *EventsHandler) PostEventsByVehicle(w http.ResponseWriter, r *http.Request) {
-	vehicleID, err := uuid.Parse(r.PathValue("vehicle_id"))
+	vehicleID, err := parseID(w, r, "vehicle_id")
 	if err != nil {
-		errs.WriteError(w, errs.NewError("invalid_vehicle_id", "Invalid vehicle ID", errs.BadRequestType, err))
+		errs.WriteError(w, err)
 		return
 	}
 
@@ -56,46 +55,25 @@ func (h *EventsHandler) PostEventsByVehicle(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	var (
-		eventValue *decimal.Decimal
-		vatRate    *decimal.Decimal
-		currency   *string
-	)
-
-	// ?? validation rule
-	if req.CostValue != "" {
-		val, err := decimal.NewFromString(req.CostValue)
-		if err != nil {
-			errs.WriteError(w, errs.NewError("invalid_cost_value", "Cost value must be a decimal", errs.BadRequestType, err))
-			return
-		}
-		eventValue = &val
-	}
-
-	if req.VATRate != "" {
-		val, err := decimal.NewFromString(req.VATRate)
-		if err != nil {
-			errs.WriteError(w, errs.NewError("invalid_vat_rate", "VAT rate must be a decimal", errs.ValidationType, err))
-			return
-		}
-		vatRate = &val
-	}
-
-	if req.Currency != "" {
-		currency = &req.Currency
-	}
-
-	params := &logic.AddEventWithCostsParams{
+	act := logic.AddEventWithCosts{
 		EventType:    eventTypeID,
-		Value:        eventValue,
-		VATRate:      vatRate,
-		Currency:     currency,
 		VehicleID:    &vehicleID,
 		EventDate:    req.EventDate,
 		EventMileage: req.Mileage,
 	}
 
-	if err := logic.AddEventWithCost(h.di, params); err != nil {
+	for _, c := range req.Costs {
+		cost := &logic.AddEventWithCostsEventCost{
+			Value:    c.Value,
+			VATRate:  c.VatRate,
+			Quantity: c.Quantity,
+			Currency: c.Currency,
+			Country:  c.Country,
+		}
+		act.Costs = append(act.Costs, cost)
+	}
+
+	if err := act.Execute(h.di); err != nil {
 		errs.WriteError(w, err)
 		return
 	}

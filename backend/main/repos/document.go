@@ -1,16 +1,14 @@
 package repos
 
 import (
-	"database/sql"
-
 	"github.com/google/uuid"
 )
 
 type DocumentRepo struct {
-	db *sql.DB
+	db DBTX
 }
 
-func NewDocumentRepo(db *sql.DB) *DocumentRepo {
+func NewDocumentRepo(db DBTX) *DocumentRepo {
 	return &DocumentRepo{db: db}
 }
 

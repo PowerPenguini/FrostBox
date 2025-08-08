@@ -1,17 +1,16 @@
 package repos
 
 import (
-	"database/sql"
 	"frostbox/models"
 
 	"github.com/google/uuid"
 )
 
 type VehicleRepo struct {
-	db *sql.DB
+	db DBTX
 }
 
-func NewVehicleRepository(db *sql.DB) *VehicleRepo {
+func NewVehicleRepository(db DBTX) *VehicleRepo {
 	return &VehicleRepo{db: db}
 }
 

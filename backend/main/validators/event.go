@@ -65,23 +65,5 @@ func (v *EventValidator) ValidateModel(event *models.Event) error {
 		}
 	}
 
-	if err := v.ValidateCostID(event); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (v *EventValidator) ValidateCostID(event *models.Event) error {
-	if event.CostID == nil {
-		return nil
-	}
-	exists, err := v.CostRepo.Exists(*event.CostID)
-	if err != nil {
-		return errs.NewError("cost_check_failed", "failed to verify cost existence", errs.InternalType, err)
-	}
-	if !exists {
-		return errs.NewError("cost_not_found", "event cost does not exist", errs.ValidationType, nil)
-	}
 	return nil
 }

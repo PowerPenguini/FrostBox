@@ -44,6 +44,27 @@ CREATE TABLE
         registration_number VARCHAR(20) NOT NULL UNIQUE
     );
 
+-- TODO: Add settlement date
+CREATE TABLE
+    event_types (
+        id UUID PRIMARY KEY DEFAULT uuid_generate_v4 (),
+        name TEXT NOT NULL,
+        category event_type_category NOT NULL,
+        system BOOLEAN NOT NULL DEFAULT FALSE,
+        default_cost_category cost_category NOT NULL DEFAULT 'other'
+    );
+
+CREATE TABLE
+    events (
+        id UUID PRIMARY KEY DEFAULT uuid_generate_v4 (),
+        vehicle_id UUID NOT NULL REFERENCES vehicles (id) ON DELETE CASCADE,
+        event_type_id UUID NOT NULL REFERENCES event_types (id) ON DELETE CASCADE,
+        event_date DATE NOT NULL,
+        event_mileage INT
+        -- cost_id UUID,
+        -- FOREIGN KEY (cost_id) REFERENCES costs (id) ON DELETE CASCADE
+    );
+
 CREATE TABLE
     costs (
         id UUID PRIMARY KEY DEFAULT uuid_generate_v4 (),
@@ -61,10 +82,12 @@ CREATE TABLE
         invoice_date DATE NOT NULL,
         cost_date DATE NOT NULL,
         document_id UUID,
+        event_id UUID,
         amortization INT NOT NULL,
         created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
         FOREIGN KEY (document_id) REFERENCES documents (id) ON DELETE CASCADE,
-        FOREIGN KEY (vehicle_id) REFERENCES vehicles (id) ON DELETE CASCADE
+        FOREIGN KEY (vehicle_id) REFERENCES vehicles (id) ON DELETE CASCADE,
+        FOREIGN KEY (event_id) REFERENCES events (id)
     );
 
 -- TODO: Add settlement date
@@ -87,16 +110,6 @@ CREATE TABLE
         FOREIGN KEY (vehicle_id) REFERENCES vehicles (id) ON DELETE CASCADE
     );
 
--- TODO: Add settlement date
-
-CREATE TABLE event_types (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    name TEXT NOT NULL,
-    category event_type_category NOT NULL,
-    system BOOLEAN NOT NULL DEFAULT FALSE,
-    default_cost_category cost_category NOT NULL DEFAULT 'other'
-);
-
 CREATE TABLE
     event_intervals (
         id UUID PRIMARY KEY DEFAULT uuid_generate_v4 (),
@@ -105,15 +118,4 @@ CREATE TABLE
         distance_interval_km INT,
         time_interval INTERVAL,
         warning_offset INTERVAL NOT NULL -- km/data // Counter
-    );
-
-CREATE TABLE
-    events (
-        id UUID PRIMARY KEY DEFAULT uuid_generate_v4 (),
-        vehicle_id UUID NOT NULL REFERENCES vehicles (id) ON DELETE CASCADE,
-        event_type_id UUID NOT NULL REFERENCES event_types (id) ON DELETE CASCADE,
-        event_date DATE NOT NULL,
-        event_mileage INT,
-        cost_id UUID,
-        FOREIGN KEY (cost_id) REFERENCES costs (id) ON DELETE CASCADE
     );

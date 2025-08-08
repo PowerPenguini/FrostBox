@@ -12,5 +12,4 @@ type Event struct {
 	EventTypeID  uuid.UUID
 	EventDate    time.Time
 	EventMileage *int
-	CostID       *uuid.UUID
 }

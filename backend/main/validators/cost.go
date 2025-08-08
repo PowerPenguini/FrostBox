@@ -1,7 +1,7 @@
 package validators
 
 import (
-	"errors"
+	"frostbox/errs"
 	"frostbox/models"
 	"frostbox/repos"
 	"strings"
@@ -11,12 +11,14 @@ import (
 )
 
 type CostValidator struct {
+	EventRepo    *repos.EventRepo
 	VehicleRepo  *repos.VehicleRepo
 	DocumentRepo *repos.DocumentRepo
 }
 
-func NewCostValidator(vr *repos.VehicleRepo, dr *repos.DocumentRepo) *CostValidator {
+func NewCostValidator(er *repos.EventRepo, vr *repos.VehicleRepo, dr *repos.DocumentRepo) *CostValidator {
 	return &CostValidator{
+		EventRepo:    er,
 		DocumentRepo: dr,
 		VehicleRepo:  vr,
 	}
@@ -24,83 +26,90 @@ func NewCostValidator(vr *repos.VehicleRepo, dr *repos.DocumentRepo) *CostValida
 
 func (v *CostValidator) Validate(cost *models.Cost) error {
 	if cost.Value.IsZero() || cost.Value.IsNegative() {
-		return errors.New("cost value must be greater than 0")
+		return errs.NewError("cost_value_invalid", "cost value must be greater than 0", errs.ValidationType, nil)
 	}
 
 	if cost.ValueMainCurrency.IsZero() || cost.ValueMainCurrency.IsNegative() {
-		return errors.New("cost value in main currency must be greater than 0")
+		return errs.NewError("cost_value_main_currency_invalid", "cost value in main currency must be greater than 0", errs.ValidationType, nil)
 	}
 
 	if strings.TrimSpace(cost.Currency) == "" {
-		return errors.New("currency is required")
+		return errs.NewError("cost_currency_required", "currency is required", errs.ValidationType, nil)
 	}
 	if !validateCurrency(cost.Currency) {
-		return errors.New("currency is not supported")
+		return errs.NewError("cost_currency_unsupported", "currency is not supported", errs.ValidationType, nil)
 	}
 
 	if strings.TrimSpace(cost.Title) == "" {
-		return errors.New("title is required")
+		return errs.NewError("cost_title_required", "title is required", errs.ValidationType, nil)
 	}
 	if len(cost.Title) > 255 {
-		return errors.New("max title length is 255 characters")
+		return errs.NewError("cost_title_too_long", "max title length is 255 characters", errs.ValidationType, nil)
 	}
 
-	// Validate cost and invoice dates
 	if cost.CostDate.After(time.Now()) {
-		return errors.New("cost date cannot be in the future")
+		return errs.NewError("cost_date_in_future", "cost date cannot be in the future", errs.ValidationType, nil)
 	}
 	if cost.InvoiceDate.After(time.Now()) {
-		return errors.New("invoice date cannot be in the future")
+		return errs.NewError("invoice_date_in_future", "invoice date cannot be in the future", errs.ValidationType, nil)
 	}
 
-	// Validate quantity
 	if cost.Quantity.IsNegative() {
-		return errors.New("quantity cannot be negative")
+		return errs.NewError("cost_quantity_negative", "quantity cannot be negative", errs.ValidationType, nil)
 	}
 
 	if cost.VATRate.IsNegative() {
-		return errors.New("VAT rate cannot be negative")
+		return errs.NewError("cost_vat_rate_negative", "VAT rate cannot be negative", errs.ValidationType, nil)
 	}
 	if !cost.VATRate.LessThanOrEqual(decimal.NewFromInt(100)) {
-		return errors.New("VAT rate cannot be higher than 100 percent")
+		return errs.NewError("cost_vat_rate_too_high", "VAT rate cannot be higher than 100 percent", errs.ValidationType, nil)
 	}
 
 	if cost.VATValue.IsNegative() {
-		return errors.New("VAT value cannot be negative")
+		return errs.NewError("cost_vat_value_negative", "VAT value cannot be negative", errs.ValidationType, nil)
 	}
 	if !cost.VATValue.LessThanOrEqual(cost.Value) {
-		return errors.New("VAT value cannot be greater than cost value")
+		return errs.NewError("cost_vat_value_too_high", "VAT value cannot be greater than cost value", errs.ValidationType, nil)
 	}
 
 	if !cost.VATValueMainCurrency.LessThanOrEqual(cost.ValueMainCurrency) {
-		return errors.New("VAT value in main currency cannot be greater than cost value in main currency")
+		return errs.NewError("cost_vat_value_main_currency_too_high", "VAT value in main currency cannot be greater than cost value in main currency", errs.ValidationType, nil)
 	}
 
 	if !validateCountryCode(cost.Country) {
-		return errors.New("country is not supported")
+		return errs.NewError("cost_country_unsupported", "country is not supported", errs.ValidationType, nil)
 	}
 	if !validateCostCategory(cost.Category) {
-		return errors.New("invalid cost category")
+		return errs.NewError("cost_category_invalid", "invalid cost category", errs.ValidationType, nil)
 	}
 
 	exists, err := v.VehicleRepo.Exists(*cost.VehicleID)
 	if err != nil {
-		return err
+		return errs.NewError("vehicle_check_failed", "failed to verify vehicle existence", errs.InternalType, err)
 	}
 	if !exists {
-		return errors.New("vehicle does not exist")
+		return errs.NewError("vehicle_not_found", "vehicle does not exist", errs.ValidationType, nil)
 	}
 
 	if cost.Amortization < 1 {
-		return errors.New("amortization cannot be less than 1 month")
+		return errs.NewError("cost_amortization_too_low", "amortization cannot be less than 1 month", errs.ValidationType, nil)
 	}
 
 	exists, err = v.DocumentRepo.Exists(*cost.DocumentID)
 	if err != nil {
-		return err
+		return errs.NewError("document_check_failed", "failed to verify document existence", errs.InternalType, err)
 	}
 	if !exists {
-		return errors.New("document does not exist")
+		return errs.NewError("document_not_found", "document does not exist", errs.ValidationType, nil)
 	}
+
+	exists, err = v.EventRepo.Exists(*cost.EventID)
+	if err != nil {
+		return errs.NewError("event_check_failed", "failed to verify event existence", errs.InternalType, err)
+	}
+	if !exists {
+		return errs.NewError("event_not_found", "event does not exist", errs.ValidationType, nil)
+	}
+
 	return nil
 }

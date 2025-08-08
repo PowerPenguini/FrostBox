@@ -1,17 +1,16 @@
 package repos
 
 import (
-	"database/sql"
 	"frostbox/models"
 
 	"github.com/google/uuid"
 )
 
 type CostRepo struct {
-	db *sql.DB
+	db DBTX
 }
 
-func NewCostRepository(db *sql.DB) *CostRepo {
+func NewCostRepository(db DBTX) *CostRepo {
 	return &CostRepo{db: db}
 }
 

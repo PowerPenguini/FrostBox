@@ -10,7 +10,7 @@ import (
 	"github.com/shopspring/decimal"
 )
 
-type AddCostParams struct {
+type AddCost struct {
 	Value        *decimal.Decimal
 	VATRate      *decimal.Decimal
 	Currency     *string
@@ -22,45 +22,48 @@ type AddCostParams struct {
 	CostDate     time.Time
 	Amortization int
 	Country      string
+	EventID      *uuid.UUID
 }
 
 type AddCostResult struct {
 	ID *uuid.UUID
 }
 
-func AddCost(di *di.DI, params *AddCostParams) (AddCostResult, error) {
-	vatValue := params.Value.Mul(*params.VATRate).Div(decimal.NewFromInt(100))
-	currencyDate := params.InvoiceDate.AddDate(0, 0, -1)
+func (p *AddCost) Execute(di *di.DI) (AddCostResult, error) {
+	vatValue := p.Value.Mul(*p.VATRate).Div(decimal.NewFromInt(100))
+	currencyDate := p.InvoiceDate.AddDate(0, 0, -1)
 
 	var result AddCostResult
-	valueMainCurrency, err := di.NBPService.ToPLN(*params.Currency, *params.Value, currencyDate)
+	valueMainCurrency, err := di.NBPService.ToPLN(*p.Currency, *p.Value, currencyDate)
 	if err != nil {
-		return result, err
+		return result, errs.NewError("currency_exchagne_failed", "value currency exchange failed due to internal error", errs.InternalType, err)
 	}
 
-	vatValueMainCurrency, err := di.NBPService.ToPLN(*params.Currency, vatValue, currencyDate)
+	vatValueMainCurrency, err := di.NBPService.ToPLN(*p.Currency, vatValue, currencyDate)
 	if err != nil {
-		return result, err
+		return result, errs.NewError("vat_currency_exchagne_failed", "vat value currency exchange failed due to internal error", errs.InternalType, err)
 	}
 	cost := &models.Cost{
-		Value:                *params.Value,
-		VATRate:              *params.VATRate,
+		Value:                *p.Value,
+		VATRate:              *p.VATRate,
 		VATValue:             vatValue,
-		Currency:             *params.Currency,
+		Currency:             *p.Currency,
 		ValueMainCurrency:    valueMainCurrency,
 		VATValueMainCurrency: vatValueMainCurrency,
-		Quantity:             params.Quantity,
-		VehicleID:            params.VehicleID,
-		Title:                params.Title,
-		Category:             params.Category,
-		Country:              params.Country,
-		InvoiceDate:          params.InvoiceDate,
-		CostDate:             params.CostDate,
-		Amortization:         params.Amortization,
+		Quantity:             p.Quantity,
+		VehicleID:            p.VehicleID,
+		Title:                p.Title,
+		Category:             p.Category,
+		Amortization:         p.Amortization,
+		InvoiceDate:          p.InvoiceDate,
+		CostDate:             p.CostDate,
+		Country:              "POL", // FIXME: Add real country
+		// Country:              p.Country,
+
 	}
 	err = di.CostValidator.Validate(cost)
 	if err != nil {
-		return AddCostResult{}, errs.ErrValidationFailed
+		return AddCostResult{}, err
 	}
 	id, err := di.CostRepo.Insert(cost)
 	return AddCostResult{id}, err

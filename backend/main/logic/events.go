@@ -2,7 +2,6 @@ package logic
 
 import (
 	"frostbox/di"
-	"frostbox/errs"
 	"frostbox/models"
 	"time"
 
@@ -10,77 +9,59 @@ import (
 	"github.com/shopspring/decimal"
 )
 
-type AddEventWithCostsParams struct {
-	EventType    uuid.UUID
-	Value        *decimal.Decimal
-	VATRate      *decimal.Decimal
-	Currency     *string
-	VehicleID    *uuid.UUID
+type AddEventWithCostsEventCost struct {
+	Value    decimal.Decimal
+	VATRate  decimal.Decimal
+	Quantity decimal.Decimal
+	Currency string
+	Country  string
+}
+type AddEventWithCosts struct {
 	EventDate    time.Time
 	EventMileage int
+	EventType    uuid.UUID
+	VehicleID    *uuid.UUID
+	Costs        []*AddEventWithCostsEventCost
 }
 
-// TODO: Add transactions
-func (p *AddEventWithCostsParams) Execute(di *di.DI) error {
-	eventType, err := di.EventTypeRepo.GetEventType(p.EventType)
-	if err != nil {
-		return errs.NewError(
-			"get_event_type_failed",
-			"failed to get event type",
-			errs.InternalType,
-			err,
-		)
-	}
-
-	event := &models.Event{
-		VehicleID:    *p.VehicleID,
-		EventTypeID:  p.EventType,
-		EventDate:    p.EventDate,
-		EventMileage: &p.EventMileage,
-	}
-
-	if err := di.EventValidator.ValidateModel(event); err != nil {
-		return err // już zawiera typ i kod błędu z walidatora
-	}
-
-	var result AddCostResult
-	if p.VATRate != nil && p.Currency != nil && p.Value != nil && *p.Currency != "" {
-		result, err = AddCost(di, &AddCostParams{
-			Value:        p.Value,
-			VATRate:      p.VATRate,
-			Currency:     p.Currency,
-			Quantity:     decimal.NewFromInt(1),
-			VehicleID:    p.VehicleID,
-			Title:        eventType.Name,
-			Category:     eventType.DefaultCostCategory,
-			InvoiceDate:  p.EventDate,
-			CostDate:     p.EventDate,
-			Amortization: 1,
-		})
+func (p *AddEventWithCosts) Execute(deps *di.DI) error {
+	return di.ExecuteInTransactionNoResult(deps, func(txDI *di.DI) error {
+		eventType, err := txDI.EventTypeRepo.GetEventType(p.EventType)
 		if err != nil {
-			return errs.NewError(
-				"add_cost_failed",
-				"failed to add cost for event",
-				errs.InternalType,
-				err,
-			)
+			return err
 		}
-	}
 
-	event.CostID = result.ID
+		event := &models.Event{
+			VehicleID:    *p.VehicleID,
+			EventTypeID:  p.EventType,
+			EventDate:    p.EventDate,
+			EventMileage: &p.EventMileage,
+		}
 
-	if err := di.EventValidator.ValidateCostID(event); err != nil {
-		return err
-	}
+		if err := deps.EventValidator.ValidateModel(event); err != nil {
+			return err
+		}
 
-	if err := di.EventRepo.AddEvent(event); err != nil {
-		return errs.NewError(
-			"add_event_failed",
-			"failed to save event",
-			errs.InternalType,
-			err,
-		)
-	}
+		for _, c := range p.Costs {
+			act := &AddCost{
+				Value:        &c.Value,
+				VATRate:      &c.VATRate,
+				Currency:     &c.Currency,
+				Quantity:     c.Quantity,
+				VehicleID:    p.VehicleID,
+				Title:        eventType.Name,
+				Category:     eventType.DefaultCostCategory,
+				InvoiceDate:  p.EventDate,
+				CostDate:     p.EventDate,
+				Amortization: 1,
+				Country:      "PL",
+			}
+			_, err := act.Execute(txDI)
+			if err != nil {
+				return err
+			}
+		}
 
-	return nil
+		return txDI.EventRepo.AddEvent(event)
+	})
 }
