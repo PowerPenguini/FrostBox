@@ -52,6 +52,7 @@ type DI struct {
 
 	db         *sql.DB
 	uowFactory *UnitOfWorkFactory
+	tx         *sql.Tx
 }
 
 func NewDI(connStr string) (*DI, error) {
@@ -116,7 +117,11 @@ func NewDatabase(connStr string) (*sql.DB, error) {
 }
 
 func ExecuteInTransaction[T any](d *DI, fn func(txDI *DI) (T, error)) (T, error) {
+	if d.tx != nil {
+		return fn(d)
+	}
 	tx, err := d.db.Begin()
+
 	var zero T
 	if err != nil {
 		return zero, err
@@ -138,6 +143,9 @@ func ExecuteInTransaction[T any](d *DI, fn func(txDI *DI) (T, error)) (T, error)
 }
 
 func ExecuteInTransactionNoResult(d *DI, fn func(txDI *DI) error) error {
+	if d.tx != nil {
+		return fn(d)
+	}
 	tx, err := d.db.Begin()
 	if err != nil {
 		return err
@@ -161,6 +169,10 @@ func ExecuteInTransactionNoResult(d *DI, fn func(txDI *DI) error) error {
 }
 
 func (d *DI) WithTx(tx *sql.Tx) *DI {
+	if tx == nil {
+		return d
+	}
+
 	vehicleRepoTx := repos.NewVehicleRepository(tx)
 	costRepoTx := repos.NewCostRepository(tx)
 	eventRepoTx := repos.NewEventRepo(tx)

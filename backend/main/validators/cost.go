@@ -83,6 +83,27 @@ func (v *CostValidator) Validate(cost *models.Cost) error {
 		return errs.NewError("cost_category_invalid", "invalid cost category", errs.ValidationType, nil)
 	}
 
+	if cost.Amortization < 1 {
+		return errs.NewError("cost_amortization_too_low", "amortization cannot be less than 1 month", errs.ValidationType, nil)
+	}
+
+	if err := v.ValidateVehicleID(cost); err != nil {
+		return err
+	}
+	if err := v.ValidateDocumentID(cost); err != nil {
+		return err
+	}
+	if err := v.ValidateEventID(cost); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (v *CostValidator) ValidateVehicleID(cost *models.Cost) error {
+	if cost.VehicleID == nil {
+		return nil
+	}
 	exists, err := v.VehicleRepo.Exists(*cost.VehicleID)
 	if err != nil {
 		return errs.NewError("vehicle_check_failed", "failed to verify vehicle existence", errs.InternalType, err)
@@ -90,26 +111,33 @@ func (v *CostValidator) Validate(cost *models.Cost) error {
 	if !exists {
 		return errs.NewError("vehicle_not_found", "vehicle does not exist", errs.ValidationType, nil)
 	}
+	return nil
+}
 
-	if cost.Amortization < 1 {
-		return errs.NewError("cost_amortization_too_low", "amortization cannot be less than 1 month", errs.ValidationType, nil)
+func (v *CostValidator) ValidateDocumentID(cost *models.Cost) error {
+	if cost.DocumentID == nil {
+		return nil
 	}
-
-	exists, err = v.DocumentRepo.Exists(*cost.DocumentID)
+	exists, err := v.DocumentRepo.Exists(*cost.DocumentID)
 	if err != nil {
 		return errs.NewError("document_check_failed", "failed to verify document existence", errs.InternalType, err)
 	}
 	if !exists {
 		return errs.NewError("document_not_found", "document does not exist", errs.ValidationType, nil)
 	}
+	return nil
+}
 
-	exists, err = v.EventRepo.Exists(*cost.EventID)
+func (v *CostValidator) ValidateEventID(cost *models.Cost) error {
+	if cost.EventID == nil {
+		return nil
+	}
+	exists, err := v.EventRepo.Exists(*cost.EventID)
 	if err != nil {
 		return errs.NewError("event_check_failed", "failed to verify event existence", errs.InternalType, err)
 	}
 	if !exists {
 		return errs.NewError("event_not_found", "event does not exist", errs.ValidationType, nil)
 	}
-
 	return nil
 }
