@@ -48,7 +48,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { VehicleCellViewer } from "@/components/vehicle-cell-viewer";
+import { VehicleViewer } from "@/components/vehicle-viewer/vehicle-viewer";
 import { useVehiclesDataContext } from "@/state/vehicles-data-context";
 import { Spinner } from "./spinner";
 
@@ -62,7 +62,7 @@ const columns = [
   {
     accessorKey: "Numer rejestracyjny",
     header: "Numer rejestracyjny",
-    cell: ({ row }) => <VehicleCellViewer item={row.original} />,
+    cell: ({ row }) => <VehicleViewer vehicle={row.original} />,
     enableHiding: false,
   },
 
@@ -181,7 +181,7 @@ export function VehiclesTable() {
                 .filter(
                   (column) =>
                     typeof column.accessorFn !== "undefined" &&
-                    column.getCanHide()
+                    column.getCanHide(),
                 )
                 .map((column) => {
                   return (
@@ -215,7 +215,7 @@ export function VehiclesTable() {
                         ? null
                         : flexRender(
                             header.column.columnDef.header,
-                            header.getContext()
+                            header.getContext(),
                           )}
                     </TableHead>
                   );

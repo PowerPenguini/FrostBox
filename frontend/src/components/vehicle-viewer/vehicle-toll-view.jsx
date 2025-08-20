@@ -8,9 +8,14 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
-import { DatePickerFilter } from "./date-picker-filter";
+import { DatePickerFilter } from "@/components/date-picker-filter";
 import { useAuthContext } from "@/state/auth-context";
-
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { IconHelpHexagon } from "@tabler/icons-react";
 
 const chartConfig = {
   DEU: {
@@ -27,7 +32,7 @@ const chartConfig = {
   },
 };
 
-export function VehicleFuelView({item}) {
+export function VehicleTollView({ open, item }) {
   const { token } = useAuthContext(null);
   const [data, setData] = useState(null);
   const [error, setError] = useState(null);
@@ -35,12 +40,11 @@ export function VehicleFuelView({item}) {
   useEffect(() => {
     const controller = new AbortController();
 
-    async function fetchFuel() {
+    async function fetchTolls() {
       try {
         const from = "2022-07-17";
         const to = "2025-07-17";
-        const vehicleID = "11111111-1111-1111-1111-111111111111";
-        const url = `http://localhost/api/v1/vehicles/${item.id}/fuel?start_date=${from}&end_date=${to}`;
+        const url = `http://localhost/api/v1/vehicles/${item.id}/tolls?start_date=${from}&end_date=${to}`;
 
         const res = await fetch(url, {
           headers: {
@@ -62,7 +66,7 @@ export function VehicleFuelView({item}) {
       }
     }
 
-    fetchFuel();
+    fetchTolls();
 
     return () => controller.abort();
   }, []);
@@ -91,7 +95,7 @@ export function VehicleFuelView({item}) {
                       country,
                       tolls: parseFloat(val.toll_distribution_main_currency),
                       fill: chartConfig[country]?.color || "#ccc",
-                    })
+                    }),
                   )}
                   dataKey="tolls"
                   nameKey="country"
@@ -139,70 +143,54 @@ export function VehicleFuelView({item}) {
           {[
             {
               label: "Udział w kosztach",
-              data: data?.fuel_percent_in_cost,
+              data: data?.toll_percent_in_cost,
               unit: "%",
               descrption: "Pomaga w ocenie xyz",
-              formula: "(koszt palwia / całkowity koszt) * 100%",
+              formula: "(koszt opłaty drogowej / całkowity koszt) * 100%",
             },
             {
               label: "Wskaźnik kosztów do przychodów (OER)",
-              data: data?.operating_expense_ratio,
+              data: data?.toll_percent_in_revenue,
               unit: "%",
               descrption:
-                "Wysoki wskaźnik kosztów paliwa wskazuje, że znaczna część przychodu jest wydawana na paliwo, co może sugerować niską efektywność operacyjną. Niski wskaźnik oznacza lepsze zarządzanie kosztami paliwa w stosunku do przychodów. 0-15% - dobrze 15-20 średnio, 20 > źle",
-              formula: "(koszt paliwa / przychód w danym okresie) * 100%",
+                "Pokazuje, jaki procent przychodów w danym okresie pochłaniają opłaty drogowe",
+              formula: "(opłaty drogowe / przychód w danym okresie) * 100%",
             },
             {
               label: "Wskaźnik zwrotu",
-              data: data?.revenue_per_fuel_unit,
+              data: data?.revenue_per_toll_unit,
               unit: "x",
               descrption:
                 "Przychód z 1 zł opłaty drogowej. Im wyższy wskaźnik, tym większa efektywność kosztowa trasy.",
               formula: "(przychód / opłaty drogowe)",
             },
             {
-              label: "Zysk po kosztach paliwa",
-              data: data?.revenue_after_fuel,
+              label: "Zysk po opłatach drogowych",
+              data: data?.revenue_after_tolls,
               unit: "zł",
               descrption: "Zysk po opłatach drogowych",
               formula: "(przychód - opłaty drogowe)",
             },
             {
               label: "Wskaźnik efektywności przychodowej",
-              data: data?.efficiency_after_fuel,
+              data: data?.efficiency_after_toll,
               unit: "%",
               descrption:
                 "Jaka część przychodu zostaje 'na czysto' po zapłaceniu za autostrady / opłaty drogowe.",
               formula: "((przychód - opłaty drogowe) / przychód) * 100%",
             },
             {
-              label: "Średnia cena paliwa",
-              data: data?.fuel_price_per_liter,
-              unit: "zł/l",
+              label: "Średni koszt opłaty drogowej",
+              data: data?.avg_toll_cost,
+              unit: "zł",
               descrption:
-                "",
-              formula: "(opłaty drogowe / liczba opłat drogowych)",
-            },
-            {
-              label: "Całkowita ilość paliwa",
-              data: data?.total_fuel_liters,
-              unit: "l",
-              descrption:
-                "",
-              formula: "(opłaty drogowe / liczba opłat drogowych)",
-            },
-            {
-              label: "ROI",
-              data: data?.fuel_roi,
-              unit: "%",
-              descrption:
-                "",
+                "Średni koszt opłaty drogowej na pojazd pomaga kontrolować wydatki, optymalizować trasy, porównywać efektywność aut i poprawiać rentowność przewozów.",
               formula: "(opłaty drogowe / liczba opłat drogowych)",
             },
           ].map((item, idx) => (
             <React.Fragment key={item.label}>
               <VehicleDataRecord {...item} />
-              {idx < 7 && <hr />}
+              {idx < 5 && <hr />}
             </React.Fragment>
           ))}
         </div>

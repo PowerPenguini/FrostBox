@@ -6,16 +6,16 @@ import {
 import { formatDate } from "@/formatting/date";
 import { useState, useEffect } from "react";
 import { useAuthContext } from "@/state/auth-context";
-import { Button } from "./ui/button";
-import { Spinner } from "./spinner";
-import { ErrorText } from "./error-text";
-import { AddEventForm } from "./add-event-form";
+import { Button } from "@/components/ui/button";
+import { Spinner } from "@/components/spinner";
+import { ErrorText } from "@/components/error-text";
+import { useVehicleViewer } from "@/state/vehicle-viewer-context";
 
 export function VehicleEventListView({ vehicleId }) {
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
-  const [showForm, setShowForm] = useState(false);
+  const { push } = useVehicleViewer();
 
   const { token } = useAuthContext();
   async function fetchEvents() {
@@ -50,7 +50,7 @@ export function VehicleEventListView({ vehicleId }) {
         <Button
           className="text-sm"
           variant="outline"
-          onClick={() => setShowForm(!showForm)}
+          onClick={() => push("Dodaj zdarzenie")}
         >
           <IconPlus />
           Dodaj zdarzenie
@@ -67,13 +67,6 @@ export function VehicleEventListView({ vehicleId }) {
 
       {!loading && !error && (
         <ol className="relative ml-3 border-gray-200 border-s">
-          {showForm && (
-            <AddEventForm
-              fetchEvents={fetchEvents}
-              vehicleId={vehicleId}
-              setShowForm={setShowForm}
-            />
-          )}
           {events.map((event) => (
             <Event
               key={event.id}

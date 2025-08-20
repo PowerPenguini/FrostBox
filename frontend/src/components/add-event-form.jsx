@@ -9,7 +9,7 @@ import { CurrencyCombox } from "./currency-combox";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ErrorText } from "@/components/error-text";
 import { translateErrorCode } from "@/formatting/errors";
-
+import { Label } from "@/components/ui/label";
 
 export function AddEventForm({ vehicleId, fetchEvents, setShowForm }) {
   const [formStep, setFormStep] = useState(1);
@@ -35,7 +35,7 @@ export function AddEventForm({ vehicleId, fetchEvents, setShowForm }) {
       !isNaN(formData.date.getTime())
     );
   }
-  
+
   const isStep2Valid = () => {
     if (noCost) return true;
     return (
@@ -54,7 +54,6 @@ export function AddEventForm({ vehicleId, fetchEvents, setShowForm }) {
       return;
     }
     setError("");
-    
 
     const payload = {
       event_type: formData.event_type,
@@ -121,20 +120,27 @@ export function AddEventForm({ vehicleId, fetchEvents, setShowForm }) {
       >
         {formStep === 1 && (
           <>
+            <Label htmlFor="type">Typ zdarzenia</Label>
             <EventTypeCombox
+              id="type"
               value={formData.event_type}
               onChange={(value) =>
                 setFormData({ ...formData, event_type: value })
               }
             />
+            <Label htmlFor="date">Data zdarzenia</Label>
+
             <DatePickerPopover
+              id="date"
               value={formData.date}
               onChange={(newDate) =>
                 setFormData({ ...formData, date: newDate })
               }
               text="Data zdarzenia"
             />
+            <Label htmlFor="type">Przebieg</Label>
             <Input
+              id="type"
               type="number"
               placeholder="Przebieg"
               value={formData.mileage}
@@ -146,7 +152,6 @@ export function AddEventForm({ vehicleId, fetchEvents, setShowForm }) {
             />
           </>
         )}
-
         {formStep === 2 && (
           <>
             <Input
@@ -200,9 +205,7 @@ export function AddEventForm({ vehicleId, fetchEvents, setShowForm }) {
             </div>
           </>
         )}
-
         {error && <ErrorText text={error} />}
-
         <div className="flex justify-between">
           {formStep > 1 && (
             <>
@@ -228,7 +231,7 @@ export function AddEventForm({ vehicleId, fetchEvents, setShowForm }) {
                   e.preventDefault();
                   if (isStep1Valid()) {
                     setFormStep(formStep + 1);
-                    setError("")
+                    setError("");
                   } else {
                     setError("Wypełnij wszystkie wymagane pola.");
                   }
@@ -243,4 +246,3 @@ export function AddEventForm({ vehicleId, fetchEvents, setShowForm }) {
     </li>
   );
 }
-

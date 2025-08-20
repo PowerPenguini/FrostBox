@@ -1,21 +1,13 @@
-import * as React from "react";
 import { Label, Pie, PieChart } from "recharts";
-import { useState, useEffect } from "react";
+import { useState, useEffect, Fragment } from "react";
 import { VehicleDataRecord } from "./vehicle-data-record";
-
 import {
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
-import { DatePickerFilter } from "./date-picker-filter";
+import { DatePickerFilter } from "@/components/date-picker-filter";
 import { useAuthContext } from "@/state/auth-context";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import { IconHelpHexagon } from "@tabler/icons-react";
 
 const chartConfig = {
   DEU: {
@@ -32,7 +24,7 @@ const chartConfig = {
   },
 };
 
-export function VehicleTollView({open, item}) {
+export function VehicleProfitabilityView({ vehicle }) {
   const { token } = useAuthContext(null);
   const [data, setData] = useState(null);
   const [error, setError] = useState(null);
@@ -44,7 +36,7 @@ export function VehicleTollView({open, item}) {
       try {
         const from = "2022-07-17";
         const to = "2025-07-17";
-        const url = `http://localhost/api/v1/vehicles/${item.id}/tolls?start_date=${from}&end_date=${to}`;
+        const url = `http://localhost/api/v1/vehicles/${vehicle.id}/profitability?start_date=${from}&end_date=${to}`;
 
         const res = await fetch(url, {
           headers: {
@@ -72,12 +64,12 @@ export function VehicleTollView({open, item}) {
   }, []);
 
   return (
-    <>
+    <div className="px-4">
       <div className="flex items-center gap-4 font-medium text-lg">
         Opłaty drogowe
         <DatePickerFilter />
       </div>
-      <div className="flex items-center gap-6">
+      <div className="flex gap-6">
         <div className="w-[250px]">
           <ChartContainer
             config={chartConfig}
@@ -95,7 +87,7 @@ export function VehicleTollView({open, item}) {
                       country,
                       tolls: parseFloat(val.toll_distribution_main_currency),
                       fill: chartConfig[country]?.color || "#ccc",
-                    })
+                    }),
                   )}
                   dataKey="tolls"
                   nameKey="country"
@@ -142,59 +134,48 @@ export function VehicleTollView({open, item}) {
         <div className="flex flex-col flex-1 gap-2">
           {[
             {
-              label: "Udział w kosztach",
-              data: data?.toll_percent_in_cost,
-              unit: "%",
-              descrption: "Pomaga w ocenie xyz",
-              formula: "(koszt opłaty drogowej / całkowity koszt) * 100%",
-            },
-            {
-              label: "Wskaźnik kosztów do przychodów (OER)",
-              data: data?.toll_percent_in_revenue,
-              unit: "%",
-              descrption:
-                "Pokazuje, jaki procent przychodów w danym okresie pochłaniają opłaty drogowe",
-              formula: "(opłaty drogowe / przychód w danym okresie) * 100%",
-            },
-            {
-              label: "Wskaźnik zwrotu",
-              data: data?.revenue_per_toll_unit,
-              unit: "x",
-              descrption:
-                "Przychód z 1 zł opłaty drogowej. Im wyższy wskaźnik, tym większa efektywność kosztowa trasy.",
-              formula: "(przychód / opłaty drogowe)",
-            },
-            {
-              label: "Zysk po opłatach drogowych",
-              data: data?.revenue_after_tolls,
+              label: "Suma kosztów",
+              data: data?.total_cost,
               unit: "zł",
-              descrption: "Zysk po opłatach drogowych",
-              formula: "(przychód - opłaty drogowe)",
+              descrption: "Suma wszystkich kosztów dla pojazdu",
             },
             {
-              label: "Wskaźnik efektywności przychodowej",
-              data: data?.efficiency_after_toll,
+              label: "Suma przychodów",
+              data: data?.total_revenue,
+              unit: "zł",
+              descrption: "Suma wszystkich kosztów dla pojazdu",
+            },
+            {
+              label: "Zysk",
+              data: data?.profit,
+              unit: "zł",
+              descrption: "Całkowity zysk dla pojazdu",
+              formula: "(całkowity przychód - całkowity koszt)",
+            },
+            {
+              label: "ROI",
+              data: data?.roi,
               unit: "%",
               descrption:
-                "Jaka część przychodu zostaje 'na czysto' po zapłaceniu za autostrady / opłaty drogowe.",
-              formula: "((przychód - opłaty drogowe) / przychód) * 100%",
+                "Wartość ROI pokazuje, ile zarobiłeś na każdej jednostce wydanej kwoty (np. 1 PLN zainwestowany zwrócił 0,5 PLN zysku, ROI = 0.5, czyli 50%)",
+              formula: "(całkowity przychód - całkowity koszt) / koszt) * 100%",
             },
             {
-              label: "Średni koszt opłaty drogowej",
-              data: data?.avg_toll_cost,
-              unit: "zł",
+              label: "Wskaźnik rentowności",
+              data: data?.profitability_ratio,
+              unit: "%",
               descrption:
-                "Średni koszt opłaty drogowej na pojazd pomaga kontrolować wydatki, optymalizować trasy, porównywać efektywność aut i poprawiać rentowność przewozów.",
-              formula: "(opłaty drogowe / liczba opłat drogowych)",
+                "Wskaźnik rentowności to procentowy udział zysku netto w przychodach ze sprzedaży. Wysoki wskaźnik wskazuje na efektywne zarządzanie kosztami",
+              formula: "(zysk / przychód) * 100%",
             },
           ].map((item, idx) => (
-            <React.Fragment key={item.label}>
+            <Fragment key={item.label}>
               <VehicleDataRecord {...item} />
               {idx < 5 && <hr />}
-            </React.Fragment>
+            </Fragment>
           ))}
         </div>
       </div>
-    </>
+    </div>
   );
 }

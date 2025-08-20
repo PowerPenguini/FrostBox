@@ -58,6 +58,7 @@ export default function RootLayout({ children }) {
         "--sidebar-width": "calc(var(--spacing) * 72)",
         "--header-height": "calc(var(--spacing) * 12)",
       }}
+      className="min-h-svh"
     >
       <AppSidebar variant="inset" />
       <SidebarInset>{children}</SidebarInset>

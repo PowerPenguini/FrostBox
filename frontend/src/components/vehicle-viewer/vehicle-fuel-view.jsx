@@ -1,13 +1,14 @@
 import * as React from "react";
 import { Label, Pie, PieChart } from "recharts";
 import { useState, useEffect } from "react";
-import { VehicleDataRecord } from "./vehicle-data-record"; 
+import { VehicleDataRecord } from "@/components/vehicle-viewer/vehicle-data-record";
+
 import {
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
-import { DatePickerFilter } from "./date-picker-filter";
+import { DatePickerFilter } from "@/components/date-picker-filter";
 import { useAuthContext } from "@/state/auth-context";
 
 const chartConfig = {
@@ -25,7 +26,7 @@ const chartConfig = {
   },
 };
 
-export function VehicleProfitabilityView({item}) {
+export function VehicleFuelView({ item }) {
   const { token } = useAuthContext(null);
   const [data, setData] = useState(null);
   const [error, setError] = useState(null);
@@ -33,11 +34,12 @@ export function VehicleProfitabilityView({item}) {
   useEffect(() => {
     const controller = new AbortController();
 
-    async function fetchTolls() {
+    async function fetchFuel() {
       try {
         const from = "2022-07-17";
         const to = "2025-07-17";
-        const url = `http://localhost/api/v1/vehicles/${item.id}/profitability?start_date=${from}&end_date=${to}`;
+        const vehicleID = "11111111-1111-1111-1111-111111111111";
+        const url = `http://localhost/api/v1/vehicles/${item.id}/fuel?start_date=${from}&end_date=${to}`;
 
         const res = await fetch(url, {
           headers: {
@@ -59,7 +61,7 @@ export function VehicleProfitabilityView({item}) {
       }
     }
 
-    fetchTolls();
+    fetchFuel();
 
     return () => controller.abort();
   }, []);
@@ -70,7 +72,7 @@ export function VehicleProfitabilityView({item}) {
         Opłaty drogowe
         <DatePickerFilter />
       </div>
-      <div className="flex gap-6">
+      <div className="flex items-center gap-6">
         <div className="w-[250px]">
           <ChartContainer
             config={chartConfig}
@@ -88,7 +90,7 @@ export function VehicleProfitabilityView({item}) {
                       country,
                       tolls: parseFloat(val.toll_distribution_main_currency),
                       fill: chartConfig[country]?.color || "#ccc",
-                    })
+                    }),
                   )}
                   dataKey="tolls"
                   nameKey="country"
@@ -135,45 +137,68 @@ export function VehicleProfitabilityView({item}) {
         <div className="flex flex-col flex-1 gap-2">
           {[
             {
-              label: "Suma kosztów",
-              data: data?.total_cost,
-              unit: "zł",
-              descrption: "Suma wszystkich kosztów dla pojazdu",
+              label: "Udział w kosztach",
+              data: data?.fuel_percent_in_cost,
+              unit: "%",
+              descrption: "Pomaga w ocenie xyz",
+              formula: "(koszt palwia / całkowity koszt) * 100%",
             },
             {
-              label: "Suma przychodów",
-              data: data?.total_revenue,
-              unit: "zł",
+              label: "Wskaźnik kosztów do przychodów (OER)",
+              data: data?.operating_expense_ratio,
+              unit: "%",
               descrption:
-                "Suma wszystkich kosztów dla pojazdu",
+                "Wysoki wskaźnik kosztów paliwa wskazuje, że znaczna część przychodu jest wydawana na paliwo, co może sugerować niską efektywność operacyjną. Niski wskaźnik oznacza lepsze zarządzanie kosztami paliwa w stosunku do przychodów. 0-15% - dobrze 15-20 średnio, 20 > źle",
+              formula: "(koszt paliwa / przychód w danym okresie) * 100%",
             },
             {
-              label: "Zysk",
-              data: data?.profit,
-              unit: "zł",
+              label: "Wskaźnik zwrotu",
+              data: data?.revenue_per_fuel_unit,
+              unit: "x",
               descrption:
-                "Całkowity zysk dla pojazdu",
-              formula: "(całkowity przychód - całkowity koszt)",
+                "Przychód z 1 zł opłaty drogowej. Im wyższy wskaźnik, tym większa efektywność kosztowa trasy.",
+              formula: "(przychód / opłaty drogowe)",
+            },
+            {
+              label: "Zysk po kosztach paliwa",
+              data: data?.revenue_after_fuel,
+              unit: "zł",
+              descrption: "Zysk po opłatach drogowych",
+              formula: "(przychód - opłaty drogowe)",
+            },
+            {
+              label: "Wskaźnik efektywności przychodowej",
+              data: data?.efficiency_after_fuel,
+              unit: "%",
+              descrption:
+                "Jaka część przychodu zostaje 'na czysto' po zapłaceniu za autostrady / opłaty drogowe.",
+              formula: "((przychód - opłaty drogowe) / przychód) * 100%",
+            },
+            {
+              label: "Średnia cena paliwa",
+              data: data?.fuel_price_per_liter,
+              unit: "zł/l",
+              descrption: "",
+              formula: "(opłaty drogowe / liczba opłat drogowych)",
+            },
+            {
+              label: "Całkowita ilość paliwa",
+              data: data?.total_fuel_liters,
+              unit: "l",
+              descrption: "",
+              formula: "(opłaty drogowe / liczba opłat drogowych)",
             },
             {
               label: "ROI",
-              data: data?.roi,
+              data: data?.fuel_roi,
               unit: "%",
-              descrption: "Wartość ROI pokazuje, ile zarobiłeś na każdej jednostce wydanej kwoty (np. 1 PLN zainwestowany zwrócił 0,5 PLN zysku, ROI = 0.5, czyli 50%)",
-              formula: "(całkowity przychód - całkowity koszt) / koszt) * 100%",
-            },
-            {
-              label: "Wskaźnik rentowności",
-              data: data?.profitability_ratio,
-              unit: "%",
-              descrption:
-                "Wskaźnik rentowności to procentowy udział zysku netto w przychodach ze sprzedaży. Wysoki wskaźnik wskazuje na efektywne zarządzanie kosztami",
-              formula: "(zysk / przychód) * 100%",
+              descrption: "",
+              formula: "(opłaty drogowe / liczba opłat drogowych)",
             },
           ].map((item, idx) => (
             <React.Fragment key={item.label}>
               <VehicleDataRecord {...item} />
-              {idx < 5 && <hr />}
+              {idx < 7 && <hr />}
             </React.Fragment>
           ))}
         </div>

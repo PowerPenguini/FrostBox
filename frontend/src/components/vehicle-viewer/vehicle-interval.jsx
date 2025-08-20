@@ -8,11 +8,11 @@ import {
 import { useState } from "react";
 import { Progress } from "@/components/ui/progress";
 import { formatDate } from "@/formatting/date";
-import { Button } from "./ui/button";
-import { DeleteDialog } from "./delete-dialog";
+import { Button } from "@/components/ui/button";
+import { DeleteDialog } from "@/components/delete-dialog";
 
 export function VehicleInterval({ interval, onDelete }) {
-  const [open, setOpen] = useState(false)
+  const [open, setOpen] = useState(false);
   return (
     <div className="group relative flex flex-col gap-4 pt-2 pb-4 border rounded-lg">
       <div className="flex items-center gap-2 pr-2 pl-4 font-medium">
@@ -39,8 +39,12 @@ export function VehicleInterval({ interval, onDelete }) {
           <Button variant="ghost" className="p-0">
             <IconEdit />
           </Button>
-          
-          <Button variant="ghost" className="p-0 text-destructive" onClick={() => setOpen(true)}> 
+
+          <Button
+            variant="ghost"
+            className="p-0 text-destructive"
+            onClick={() => setOpen(true)}
+          >
             <IconTrash />
           </Button>
         </div>
@@ -82,7 +86,7 @@ export function VehicleInterval({ interval, onDelete }) {
               ? calculateMileageProgress(
                   interval.mileage_start,
                   interval.mileage_end,
-                  interval.mileage_current
+                  interval.mileage_current,
                 )
               : 0
           }
@@ -106,7 +110,13 @@ export function VehicleInterval({ interval, onDelete }) {
           }
         />
       </div>
-      <DeleteDialog title="Jesteś pewny?" description="Usunięcie interwału jest nieodwracalne i może spowodować utratę jego stanu. Czy na pewno chcesz usunąć interwał?" open={open} onCancel={() => setOpen(false)} onDelete={onDelete}/>
+      <DeleteDialog
+        title="Jesteś pewny?"
+        description="Usunięcie interwału jest nieodwracalne i może spowodować utratę jego stanu. Czy na pewno chcesz usunąć interwał?"
+        open={open}
+        onCancel={() => setOpen(false)}
+        onDelete={onDelete}
+      />
     </div>
   );
 }

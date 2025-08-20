@@ -1,11 +1,11 @@
 import { IconPlus } from "@tabler/icons-react";
 import { useAuthContext } from "@/state/auth-context";
-import { Spinner } from "./spinner";
+import { Spinner } from "@/components/spinner";
 import { ErrorText } from "@/components/error-text";
 import { toast } from "sonner";
 import { VehicleInterval } from "./vehicle-interval";
 import { useState, useEffect } from "react";
-import { Button } from "./ui/button";
+import { Button } from "@/components/ui/button";
 import { getVehicleIntervals, deleteInterval } from "@/api/vehicles";
 
 export function VehicleServiceView({ open, vehicle }) {
@@ -25,7 +25,7 @@ export function VehicleServiceView({ open, vehicle }) {
       setLoading(false);
     }
   };
-  
+
   const handleDelete = async (id) => {
     try {
       await deleteInterval(id, token);
@@ -62,7 +62,7 @@ export function VehicleServiceView({ open, vehicle }) {
             <VehicleInterval
               key={interval.id}
               interval={interval}
-              onDelete={() => handleDelete(interval.id) }
+              onDelete={() => handleDelete(interval.id)}
             />
           ))
         ) : (
