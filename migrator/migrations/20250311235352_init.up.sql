@@ -10,7 +10,14 @@ CREATE TYPE cost_category AS ENUM ('fuel', 'additive', 'toll', 'service', 'other
 
 CREATE TYPE vehicle_type AS ENUM ('semitruck', 'semitrailer');
 
-CREATE TYPE event_type_category AS ENUM ('maintenance', 'service', 'administrative');
+CREATE TYPE event_type_category AS ENUM ('maintenance', 'service', 'periodic_service', 'emergency_service', 'administrative');
+
+CREATE TYPE component_area AS ENUM (
+  'engine_and_lubrication_system',
+  'braking_system',
+  'drivetrain',
+  'cabin_and_equipment'
+);
 
 CREATE TABLE
     users (
@@ -51,7 +58,9 @@ CREATE TABLE
         name TEXT NOT NULL,
         category event_type_category NOT NULL,
         system BOOLEAN NOT NULL DEFAULT FALSE,
-        default_cost_category cost_category NOT NULL DEFAULT 'other'
+        default_cost_category cost_category NOT NULL DEFAULT 'other',
+        description TEXT,
+        component_area component_area
     );
 
 CREATE TABLE

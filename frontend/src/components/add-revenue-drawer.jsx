@@ -90,7 +90,7 @@ export function AddRevenueDrawer() {
       <DrawerTrigger asChild>
         <Button variant="outline" size="sm">
           <IconPlus />
-          <span className="hidden lg:inline">Dodaj koszt</span>
+          <span className="hidden lg:inline">Dodaj przychód</span>
         </Button>
       </DrawerTrigger>
       <DrawerContent>

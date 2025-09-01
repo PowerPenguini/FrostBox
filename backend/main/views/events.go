@@ -42,7 +42,7 @@ func (r *EventViewer) GetEventsByVehicle(vehicleID uuid.UUID) (contract.GetEvent
 	var events contract.GetEventsResponse
 
 	for rows.Next() {
-		var e contract.GetEvent
+		var e contract.Event
 		err := rows.Scan(
 			&e.ID,
 			&e.EventType,
@@ -62,36 +62,3 @@ func (r *EventViewer) GetEventsByVehicle(vehicleID uuid.UUID) (contract.GetEvent
 	return events, nil
 }
 
-func (r *EventViewer) GetEventsTypes() (contract.GetEventsTypes, error) {
-	query := `
-		SELECT id, name, category, system FROM event_types;
-    `
-
-	rows, err := r.db.Query(query)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-
-	var types contract.GetEventsTypes
-
-	for rows.Next() {
-		var e contract.EventType
-		err := rows.Scan(
-			&e.ID,
-			&e.Name,
-			&e.Category,
-			&e.System,
-		)
-		if err != nil {
-			return nil, err
-		}
-		types = append(types, e)
-	}
-
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-
-	return types, nil
-}

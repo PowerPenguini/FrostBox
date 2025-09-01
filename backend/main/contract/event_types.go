@@ -7,10 +7,12 @@ import (
 type GetEventsTypes []EventType
 
 type EventType struct {
-	ID       uuid.UUID `json:"id"`
-	Name     string    `json:"name"`
-	Category string    `json:"category"`
-	System   bool      `json:"system"`
+	ID            uuid.UUID `json:"id"`
+	Name          string    `json:"name"`
+	Description   string    `json:"description"`
+	Category      string    `json:"category"`
+	System        bool      `json:"system"`
+	ComponentArea string    `json:"component_area"`
 }
 
 type PostEventsTypesReq struct {

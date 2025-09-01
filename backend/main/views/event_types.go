@@ -31,3 +31,39 @@ func (r *EventTypeViewer) GetEventTypeCategories() (contract.GetEventsTypesCateg
 	}
 	return categories, nil
 }
+
+func (r *EventViewer) GetEventsTypes() (contract.GetEventsTypes, error) {
+	query := `
+		SELECT id, name, category, system, description, component_area FROM event_types;
+    `
+
+	rows, err := r.db.Query(query)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var types contract.GetEventsTypes
+
+	for rows.Next() {
+		var e contract.EventType
+		err := rows.Scan(
+			&e.ID,
+			&e.Name,
+			&e.Category,
+			&e.System,
+			&e.Description,
+			&e.ComponentArea,
+		)
+		if err != nil {
+			return nil, err
+		}
+		types = append(types, e)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return types, nil
+}

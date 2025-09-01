@@ -1,7 +1,7 @@
 package validators
 
 func validateCostCategory(category string) bool {
-	validCategories := map[string]struct{}{
+	validCategories := map[string]struct{}{ // TODO: get from db
 		"fuel":     {},
 		"additive": {},
 		"toll":     {},

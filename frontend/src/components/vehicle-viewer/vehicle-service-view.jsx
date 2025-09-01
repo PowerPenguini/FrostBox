@@ -8,7 +8,7 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { getVehicleIntervals, deleteInterval } from "@/api/vehicles";
 
-export function VehicleServiceView({ open, vehicle }) {
+export function VehicleIntervalsView({ open, vehicle }) {
   const [intervals, setIntervals] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -42,7 +42,7 @@ export function VehicleServiceView({ open, vehicle }) {
   }, [open, vehicle.id, token]);
 
   return (
-    <>
+    <div className="px-4 flex flex-col gap-4 pb-4">
       <div className="flex items-center gap-4 font-medium text-lg">
         Interwały
         <Button className="text-sm" variant="outline">
@@ -50,9 +50,9 @@ export function VehicleServiceView({ open, vehicle }) {
           Dodaj interwał
         </Button>
       </div>
-      <div className="gap-4 grid grid-cols-2">
+      <div className="gap-4 flex flex-col">
         {loading ? (
-          <div className="place-items-center grid col-span-2 p-4 w-full">
+          <div className="place-items-center grid p-4 w-full">
             <Spinner />
           </div>
         ) : error ? (
@@ -71,6 +71,6 @@ export function VehicleServiceView({ open, vehicle }) {
           </div>
         )}
       </div>
-    </>
+    </div>
   );
 }

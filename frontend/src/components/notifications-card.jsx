@@ -68,9 +68,9 @@ function Notification({ notification }) {
         <p className="text-sm leading-none">
           {notification.status === "CRITICAL" && (
             <>
-              Przekroczony interwał{" "}
-              <span className="font-bold">{notification.event_type_name}</span>{" "}
-              dla pojazdu{" "}
+              Przekroczony interwał
+              <span className="font-bold">{notification.event_type_name}</span>
+              dla pojazdu
               <span className="font-bold">
                 {notification.vehicle_registration_number}
               </span>
@@ -78,9 +78,9 @@ function Notification({ notification }) {
           )}
           {notification.status === "WARNING" && (
             <>
-              Zbliża się interwał{" "}
-              <span className="font-bold">{notification.event_type_name}</span>{" "}
-              dla pojazdu{" "}
+              Zbliża się interwał
+              <span className="font-bold">{notification.event_type_name}</span>
+              dla pojazdu
               <span className="font-bold">
                 {notification.vehicle_registration_number}
               </span>

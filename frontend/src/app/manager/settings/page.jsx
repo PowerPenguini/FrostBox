@@ -30,7 +30,7 @@ import { renderCategory } from "@/formatting/category";
 import { DeleteDialog } from "@/components/delete-dialog";
 import { Input } from "@/components/ui/input";
 import { EventTypeCategoryCombobox } from "@/components/event-type-category-combox";
-import { deleteEventType } from "@/api/eventsTypes";
+import { DeleteEventType } from "@/api/eventsTypes";
 import { toast } from "sonner";
 
 export default function Page() {
@@ -61,7 +61,7 @@ export default function Page() {
 
   const handleDelete = async (id) => {
   try {
-    await deleteEventType(id, token);
+    await DeleteEventType(id, token);
     setEventTypes((prev) => prev.filter(eventType => eventType.id !== id));
     setSelectedId(null);
   } catch (error) {

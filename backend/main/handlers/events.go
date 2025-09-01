@@ -5,10 +5,8 @@ import (
 	"frostbox/contract"
 	"frostbox/di"
 	"frostbox/errs"
-	"frostbox/logic"
+	"frostbox/mappers"
 	"net/http"
-
-	"github.com/google/uuid"
 )
 
 type EventsHandler struct {
@@ -49,29 +47,7 @@ func (h *EventsHandler) PostEventsByVehicle(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	eventTypeID, err := uuid.Parse(req.EventType)
-	if err != nil {
-		errs.WriteError(w, errs.NewError("invalid_event_type", "Invalid event type ID", errs.BadRequestType, err))
-		return
-	}
-
-	act := logic.AddEventWithCosts{
-		EventType:    eventTypeID,
-		VehicleID:    &vehicleID,
-		EventDate:    req.EventDate,
-		EventMileage: req.Mileage,
-	}
-
-	for _, c := range req.Costs {
-		cost := &logic.AddEventWithCostsEventCost{
-			Value:    c.Value,
-			VATRate:  c.VatRate,
-			Quantity: c.Quantity,
-			Currency: c.Currency,
-			Country:  c.Country,
-		}
-		act.Costs = append(act.Costs, cost)
-	}
+	act := mappers.MapPostEventsContractToLogic(req, vehicleID)
 
 	if err := act.Execute(h.di); err != nil {
 		errs.WriteError(w, err)

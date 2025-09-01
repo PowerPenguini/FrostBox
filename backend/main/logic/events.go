@@ -9,6 +9,19 @@ import (
 	"github.com/shopspring/decimal"
 )
 
+type AddEventsWithCosts struct {
+	VehicleID uuid.UUID
+	Events    []*AddEventsWithCostsEvent
+}
+
+type AddEventsWithCostsEvent struct {
+	EventType    uuid.UUID
+	VehicleID    uuid.UUID
+	EventDate    time.Time
+	EventMileage int
+	Costs        []*AddEventWithCostsEventCost
+}
+
 type AddEventWithCostsEventCost struct {
 	Value    decimal.Decimal
 	VATRate  decimal.Decimal
@@ -16,52 +29,51 @@ type AddEventWithCostsEventCost struct {
 	Currency string
 	Country  string
 }
-type AddEventWithCosts struct {
-	EventDate    time.Time
-	EventMileage int
-	EventType    uuid.UUID
-	VehicleID    *uuid.UUID
-	Costs        []*AddEventWithCostsEventCost
-}
 
-func (p *AddEventWithCosts) Execute(deps *di.DI) error {
+func (p *AddEventsWithCosts) Execute(deps *di.DI) error {
 	return di.ExecuteInTransactionNoResult(deps, func(txDI *di.DI) error {
-		eventType, err := txDI.EventTypeRepo.GetEventType(p.EventType)
-		if err != nil {
-			return err
-		}
-
-		event := &models.Event{
-			VehicleID:    *p.VehicleID,
-			EventTypeID:  p.EventType,
-			EventDate:    p.EventDate,
-			EventMileage: &p.EventMileage,
-		}
-
-		if err := deps.EventValidator.ValidateModel(event); err != nil {
-			return err
-		}
-
-		for _, c := range p.Costs {
-			act := &AddCost{
-				Value:        &c.Value,
-				VATRate:      &c.VATRate,
-				Currency:     &c.Currency,
-				Quantity:     c.Quantity,
-				VehicleID:    p.VehicleID,
-				Title:        eventType.Name,
-				Category:     eventType.DefaultCostCategory,
-				InvoiceDate:  p.EventDate,
-				CostDate:     p.EventDate,
-				Amortization: 1,
-				Country:      "PL",
-			}
-			_, err := act.Execute(txDI)
+		for _, ev := range p.Events {
+			eventType, err := txDI.EventTypeRepo.GetEventType(ev.EventType)
 			if err != nil {
+				return err
+			}
+
+			event := &models.Event{
+				VehicleID:    ev.VehicleID,
+				EventTypeID:  ev.EventType,
+				EventDate:    ev.EventDate,
+				EventMileage: &ev.EventMileage,
+			}
+
+			if err := deps.EventValidator.ValidateModel(event); err != nil {
+				return err
+			}
+
+			for _, c := range ev.Costs {
+				act := &AddCost{
+					Value:        &c.Value,
+					VATRate:      &c.VATRate,
+					Currency:     &c.Currency,
+					Quantity:     c.Quantity,
+					VehicleID:    &ev.VehicleID,
+					Title:        eventType.Name,
+					Category:     eventType.DefaultCostCategory,
+					InvoiceDate:  ev.EventDate,
+					CostDate:     ev.EventDate,
+					Amortization: 1,
+					Country:      "PL",
+				}
+
+				if _, err := act.Execute(txDI); err != nil {
+					return err
+				}
+			}
+
+			if err := txDI.EventRepo.AddEvent(event); err != nil {
 				return err
 			}
 		}
 
-		return txDI.EventRepo.AddEvent(event)
+		return nil
 	})
 }

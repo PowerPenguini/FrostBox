@@ -124,11 +124,7 @@
 @layer utilities {
   @keyframes progress {
     0% { background-position: 200% 50%; }
+    67% { background-position: 0% 50%; } 
     100% { background-position: 0% 50%; }
-  }
-
-  .animate-progress {
-    animation: progress 2s linear infinite;
-    background-size: 200% 100%;
   }
 }

@@ -35,13 +35,13 @@ import {
 import { VehicleEventListView } from "./vehicle-event-list-view";
 import { VehicleTollView } from "@/components/vehicle-viewer/vehicle-toll-view";
 import { VehicleEventAddView } from "./vehicle-event-add-view";
-import { VehicleServiceView } from "./vehicle-service-view";
+import { VehicleIntervalsView } from "./vehicle-service-view";
 import { VehicleProfitabilityView } from "@/components/vehicle-viewer/vehicle-profitability-view";
 import { VehicleFuelView } from "./vehicle-fuel-view";
 import { VehicleViewerProvider } from "@/state/vehicle-viewer-context";
 import { useVehicleViewer } from "@/state/vehicle-viewer-context";
-import { VehicleServiceEventWizard } from "./vehicle-service-event-wizard";
-
+import { VehicleServiceEventWizard } from "@/components/vehicle-viewer/service-wizard/vehicle-service-event-wizard";
+import { EventTypesProvider } from "@/state/event-types-context";
 export function VehicleViewer({ vehicle }) {
   const [open, setOpen] = useState(false);
 
@@ -53,15 +53,17 @@ export function VehicleViewer({ vehicle }) {
         </Button>
       </DialogTrigger>
       <DialogContent className="p-0 md:max-w-[900px] md:max-h-[600px] overflow-hidden">
-        <VehicleViewerProvider>
-          <SidebarProvider>
-            <ViewerSidebar />
-            <main className="flex flex-col flex-1 h-[600px] overflow-hidden">
-              <HeaderBreadcrumb vehicle={vehicle} />{" "}
-              <ViewerContent open={open} vehicle={vehicle} />
-            </main>
-          </SidebarProvider>
-        </VehicleViewerProvider>
+        <EventTypesProvider>
+          <VehicleViewerProvider>
+            <SidebarProvider>
+              <ViewerSidebar />
+              <main className="flex flex-col flex-1 h-[600px] overflow-hidden">
+                <HeaderBreadcrumb vehicle={vehicle} />{" "}
+                <ViewerContent open={open} vehicle={vehicle} />
+              </main>
+            </SidebarProvider>
+          </VehicleViewerProvider>
+        </EventTypesProvider>
       </DialogContent>
     </Dialog>
   );
@@ -148,7 +150,7 @@ export function ViewerContent({ open, vehicle }) {
       case "Paliwo":
         return <VehicleFuelView item={vehicle} />;
       case "Interwały serwisowe":
-        return <VehicleServiceView open={open} vehicle={vehicle} />;
+        return <VehicleIntervalsView open={open} vehicle={vehicle} />;
       case "Dziennik zdarzeń":
         return <VehicleEventListView vehicleId={vehicle.id} />;
       case "Dodaj zdarzenie":
@@ -158,9 +160,11 @@ export function ViewerContent({ open, vehicle }) {
       case "Spedycja":
         return <div>🚛 Spedycja (placeholder)</div>;
       case "Serwis okresowy":
-        return <VehicleServiceEventWizard />;
+        return <VehicleServiceEventWizard vehicleId={vehicle.id} category="periodic_service"/>;
+      case "Serwis awaryjny":
+        return <VehicleServiceEventWizard vehicleId={vehicle.id} category="emergency_service"/>;
       default:
-        return <div className="text-muted-foreground">Nieznany widok</div>;
+        return <div className="p-4 text-muted-foreground">Nieznany widok</div>;
     }
   }
 

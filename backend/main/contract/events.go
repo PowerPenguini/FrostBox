@@ -7,17 +7,18 @@ import (
 	"github.com/shopspring/decimal"
 )
 
-type GetEventsResponse []GetEvent
+type GetEventsResponse []Event
+type PostVehicleEventRequest []VehicleEvent
 
-type GetEvent struct {
+type Event struct {
 	ID        uuid.UUID `json:"id"`
 	EventType string    `json:"event_type"`
 	EventDate time.Time `json:"date"`
 	Mileage   *int      `json:"mileage"`
 }
 
-type PostVehicleEventRequest struct {
-	EventType string      `json:"event_type"`
+type VehicleEvent struct {
+	EventType uuid.UUID   `json:"event_type"`
 	EventDate time.Time   `json:"date"`
 	Mileage   int         `json:"mileage"`
 	Costs     []EventCost `json:"costs"`

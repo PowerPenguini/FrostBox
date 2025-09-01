@@ -1,3 +1,5 @@
+import { translateErrorCode } from "@/formatting/errors";
+
 export async function getVehicleIntervals(vehicleId, token) {
   const res = await fetch(`/api/v1/vehicles/${vehicleId}/intervals`, {
     headers: {

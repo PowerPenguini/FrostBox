@@ -14,5 +14,5 @@ export function translateErrorCode(code) {
     cost_not_found: "Koszt nie istnieje",
   };
 
-  return messages[code] || "Nieznany błąd";
+  return messages[code] || "Wystąpił nieznany błąd. Spróbuj ponownie później";
 }
