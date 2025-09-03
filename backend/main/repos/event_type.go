@@ -17,7 +17,7 @@ func NewEventTypeRepo(db DBTX) *EventTypeRepo {
 
 func (r *EventTypeRepo) GetEventType(eventTypeID uuid.UUID) (*models.EventType, error) {
 	query := `
-		SELECT id, name, default_cost_category
+		SELECT id, name
 		FROM event_types
 		WHERE id = $1
 	`
@@ -25,7 +25,7 @@ func (r *EventTypeRepo) GetEventType(eventTypeID uuid.UUID) (*models.EventType, 
 	row := r.db.QueryRow(query, eventTypeID)
 
 	var et models.EventType
-	err := row.Scan(&et.ID, &et.Name, &et.DefaultCostCategory)
+	err := row.Scan(&et.ID, &et.Name)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, nil

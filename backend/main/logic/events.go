@@ -26,6 +26,7 @@ type AddEventWithCostsEventCost struct {
 	Value    decimal.Decimal
 	VATRate  decimal.Decimal
 	Quantity decimal.Decimal
+	Category string
 	Currency string
 	Country  string
 }
@@ -57,7 +58,7 @@ func (p *AddEventsWithCosts) Execute(deps *di.DI) error {
 					Quantity:     c.Quantity,
 					VehicleID:    &ev.VehicleID,
 					Title:        eventType.Name,
-					Category:     eventType.DefaultCostCategory,
+					Category:     c.Category,
 					InvoiceDate:  ev.EventDate,
 					CostDate:     ev.EventDate,
 					Amortization: 1,

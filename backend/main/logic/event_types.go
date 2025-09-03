@@ -13,9 +13,8 @@ type DeleteEventType struct {
 	ID uuid.UUID
 }
 type CreateEventType struct {
-	Name                string
-	DefaultCostCategory string
-	Category            string
+	Name     string
+	Category string
 }
 
 func (p *DeleteEventType) Execute(di *di.DI) error {

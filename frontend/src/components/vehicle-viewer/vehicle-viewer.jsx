@@ -42,6 +42,7 @@ import { VehicleViewerProvider } from "@/state/vehicle-viewer-context";
 import { useVehicleViewer } from "@/state/vehicle-viewer-context";
 import { VehicleServiceEventWizard } from "@/components/vehicle-viewer/service-wizard/vehicle-service-event-wizard";
 import { EventTypesProvider } from "@/state/event-types-context";
+import { VehicleIntervalWizard } from "./interval-wizard/vehicle-interval-wizard";
 export function VehicleViewer({ vehicle }) {
   const [open, setOpen] = useState(false);
 
@@ -160,9 +161,21 @@ export function ViewerContent({ open, vehicle }) {
       case "Spedycja":
         return <div>🚛 Spedycja (placeholder)</div>;
       case "Serwis okresowy":
-        return <VehicleServiceEventWizard vehicleId={vehicle.id} category="periodic_service"/>;
+        return (
+          <VehicleServiceEventWizard
+            vehicleId={vehicle.id}
+            category="periodic_service"
+          />
+        );
       case "Serwis awaryjny":
-        return <VehicleServiceEventWizard vehicleId={vehicle.id} category="emergency_service"/>;
+        return (
+          <VehicleServiceEventWizard
+            vehicleId={vehicle.id}
+            category="emergency_service"
+          />
+        );
+      case "Dodaj interwały":
+        return <VehicleIntervalWizard />;
       default:
         return <div className="p-4 text-muted-foreground">Nieznany widok</div>;
     }

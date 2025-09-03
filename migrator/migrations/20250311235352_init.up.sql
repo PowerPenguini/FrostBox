@@ -6,7 +6,7 @@ CREATE TYPE document_status AS ENUM ('withdrawn', 'added', 'incorrect');
 
 CREATE TYPE document_type AS ENUM ('cost', 'revenue');
 
-CREATE TYPE cost_category AS ENUM ('fuel', 'additive', 'toll', 'service', 'other');
+CREATE TYPE cost_category AS ENUM ('fuel', 'additive', 'toll', 'service_labour', 'service_material', 'other');
 
 CREATE TYPE vehicle_type AS ENUM ('semitruck', 'semitrailer');
 
@@ -58,7 +58,6 @@ CREATE TABLE
         name TEXT NOT NULL,
         category event_type_category NOT NULL,
         system BOOLEAN NOT NULL DEFAULT FALSE,
-        default_cost_category cost_category NOT NULL DEFAULT 'other',
         description TEXT,
         component_area component_area
     );

@@ -19,22 +19,22 @@ export function VehicleInterval({ interval, onDelete }) {
     switch (status) {
       case "INFO":
         return (
-          <Badge className="bg-green-100 text-green-700 flex items-center gap-1">
-            <IconCircleCheckFilled className="w-3 h-3 fill-green-600" />
+          <Badge className="flex items-center gap-1 bg-green-100 border-green-300 text-green-700">
+            <IconCircleCheckFilled className="fill-green-600 w-3 h-3" />
             OK
           </Badge>
         );
       case "WARNING":
         return (
-          <Badge className="bg-amber-100 text-amber-700 flex items-center gap-1">
-            <IconAlertTriangleFilled className="w-3 h-3 fill-amber-600" />
+          <Badge className="flex items-center gap-1 bg-amber-100 border-amber-300 text-amber-700">
+            <IconAlertTriangleFilled className="fill-amber-600 w-3 h-3" />
             Uwaga
           </Badge>
         );
       case "CRITICAL":
         return (
-          <Badge className="bg-red-100 text-red-700 flex items-center gap-1">
-            <IconAlertHexagonFilled className="w-3 h-3 fill-red-600" />
+          <Badge className="flex items-center gap-1 bg-red-100 border-red-300 text-red-700">
+            <IconAlertHexagonFilled className="fill-red-600 w-3 h-3" />
             Krytyczne
           </Badge>
         );
@@ -44,7 +44,7 @@ export function VehicleInterval({ interval, onDelete }) {
   };
 
   return (
-    <div className="group relative flex flex-col gap-4 pt-3 pb-5 border rounded-lg shadow-sm hover:shadow-md transition-all duration-300 bg-white">
+    <div className="group relative flex flex-col gap-4 bg-white shadow-sm hover:shadow-md pt-3 pb-5 border rounded-lg transition-all duration-300">
       <div className="flex items-center gap-2 pr-2 pl-4 font-medium">
         {getStatusBadge(interval.status)}
         <div>{interval.name}</div>
@@ -66,7 +66,7 @@ export function VehicleInterval({ interval, onDelete }) {
 
       {/* mileage progress */}
       <div className="flex flex-col gap-2 px-4">
-        <div className="flex justify-between text-sm text-gray-700">
+        <div className="flex justify-between text-gray-700 text-sm">
           <span
             className={
               interval.mileage_start !== null &&
@@ -110,7 +110,7 @@ export function VehicleInterval({ interval, onDelete }) {
 
       {/* date progress */}
       <div className="flex flex-col gap-2 px-4">
-        <div className="flex justify-between text-sm text-gray-700">
+        <div className="flex justify-between text-gray-700 text-sm">
           <span className={interval.date_start ? "text-muted-foreground" : "text-gray-400"}>
             {formatDate(interval.date_start) || "N/A"}
           </span>

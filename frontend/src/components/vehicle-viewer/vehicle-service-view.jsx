@@ -7,12 +7,14 @@ import { VehicleInterval } from "./vehicle-interval";
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { getVehicleIntervals, deleteInterval } from "@/api/vehicles";
+import { useVehicleViewer } from "@/state/vehicle-viewer-context";
 
 export function VehicleIntervalsView({ open, vehicle }) {
   const [intervals, setIntervals] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const { token } = useAuthContext();
+  const { push } = useVehicleViewer();
 
   const fetchIntervals = async () => {
     try {
@@ -42,15 +44,15 @@ export function VehicleIntervalsView({ open, vehicle }) {
   }, [open, vehicle.id, token]);
 
   return (
-    <div className="px-4 flex flex-col gap-4 pb-4">
+    <div className="flex flex-col gap-4 px-4 pb-4">
       <div className="flex items-center gap-4 font-medium text-lg">
         Interwały
-        <Button className="text-sm" variant="outline">
+        <Button className="text-sm" onClick={()=> {push("Dodaj interwały")}} variant="outline">
           <IconPlus />
-          Dodaj interwał
+          Dodaj interwały
         </Button>
       </div>
-      <div className="gap-4 flex flex-col">
+      <div className="flex flex-col gap-4">
         {loading ? (
           <div className="place-items-center grid p-4 w-full">
             <Spinner />

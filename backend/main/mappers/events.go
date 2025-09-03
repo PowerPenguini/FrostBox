@@ -35,6 +35,7 @@ func mapCostsContractToDomain(costs []contract.EventCost) []*logic.AddEventWithC
 			Quantity: c.Quantity,
 			Currency: c.Currency,
 			Country:  c.Country,
+			Category: c.Category,
 		})
 	}
 	return result

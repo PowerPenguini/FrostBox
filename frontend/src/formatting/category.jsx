@@ -12,7 +12,8 @@ const mnemonics = {
   toll: { name: "Opłata drogowa", icon: IconRoad },
   additive: { name: "Dodatki", icon: IconDropletPlus },
   fuel: { name: "Paliwo", icon: IconGasStation },
-  service: { name: "Serwis", icon: IconNut },
+  service_labour: { name: "Serwis - usługa", icon: IconNut },
+  service_material: { name: "Serwis - materiał", icon: IconNut },
   administrative: { name: "Administracyjne", icon: IconFileDescription },
   maintenance: { name: "Gospodarcze", icon: IconBucketDroplet },
 };

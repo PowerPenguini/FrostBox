@@ -31,6 +31,7 @@ function mapStateToApiPayload(state) {
         quantity: c.quantity,
         currency: c.currency,
         country: c.country || "PL",
+        category: c.type === "material" ? "service_material" : c.type === "service" ? "service_labour" : "other",
       })),
     }));
 }
